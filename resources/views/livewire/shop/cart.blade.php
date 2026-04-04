@@ -15,12 +15,31 @@
             <span class="font-medium text-slate-700 dark:text-slate-100">Cart</span>
         </nav>
 
-        <div class="glass card-shadow mb-6 rounded-[2rem] px-6 py-7">
-            <h1 class="text-adapt text-3xl font-black">
-                Shopping Cart
-                <span class="ml-2 text-base font-normal text-soft">({{ $count }} items)</span>
-            </h1>
-            <p class="mt-3 text-sm leading-7 text-soft">Review your selected products, update quantities, and move to checkout with the same storefront flow as the home page.</p>
+        <div class="storefront-hero card-shadow storefront-reveal mb-6 rounded-[2rem] px-5 py-6 sm:px-6 sm:py-7">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Cart Workspace</p>
+                    <h1 class="mt-3 text-adapt text-3xl font-black">
+                        Shopping Cart
+                        <span class="ml-2 text-base font-normal text-soft">({{ $count }} items)</span>
+                    </h1>
+                    <p class="mt-3 max-w-2xl text-sm leading-7 text-soft">Review your selected products, update quantities, and move to checkout with the same storefront flow as the home page.</p>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Items</p>
+                        <p class="mt-2 text-2xl font-black text-adapt">{{ $count }}</p>
+                    </div>
+                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Subtotal</p>
+                        <p class="mt-2 text-2xl font-black text-adapt">Rs {{ number_format($subtotal,2) }}</p>
+                    </div>
+                    <div class="rounded-[1.25rem] px-4 py-4 text-white shadow-[0_16px_42px_rgba(109,40,217,0.18)]" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">Checkout</p>
+                        <p class="mt-2 text-lg font-black">{{ $discountAmount > 0 ? 'Discount ready' : 'Ready to pay' }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         @if(empty($cart))
@@ -39,7 +58,7 @@
             <div class="grid grid-cols-1 gap-7 lg:grid-cols-3">
                 <div class="space-y-3 lg:col-span-2">
                     @foreach($cart as $id => $item)
-                        <div class="surface card-shadow flex items-start gap-4 rounded-[1.75rem] p-4">
+                        <div class="surface card-shadow storefront-reveal storefront-reveal-delay-1 flex items-start gap-4 rounded-[1.75rem] p-4">
                             <a href="{{ url('/products/'.$id) }}" class="flex-shrink-0">
                                 <div class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white to-violet-50 dark:from-slate-900 dark:to-slate-800">
                                     @if(!empty($item['image']))
@@ -76,7 +95,7 @@
                         </div>
                     @endforeach
 
-                    <div class="surface card-shadow rounded-[1.75rem] p-5">
+                    <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 rounded-[1.75rem] p-5">
                         <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-adapt">
                             <i class="fas fa-tag" style="color:var(--primary)"></i> Coupon Code
                         </h3>
@@ -101,7 +120,7 @@
                 </div>
 
                 <div>
-                    <div class="surface card-shadow sticky top-24 rounded-[1.75rem] p-5">
+                    <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 sticky top-24 rounded-[1.75rem] p-5">
                         <h3 class="mb-5 text-base font-bold text-adapt">Order Summary</h3>
                         <div class="mb-5 space-y-2.5 text-sm">
                             <div class="flex justify-between">

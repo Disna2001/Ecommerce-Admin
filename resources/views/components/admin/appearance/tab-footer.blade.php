@@ -1,0 +1,10 @@
+<x-admin.ui.panel title="Footer and Social Identity" description="Update the footer copy and linked social platforms customers see across the storefront.">
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="lg:col-span-2"><label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">Footer tagline</label><input type="text" wire:model="footer_tagline" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
+        <div class="lg:col-span-2"><label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">Footer copyright</label><input type="text" wire:model="footer_copyright" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
+        <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">Facebook URL</label><input type="text" wire:model="facebook_url" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
+        <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">Twitter / X URL</label><input type="text" wire:model="twitter_url" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
+        <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">Instagram URL</label><input type="text" wire:model="instagram_url" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
+        <div><label class="block text-sm font-semibold text-slate-700 dark:text-slate-200">Pinterest URL</label><input type="text" wire:model="pinterest_url" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
+    </div>
+</x-admin.ui.panel>

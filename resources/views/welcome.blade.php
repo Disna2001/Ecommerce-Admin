@@ -20,11 +20,11 @@ $cartCount = collect(session('cart', []))->sum('quantity');
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @livewireStyles
     <style>
-        :root { --primary: {{ $primaryColor }}; --secondary: {{ $secondaryColor }}; --accent: {{ $accentColor }}; }
+        :root { --primary: {{ $primaryColor }}; --secondary: {{ $secondaryColor }}; --accent: {{ $accentColor }}; --site-text: {{ $textColor ?? '#111827' }}; --site-bg: {{ $bgColor ?? '#f8fafc' }}; --nav-bg: {{ $navBgColor ?? '#ffffff' }}; }
         body { font-family: 'Figtree', sans-serif; }
-        .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.15), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.14), transparent 24%), #f5f3ff; color: #24183f; }
+        .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.15), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.14), transparent 24%), var(--site-bg); color: var(--site-text); }
         .dark .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.28), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.18), transparent 22%), #0f1020; color: #f5f3ff; }
-        .glass { background: rgba(255,255,255,.78); border: 1px solid rgba(139,92,246,.12); backdrop-filter: blur(16px); }
+        .glass { background: color-mix(in srgb, var(--nav-bg) 78%, white 22%); border: 1px solid rgba(139,92,246,.12); backdrop-filter: blur(16px); }
         .dark .glass { background: rgba(15,23,42,.72); border-color: rgba(255,255,255,.08); }
         .muted { color: #6b6480; } .dark .muted { color: #c8bdf0; }
         .card { box-shadow: 0 18px 48px rgba(88,28,135,.10); }
@@ -60,12 +60,14 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                     @endif
                 </a>
                 <nav class="hidden items-center gap-5 text-sm font-medium lg:flex">
-                    <a wire:navigate href="{{ url('/products') }}">Products</a>
-                    <a href="#categories">Categories</a>
-                    <a href="#deals">Deals</a>
-                    <a href="#reviews">Reviews</a>
-                    <a wire:navigate href="{{ route('track-order') }}">Track</a>
-                    <a wire:navigate href="{{ route('help-center') }}">Help</a>
+                    <a wire:navigate href="{{ url('/products') }}">{{ $navProductsLabel }}</a>
+                    <a href="#categories">{{ $navCategoriesLabel }}</a>
+                    @if($showDealsLink)
+                        <a href="#deals">{{ $navDealsLabel }}</a>
+                    @endif
+                    <a href="#reviews">{{ $navReviewsLabel }}</a>
+                    <a wire:navigate href="{{ route('track-order') }}">{{ $navTrackLabel }}</a>
+                    <a wire:navigate href="{{ route('help-center') }}">{{ $navHelpLabel }}</a>
                     <a href="#footer">Contact</a>
                 </nav>
             </div>
@@ -95,55 +97,168 @@ $cartCount = collect(session('cart', []))->sum('quantity');
     </header>
 
     <main class="px-4 pb-16">
-        <section class="mx-auto mt-4 max-w-7xl rounded-[2rem] px-6 py-12 card" style="background:linear-gradient(180deg, #efe9ff 0%, #f7f4ff 100%)">
-            <div class="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-                <div class="mx-auto max-w-4xl text-center lg:mx-0 lg:max-w-none lg:text-left">
+        <section class="mx-auto mt-4 max-w-7xl rounded-[2rem] px-6 py-12 card
+            {{ $heroSurface === 'minimal' ? 'bg-transparent shadow-none' : '' }}
+            {{ $heroSurface === 'solid' ? '' : '' }}"
+            style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(180deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
+            <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : ($heroLayout === 'stacked' ? 'space-y-8' : 'grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center') }}">
+                <div class="mx-auto max-w-4xl {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? 'text-center' : 'lg:mx-0 lg:max-w-none lg:text-left text-center' }}">
                     <p class="text-xs font-semibold uppercase tracking-[0.3em]" style="color:var(--primary)">{{ $siteTagline }}</p>
-                    <h1 class="mt-6 text-4xl font-black leading-tight text-slate-900 sm:text-5xl lg:text-6xl">
+                    <h1 class="mt-6 text-4xl font-black leading-tight text-slate-900 sm:text-5xl lg:text-6xl {{ $heroSurface !== 'minimal' ? 'text-white' : '' }}">
                         {{ $heroTitle }}
                         <span class="block" style="color:var(--primary)">{{ $heroHighlight }}</span>
                     </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 lg:mx-0">{{ $heroSubtitle }} <span class="font-medium text-slate-800">{{ $heroMicrocopy }}</span></p>
-                    <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+                    <p class="mx-auto mt-5 max-w-2xl text-base leading-8 {{ $heroSurface !== 'minimal' ? 'text-white/85' : 'text-slate-600' }} {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? '' : 'lg:mx-0' }}">{{ $heroSubtitle }} <span class="font-medium {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-800' }}">{{ $heroMicrocopy }}</span></p>
+                    <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? 'justify-center' : 'lg:justify-start justify-center' }}">
                         <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">{{ $heroBtnText }} <i class="fas fa-arrow-right text-xs"></i></a>
-                        @guest <a wire:navigate href="{{ route('register') }}" class="inline-flex items-center rounded-full border border-slate-300 bg-white/80 px-7 py-3 text-sm font-semibold text-slate-700">Create account</a> @endguest
+                        @guest <a wire:navigate href="{{ route('register') }}" class="inline-flex items-center rounded-full border {{ $heroSurface !== 'minimal' ? 'border-white/25 bg-white/10 text-white' : 'border-slate-300 bg-white/80 text-slate-700' }} px-7 py-3 text-sm font-semibold">Create account</a> @endguest
                     </div>
-                    <div class="mt-8 flex flex-wrap items-center justify-center gap-5 text-sm font-medium text-slate-700 lg:justify-start">
+                    <div class="mt-8 flex flex-wrap items-center justify-center gap-5 text-sm font-medium {{ $heroSurface !== 'minimal' ? 'text-white/85' : 'text-slate-700' }} {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? '' : 'lg:justify-start' }}">
                         @foreach([$featureOne, $featureTwo, $featureThree, $featureFour] as $feature)
                             <span class="inline-flex items-center gap-2"><i class="fas fa-star text-[11px]" style="color:var(--primary)"></i>{{ $feature }}</span>
                         @endforeach
                     </div>
                 </div>
 
-                @if($heroImagePath)
+                @if($heroImagePath && $heroLayout !== 'centered')
                     <div class="mx-auto w-full max-w-xl">
-                        <div class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/70 p-3 shadow-[0_25px_60px_rgba(88,28,135,0.14)]">
+                        <div class="overflow-hidden rounded-[2rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10' : 'border-white/70 bg-white/70' }} p-3 shadow-[0_25px_60px_rgba(88,28,135,0.14)]">
                             <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[380px]">
                         </div>
                     </div>
                 @endif
             </div>
+            @if($heroBanners->isNotEmpty())
+                <div class="mt-8 grid gap-4 md:grid-cols-3" style="grid-template-columns: repeat({{ min(3, max(1, $heroBanners->count())) }}, minmax(0, 1fr));">
+                    @foreach($heroBanners as $banner)
+                        <div class="rounded-[1.5rem] border border-white/15 p-5 text-white shadow-[0_16px_48px_rgba(15,23,42,0.18)]" style="background:linear-gradient(135deg, {{ $banner->bg_color }}, {{ $banner->bg_color }}dd); color: {{ $banner->text_color }};">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em]" style="color: {{ $banner->text_color }}cc;">{{ $banner->subtitle ?: 'Storefront Banner' }}</p>
+                            <h3 class="mt-3 text-xl font-bold">{{ $banner->title }}</h3>
+                            @if($banner->caption)
+                                <p class="mt-2 text-sm" style="color: {{ $banner->text_color }}dd;">{{ $banner->caption }}</p>
+                            @endif
+                            @if($banner->button_text)
+                                <a href="{{ $banner->button_link ?: '#' }}" class="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900">{{ $banner->button_text }}</a>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </section>
 
-        <section id="categories" class="mx-auto mt-5 flex max-w-7xl gap-3 overflow-x-auto pb-2">
-            <a wire:navigate href="{{ url('/products') }}" class="shrink-0 rounded-2xl px-5 py-3 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">All Products</a>
-            @foreach($categories as $category)
-                <a wire:navigate href="{{ url('/products?category='.$category->id) }}" class="glass shrink-0 rounded-2xl px-5 py-3 text-sm font-medium">{{ $category->name }}</a>
-            @endforeach
+        <section id="categories" class="mx-auto mt-8 max-w-7xl">
+            <div class="mb-4 flex items-end justify-between gap-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color:var(--primary)">{{ $categoryStripTitle }}</p>
+                    <p class="mt-2 text-sm text-slate-500">{{ $categoryStripSubtitle }}</p>
+                </div>
+            </div>
+            <div class="{{ $categoryStripStyle === 'cards' ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-4' : 'flex gap-3 overflow-x-auto pb-2' }}">
+                <a wire:navigate href="{{ url('/products') }}" class="{{ $categoryStripStyle === 'cards' ? 'min-h-[110px]' : 'shrink-0' }} rounded-2xl px-5 py-4 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                    <span class="inline-flex items-center gap-2">
+                        @if($categoryShowIcons)<i class="fas fa-table-cells-large"></i>@endif
+                        All Products
+                    </span>
+                </a>
+                @foreach($categories as $category)
+                    <a wire:navigate href="{{ url('/products?category='.$category->id) }}" class="glass {{ $categoryStripStyle === 'cards' ? 'min-h-[110px] rounded-[1.5rem] p-5' : 'shrink-0 rounded-2xl px-5 py-3' }} text-sm font-medium">
+                        @if($categoryShowIcons)
+                            <span class="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/70 text-violet-600">
+                                <i class="fas {{ ($categoryIcons[$category->id] ?? 'fa-tag') }}"></i>
+                            </span>
+                        @endif
+                        <span class="block">{{ $category->name }}</span>
+                    </a>
+                @endforeach
+            </div>
         </section>
 
-        @foreach([['deals',$dealsTitle,$deals,'Hot Sale'],['featured',$featuredTitle,$featured,'Featured'],['new-arrivals',$newTitle,$newArrivals,'New']] as [$sectionId,$sectionTitle,$items,$badge])
+        @if($promoStripEnabled)
+            <section class="mx-auto mt-8 max-w-7xl">
+                <div class="card rounded-[2rem] px-6 py-6 text-white sm:px-8" style="background:linear-gradient(120deg, {{ $promoStripFrom }}, {{ $promoStripTo }})">
+                    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="max-w-3xl">
+                            <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em]">{{ $promoStripBadge }}</span>
+                            <h2 class="mt-4 text-2xl font-black sm:text-3xl">{{ $promoStripTitle }}</h2>
+                            <p class="mt-3 max-w-2xl text-sm leading-7 text-white/80">{{ $promoStripText }}</p>
+                        </div>
+                        <a wire:navigate href="{{ url($promoStripButtonLink) }}" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-900">
+                            {{ $promoStripButtonText }}
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        @endif
+
+        @if($promoBanners->isNotEmpty())
+            <section class="mx-auto mt-8 max-w-7xl">
+                <div class="grid gap-4 lg:grid-cols-3">
+                    @foreach($promoBanners as $banner)
+                        <article class="overflow-hidden rounded-[1.75rem] border border-white/40 shadow-[0_18px_54px_rgba(15,23,42,0.12)]" style="background:linear-gradient(135deg, {{ $banner->bg_color }}, {{ $banner->bg_color }}cc); color: {{ $banner->text_color }};">
+                            <div class="p-6">
+                                @if($banner->subtitle)
+                                    <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color: {{ $banner->text_color }}cc;">{{ $banner->subtitle }}</p>
+                                @endif
+                                <h3 class="mt-3 text-2xl font-black">{{ $banner->title }}</h3>
+                                @if($banner->caption)
+                                    <p class="mt-3 text-sm leading-7" style="color: {{ $banner->text_color }}dd;">{{ $banner->caption }}</p>
+                                @endif
+                                @if($banner->button_text)
+                                    <a href="{{ $banner->button_link ?: '#' }}" class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900">
+                                        {{ $banner->button_text }}
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </a>
+                                @endif
+                            </div>
+                            @if($banner->image_path)
+                                <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title }}" class="h-44 w-full object-cover">
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @php
+            $railGridClass = match($railLayout) {
+                'compact' => 'grid gap-4 sm:grid-cols-2 xl:grid-cols-5',
+                'editorial' => 'grid gap-6 md:grid-cols-2 xl:grid-cols-3',
+                default => 'grid gap-5 sm:grid-cols-2 xl:grid-cols-4',
+            };
+            $railCardClass = match($railLayout) {
+                'compact' => 'product-card card overflow-hidden rounded-[1.5rem] p-3',
+                'editorial' => 'product-card card overflow-hidden rounded-[2rem] p-4',
+                default => 'product-card card overflow-hidden rounded-[1.75rem] p-3',
+            };
+            $sectionSubtitles = [
+                'deals' => $dealsSubtitle,
+                'featured' => $featuredSubtitle,
+                'new-arrivals' => $newSubtitle,
+            ];
+        @endphp
+
+        @foreach(array_values(array_filter([
+            ['deals', $dealsTitle, $deals->take(max(1, $productsPerRail)), 'Hot Sale'],
+            ['featured', $featuredTitle, $featured->take(max(1, $productsPerRail)), 'Featured'],
+            $showNewArrivalsLink ? ['new-arrivals', $newTitle, $newArrivals->take(max(1, $productsPerRail)), 'New'] : null,
+        ])) as [$sectionId,$sectionTitle,$items,$badge])
             @if($items->isNotEmpty())
                 <section id="{{ $sectionId }}" class="mx-auto mt-12 max-w-7xl">
                     <div class="mb-6 flex items-end justify-between gap-4">
-                        <div><h2 class="text-3xl font-bold">{{ $sectionTitle }}</h2><p class="muted mt-1 text-sm">Handpicked for fast-moving shoppers.</p></div>
+                        <div><h2 class="text-3xl font-bold">{{ $sectionTitle }}</h2><p class="muted mt-1 text-sm">{{ $sectionSubtitles[$sectionId] ?? 'Handpicked for fast-moving shoppers.' }}</p></div>
                         <a wire:navigate href="{{ url('/products') }}" class="text-sm font-semibold" style="color:var(--primary)">View All <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
                     </div>
-                    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="{{ $railGridClass }}">
                         @foreach($items as $product)
-                            <article class="product-card card overflow-hidden rounded-[1.75rem] p-3">
+                            <article class="{{ $railCardClass }}">
                                 <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden rounded-[1.25rem]">
                                     <div class="absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white" style="background:linear-gradient(90deg, #f97316, #ef4444)">{{ $badge }}</div>
+                                    @if($showRailStockStatus)
+                                        <div class="absolute right-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] {{ $product->quantity <= 0 ? 'bg-rose-500 text-white' : ($product->isLowStock() ? 'bg-amber-400 text-slate-900' : 'bg-emerald-400 text-slate-900') }}">
+                                            {{ $product->quantity <= 0 ? 'Out of stock' : ($product->isLowStock() ? 'Low stock' : 'In stock') }}
+                                        </div>
+                                    @endif
                                     <div class="flex h-64 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-white to-violet-50 p-6 dark:from-slate-900 dark:to-slate-800">
                                         @if($product->primary_image_url)
                                             <picture class="block h-full w-full">
@@ -164,6 +279,9 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                                     <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ $product->brand->name ?? ($product->category->name ?? 'Digital Product') }}</p>
                                     <h3 class="mt-2 line-clamp-2 text-base font-semibold">{{ $product->name }}</h3>
                                     <p class="muted mt-2 line-clamp-2 text-sm">{{ $product->model_name ?: 'Fast digital delivery with account-backed access.' }}</p>
+                                    @if($showRailQuantity)
+                                        <p class="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Available now: {{ $product->quantity }}</p>
+                                    @endif
                                     <div class="mt-4 flex items-end justify-between gap-3">
                                         <div>
                                             <p class="text-lg font-black" style="color:var(--primary)">Rs {{ number_format($product->final_price, 2) }}</p>
@@ -229,8 +347,10 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Quick Links</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block" href="{{ url('/products') }}">All Products</a>
-                        <a class="block" href="#deals">Deals</a>
+                        <a wire:navigate class="block" href="{{ url('/products') }}">{{ $navProductsLabel }}</a>
+                        @if($showDealsLink)
+                            <a class="block" href="#deals">{{ $navDealsLabel }}</a>
+                        @endif
                         <a class="block" href="#reviews">Reviews</a>
                         <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
                         <a wire:navigate class="block" href="{{ route('login') }}">Login</a>
@@ -239,18 +359,19 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Support</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <div>Track Order</div>
-                        <div>Help Center</div>
-                        <div>Terms & Conditions</div>
-                        <div>Privacy Policy</div>
+                        <div>{{ $navTrackLabel }}</div>
+                        <div>{{ $navHelpLabel }}</div>
+                        <div>{{ $supportHours }}</div>
+                        @if($supportEmail)<div>{{ $supportEmail }}</div>@endif
                     </div>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Contact</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <div>{{ $utilityLeft }}</div>
+                        @if($supportPhone)<div>{{ $supportPhone }}</div>@endif
+                        @if($supportWhatsapp)<div>WhatsApp: {{ $supportWhatsapp }}</div>@endif
+                        @if($supportEmail)<div>{{ $supportEmail }}</div>@endif
                         <div>{{ $utilityCenter }}</div>
-                        <div>{{ $featureOne }}</div>
                     </div>
                 </div>
             </div>

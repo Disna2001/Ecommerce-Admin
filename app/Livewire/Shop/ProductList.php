@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Stock;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\SiteSetting;
 use App\Services\Storefront\ProductPricingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -140,6 +141,17 @@ class ProductList extends Component
             'categories' => Cache::remember('product_list_categories', 600, fn() => Category::query()->select('id', 'name')->orderBy('name')->get()),
             'brands'     => Cache::remember('product_list_brands', 600, fn() => Brand::query()->select('id', 'name')->orderBy('name')->get()),
             'wishlist'   => session('wishlist', []),
+            'catalogSettings' => [
+                'badge' => SiteSetting::get('catalog_hero_badge', 'Browse Store'),
+                'title' => SiteSetting::get('catalog_hero_title', 'Find the right product faster.'),
+                'subtitle' => SiteSetting::get('catalog_hero_subtitle', 'Explore premium digital products, filter by category or brand, and sort results the way you want.'),
+                'category_strip_title' => SiteSetting::get('category_strip_title', 'Shop by category'),
+                'category_strip_subtitle' => SiteSetting::get('category_strip_subtitle', 'Jump straight into the product family you need.'),
+                'category_strip_style' => SiteSetting::get('category_strip_style', 'chips'),
+                'category_show_icons' => SiteSetting::get('category_show_icons', true),
+                'category_icons' => SiteSetting::get('category_icons', []),
+                'category_strip_limit' => max(4, min(12, (int) SiteSetting::get('category_strip_limit', 8))),
+            ],
         ]);
     }
 }

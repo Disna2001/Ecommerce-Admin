@@ -29,6 +29,7 @@ class SiteSetting extends Model
         'whatsapp_webhook_verify_token',
         'ai_api_key',
         'custom_integrations_api_key',
+        'payhere_merchant_secret',
     ];
 
     // -------------------------------------------------------------------------

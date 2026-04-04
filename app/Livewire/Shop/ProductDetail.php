@@ -7,6 +7,7 @@ use App\Models\Stock;
 use App\Models\Review;
 use App\Services\Storefront\ProductPricingService;
 use App\Services\Storefront\StorefrontImageService;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
@@ -195,6 +196,22 @@ class ProductDetail extends Component
             ->filter()
             ->values();
 
-        return view('livewire.shop.product-detail', compact('discount','finalPrice','reviews','related', 'imageUrls', 'thumbnailUrls', 'imageSourceSets', 'thumbnailSourceSets', 'videoUrls'));
+        return view('livewire.shop.product-detail', compact('discount','finalPrice','reviews','related', 'imageUrls', 'thumbnailUrls', 'imageSourceSets', 'thumbnailSourceSets', 'videoUrls'))
+            ->with('detailSettings', [
+                'trust_cards' => [
+                    ['title' => SiteSetting::get('detail_trust_one_title', 'Fast handling'), 'text' => SiteSetting::get('detail_trust_one_text', 'Orders are processed quickly with status updates sent to your email.')],
+                    ['title' => SiteSetting::get('detail_trust_two_title', 'Payment confidence'), 'text' => SiteSetting::get('detail_trust_two_text', 'Bank and online payments are verified, and checkout keeps a full order trail.')],
+                    ['title' => SiteSetting::get('detail_trust_three_title', 'Support ready'), 'text' => SiteSetting::get('detail_trust_three_text', 'You can track each step after ordering and get clear updates if verification is needed.')],
+                ],
+                'value_title' => SiteSetting::get('detail_value_title', 'Why shoppers choose this listing'),
+                'value_text' => SiteSetting::get('detail_value_text', 'Clear pricing, direct checkout, and order notifications at each major status change.'),
+                'value_cta' => SiteSetting::get('detail_value_cta', 'Checkout ready'),
+                'in_stock_label' => SiteSetting::get('detail_in_stock_label', 'In Stock'),
+                'low_stock_template' => SiteSetting::get('detail_low_stock_template', 'Only {quantity} left!'),
+                'out_of_stock_label' => SiteSetting::get('detail_out_of_stock_label', 'Out of Stock'),
+                'related_title' => SiteSetting::get('detail_related_title', 'Related Products'),
+                'show_reviews' => SiteSetting::get('detail_show_reviews', true),
+                'show_related' => SiteSetting::get('detail_show_related', true),
+            ]);
     }
 }

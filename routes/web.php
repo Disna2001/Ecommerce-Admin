@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\SiteManagementController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAuthController;
@@ -42,6 +43,10 @@ Route::post('/cart/add/{id}', [\App\Http\Controllers\CartController::class, 'add
 Route::patch('/cart/update/{id}', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/remove/{id}', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/coupon', [\App\Http\Controllers\CartController::class, 'applyCoupon'])->name('cart.coupon');
+Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::post('/checkout/payhere/notify', [PaymentGatewayController::class, 'payhereNotify'])->name('checkout.payhere.notify');
+Route::get('/checkout/payhere/{order}/return', [PaymentGatewayController::class, 'payhereReturn'])->name('checkout.payhere.return');
+Route::get('/checkout/payhere/{order}/cancel', [PaymentGatewayController::class, 'payhereCancel'])->name('checkout.payhere.cancel');
 
 // Shop - auth required
 Route::middleware('auth')->group(function () {
@@ -49,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/wishlist/toggle/{id}', [\App\Http\Controllers\WishlistController::class, 'toggle'])->name('wishlist.toggle');
 
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/payhere/{order}/redirect', [PaymentGatewayController::class, 'payhereRedirect'])->name('checkout.payhere.redirect');
 
     Route::view('/profile', 'frontend.pages.profile')->name('profile.index');
     Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');

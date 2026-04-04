@@ -489,7 +489,7 @@
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                         <p class="text-sm font-semibold text-slate-900">3. Enrich only when needed</p>
-                        <p class="mt-1 text-sm text-slate-500">Use AI, barcode generation, images, and videos when the item needs deeper storefront setup.</p>
+                        <p class="mt-1 text-sm text-slate-500">Use barcode generation, images, and videos when the item needs deeper storefront setup.</p>
                     </div>
                 </div>
             </div>
@@ -605,10 +605,10 @@
 
     @if($isOpen)
         <div class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-start justify-center px-4 py-8">
+            <div class="flex min-h-screen items-start justify-center px-4 py-4">
                 <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" wire:click="closeModal"></div>
-                <div class="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-                    <form wire:submit.prevent="store" class="flex max-h-[90vh] flex-col">
+                <div class="relative z-10 w-full max-w-6xl overflow-visible rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+                    <form wire:submit.prevent="store" class="flex flex-col">
                         <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
@@ -618,12 +618,8 @@
                                     <div class="mt-4 flex flex-wrap gap-2">
                                         <button type="button" wire:click="setEntryMode('quick')" class="rounded-full px-4 py-2 text-xs font-semibold transition {{ $entryMode === 'quick' ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-600' }}">Quick Intake</button>
                                         <button type="button" wire:click="setEntryMode('advanced')" class="rounded-full px-4 py-2 text-xs font-semibold transition {{ $entryMode === 'advanced' ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-600' }}">Advanced Setup</button>
-                                        <button type="button" wire:click="runAiIntakeAssist" wire:loading.attr="disabled" class="rounded-full bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-violet-700">
-                                            <span wire:loading.remove wire:target="runAiIntakeAssist"><i class="fas fa-wand-magic-sparkles mr-2"></i>AI Intake Assist</span>
-                                            <span wire:loading wire:target="runAiIntakeAssist"><i class="fas fa-spinner fa-spin mr-2"></i>Preparing...</span>
-                                        </button>
                                         <button type="button" wire:click="toggleQuickSetup" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">
-                                            <i class="fas fa-layer-group mr-2"></i>{{ $showQuickSetup ? 'Hide Quick Setup' : 'Quick Setup Lists' }}
+                                            <i class="fas fa-layer-group mr-2"></i>{{ $showQuickSetup ? 'Hide Quick Setup' : 'Quick Setup' }}
                                         </button>
                                     </div>
                                 </div>
@@ -631,11 +627,11 @@
                             </div>
                         </div>
 
-                        <div class="flex-1 overflow-y-auto px-6 py-6">
+                        <div class="px-6 py-6">
                             @php($stockSteps = [
                                 'catalog' => ['label' => 'Catalog', 'copy' => 'Core details and structure'],
                                 'inventory' => ['label' => 'Inventory', 'copy' => 'Quantity, pricing, and mapping'],
-                                'media' => ['label' => 'Media', 'copy' => 'AI, barcode, images, and videos'],
+                                'media' => ['label' => 'Media', 'copy' => 'Barcode, images, videos, and product details'],
                                 'review' => ['label' => 'Review', 'copy' => 'Final checks before save'],
                             ])
 
@@ -795,47 +791,14 @@
 
                             @if($stockFormStep === 'media')
                                 <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
-                                    <h4 class="text-base font-semibold text-slate-900">Model, AI, and Media</h4>
-                                    <p class="mt-2 text-sm text-slate-500">{{ $entryMode === 'quick' ? 'Quick mode keeps only the most useful product enrichment controls in front of the team.' : 'Advanced mode exposes richer media, notes, and AI guidance for complete item setup.' }}</p>
+                                    <h4 class="text-base font-semibold text-slate-900">Model and Media</h4>
+                                    <p class="mt-2 text-sm text-slate-500">{{ $entryMode === 'quick' ? 'Quick mode keeps only the most useful product enrichment controls in front of the team.' : 'Advanced mode exposes richer media and notes for complete item setup.' }}</p>
                                     <div class="mt-4 grid gap-4">
                                         <div class="grid gap-4 md:grid-cols-2">
                                             <div><label class="block text-sm font-medium text-slate-700">Model Name</label><input type="text" wire:model.live="model_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none"></div>
                                             <div><label class="block text-sm font-medium text-slate-700">Model Number</label><input type="text" wire:model.live="model_number" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none"></div>
                                         </div>
 
-                                        @if($showModelSuggestions && !empty($suggestedModelNumbers))
-                                            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                                                <div class="flex items-center justify-between gap-3">
-                                                    <p class="text-sm font-semibold text-indigo-900">Suggested model numbers</p>
-                                                    <button type="button" wire:click="closeModelSuggestions" class="text-indigo-500 transition hover:text-indigo-700"><i class="fas fa-xmark"></i></button>
-                                                </div>
-                                                <div class="mt-3 flex flex-wrap gap-2">
-                                                    @foreach($suggestedModelNumbers as $suggestion)
-                                                        <button type="button" wire:click="selectModelSuggestion('{{ $suggestion }}')" class="rounded-full border border-indigo-200 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">{{ $suggestion }}</button>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        <div><label class="block text-sm font-medium text-slate-700">Search model numbers</label><input type="text" wire:model.live.debounce.500ms="modelSearchQuery" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none" placeholder="Search similar model patterns..."></div>
-                                        <div class="flex flex-wrap gap-2">
-                                            <button type="button" wire:click="generateAiDescription" wire:loading.attr="disabled" class="rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-700"><i class="fas fa-sparkles mr-2"></i>Description</button>
-                                            <button type="button" wire:click="getAiPricingSuggestion" wire:loading.attr="disabled" class="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"><i class="fas fa-money-bill-trend-up mr-2"></i>Price</button>
-                                            <button type="button" wire:click="generateSeoKeywords" wire:loading.attr="disabled" class="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"><i class="fas fa-hashtag mr-2"></i>SEO</button>
-                                        </div>
-                                        @if($aiSuggestion)
-                                            <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                                                <p class="text-sm font-semibold text-blue-900">AI Price Suggestion: Rs {{ number_format($aiSuggestion['suggested_price'], 2) }}</p>
-                                                @if(isset($aiSuggestion['reasoning']))<p class="mt-2 text-sm text-blue-700">{{ $aiSuggestion['reasoning'] }}</p>@endif
-                                                <button type="button" wire:click="applyAiSuggestion" class="mt-3 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">Apply This Price</button>
-                                            </div>
-                                        @endif
-                                        @if($aiDemandInsight)
-                                            <div class="rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
-                                                <p class="text-sm font-semibold text-cyan-900">AI Demand View</p>
-                                                <p class="mt-2 text-sm leading-6 text-cyan-800">{{ $aiDemandInsight }}</p>
-                                            </div>
-                                        @endif
                                         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700">Barcode</label>
@@ -863,63 +826,225 @@
                                             <input type="text" wire:model="tags" class="rounded-2xl border-slate-200 text-sm shadow-none" placeholder="Tags">
                                             <textarea wire:model="notes" rows="3" class="rounded-2xl border-slate-200 text-sm shadow-none resize-none" placeholder="Additional notes"></textarea>
                                         @endif
-                                        <div><label class="block text-sm font-medium text-slate-700">Images</label><input type="file" wire:model="tempImages" multiple accept="image/*" class="mt-2 block w-full text-sm text-slate-600"></div>
-                                        @if($currentImages)
-                                            <div>
-                                                <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Current Images</p>
-                                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                                    @foreach($currentImages as $index => $imagePath)
-                                                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                                                            <img src="{{ asset('storage/' . $imagePath) }}" class="h-28 w-full object-cover" alt="Stock image">
-                                                            <button type="button" wire:click="removeCurrentImage({{ $index }})" class="flex w-full items-center justify-center gap-2 border-t border-slate-200 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                                                <i class="fas fa-trash"></i>
-                                                                <span>Delete image</span>
-                                                            </button>
-                                                        </div>
-                                                    @endforeach
+                                        <div
+                                            x-data="{ uploading: false, progress: 0 }"
+                                            x-on:livewire-upload-start="uploading = true"
+                                            x-on:livewire-upload-finish="uploading = false; progress = 100"
+                                            x-on:livewire-upload-error="uploading = false"
+                                            x-on:livewire-upload-progress="progress = $event.detail.progress"
+                                            class="rounded-[1.5rem] border border-slate-200 bg-white p-5"
+                                        >
+                                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                <div>
+                                                    <h5 class="text-sm font-semibold text-slate-900">Image studio</h5>
+                                                    <p class="mt-1 text-xs text-slate-500">Upload multiple images at once, set the display order before save, and let the system optimize them automatically for lighter, sharper storefront output.</p>
+                                                </div>
+                                                <div class="sm:w-80" wire:key="stock-image-upload-input">
+                                                    <label class="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Add images</label>
+                                                    <label class="mt-2 flex cursor-pointer items-center justify-between rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600 transition hover:border-slate-400 hover:bg-slate-100">
+                                                        <span class="inline-flex items-center gap-2">
+                                                            <i class="fas fa-images text-slate-400"></i>
+                                                            Select one or many images
+                                                        </span>
+                                                        <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">JPG, PNG, WEBP</span>
+                                                        <input type="file" wire:model="tempImages" multiple accept="image/*" class="hidden">
+                                                    </label>
                                                 </div>
                                             </div>
-                                        @endif
-                                        @if($tempImages)
-                                            <div>
-                                                <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">New Uploads</p>
-                                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                                    @foreach($tempImages as $image)<img src="{{ $image->temporaryUrl() }}" class="h-28 w-full rounded-2xl object-cover">@endforeach
+                                            <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+                                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                                                    <span class="font-semibold text-slate-900">{{ count($currentImages) + count($tempImages) }}</span> image{{ count($currentImages) + count($tempImages) === 1 ? '' : 's' }} in the gallery.
+                                                </div>
+                                                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                                                    Auto-optimized on save up to 10 MB each.
+                                                </div>
+                                                <div wire:loading.flex wire:target="tempImages" class="items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-700">
+                                                    <i class="fas fa-cloud-arrow-up animate-pulse"></i>
+                                                    Uploading images...
                                                 </div>
                                             </div>
-                                        @endif
-                                        <div>
-                                            <label class="block text-sm font-medium text-slate-700">Videos</label>
-                                            <input type="file" wire:model="tempVideos" multiple accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,video/x-matroska" class="mt-2 block w-full text-sm text-slate-600">
-                                            <p class="mt-2 text-xs text-slate-400">Use product videos for demos, unboxing, or fitting guidance. Supported: MP4, MOV, AVI, WEBM, MKV.</p>
-                                            @error('tempVideos.*')<span class="mt-1 block text-xs text-rose-500">{{ $message }}</span>@enderror
+                                            <div x-cloak x-show="uploading" class="mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                                                <div class="flex items-center justify-between gap-3 text-sm font-medium text-sky-800">
+                                                    <span>Preparing image previews</span>
+                                                    <span x-text="progress + '%'"></span>
+                                                </div>
+                                                <div class="mt-3 h-2 overflow-hidden rounded-full bg-sky-100">
+                                                    <div class="h-full rounded-full bg-sky-500 transition-all duration-300" :style="`width: ${progress}%`"></div>
+                                                </div>
+                                            </div>
+                                            @error('tempImages')<span class="mt-3 block text-xs text-rose-500">{{ $message }}</span>@enderror
+                                            @error('tempImages.*')<span class="mt-1 block text-xs text-rose-500">{{ $message }}</span>@enderror
+
+                                            @if($currentImages)
+                                                <div class="mt-5">
+                                                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Current images</p>
+                                                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                                                        @foreach($currentImages as $index => $imagePath)
+                                                            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                                                                <img src="{{ asset('storage/' . $imagePath) }}" class="h-32 w-full object-cover" alt="Stock image" loading="lazy">
+                                                                <div class="flex items-center justify-between border-t border-slate-200 bg-white px-3 py-2">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">#{{ $index + 1 }}</span>
+                                                                        @if($index === 0)
+                                                                            <span class="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">Cover</span>
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="flex items-center gap-1">
+                                                                        <button type="button" wire:click="moveCurrentImageUp({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === 0 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-left"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="moveCurrentImageDown({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === count($currentImages) - 1 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-right"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="removeCurrentImage({{ $index }})" class="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-600 hover:bg-rose-50">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if($tempImages)
+                                                <div class="mt-5">
+                                                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">New uploads</p>
+                                                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                                                        @foreach($tempImages as $index => $image)
+                                                            <div class="overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50/40">
+                                                                <img src="{{ $image->temporaryUrl() }}" class="h-32 w-full object-cover" loading="lazy" alt="New image preview">
+                                                                <div class="flex items-center justify-between border-t border-emerald-200 bg-white px-3 py-2">
+                                                                    <div class="min-w-0 pr-2">
+                                                                        <p class="truncate text-[11px] font-medium text-slate-600">{{ $image->getClientOriginalName() }}</p>
+                                                                        <p class="mt-1 text-[10px] uppercase tracking-[0.16em] text-emerald-600">{{ $index + 1 === 1 && count($currentImages) === 0 ? 'Queued as cover' : 'Queued' }}</p>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-1">
+                                                                        <button type="button" wire:click="moveTempImageUp({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === 0 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-left"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="moveTempImageDown({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === count($tempImages) - 1 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-right"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="removeTempImage({{ $index }})" class="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-600 hover:bg-rose-50">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
-                                        @if($currentVideos)
-                                            <div>
-                                                <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Current Videos</p>
-                                                <div class="grid gap-3 sm:grid-cols-2">
-                                                    @foreach($currentVideos as $index => $videoPath)
-                                                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                                                            <video src="{{ asset('storage/' . $videoPath) }}" controls class="h-40 w-full bg-black object-cover"></video>
-                                                            <button type="button" wire:click="removeCurrentVideo({{ $index }})" class="flex w-full items-center justify-center gap-2 border-t border-slate-200 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
-                                                                <i class="fas fa-trash"></i>
-                                                                <span>Delete video</span>
-                                                            </button>
-                                                        </div>
-                                                    @endforeach
+
+                                        <div
+                                            x-data="{ uploading: false, progress: 0 }"
+                                            x-on:livewire-upload-start="uploading = true"
+                                            x-on:livewire-upload-finish="uploading = false; progress = 100"
+                                            x-on:livewire-upload-error="uploading = false"
+                                            x-on:livewire-upload-progress="progress = $event.detail.progress"
+                                            class="rounded-[1.5rem] border border-slate-200 bg-white p-5"
+                                        >
+                                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                <div>
+                                                    <h5 class="text-sm font-semibold text-slate-900">Video gallery</h5>
+                                                    <p class="mt-1 text-xs text-slate-500">Queue product clips in the order you want them shown. Admin previews stay lightweight, and storefront playback uses the saved sequence.</p>
+                                                </div>
+                                                <div class="sm:w-80" wire:key="stock-video-upload-input">
+                                                    <label class="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Add videos</label>
+                                                    <label class="mt-2 flex cursor-pointer items-center justify-between rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-600 transition hover:border-slate-400 hover:bg-slate-100">
+                                                        <span class="inline-flex items-center gap-2">
+                                                            <i class="fas fa-film text-slate-400"></i>
+                                                            Select one or many videos
+                                                        </span>
+                                                        <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">MP4, MOV, WEBM</span>
+                                                        <input type="file" wire:model="tempVideos" multiple accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,video/x-matroska" class="hidden">
+                                                    </label>
                                                 </div>
                                             </div>
-                                        @endif
-                                        @if($tempVideos)
-                                            <div>
-                                                <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">New Video Uploads</p>
-                                                <div class="grid gap-3 sm:grid-cols-2">
-                                                    @foreach($tempVideos as $video)
-                                                        <video src="{{ $video->temporaryUrl() }}" controls class="h-40 w-full rounded-2xl bg-black object-cover"></video>
-                                                    @endforeach
+                                            <div class="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+                                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                                                    <span class="font-semibold text-slate-900">{{ count($currentVideos) + count($tempVideos) }}</span> video{{ count($currentVideos) + count($tempVideos) === 1 ? '' : 's' }} in the gallery.
+                                                </div>
+                                                <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                                                    Metadata-first previews keep admin light.
+                                                </div>
+                                                <div wire:loading.flex wire:target="tempVideos" class="items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-700">
+                                                    <i class="fas fa-cloud-arrow-up animate-pulse"></i>
+                                                    Uploading videos...
                                                 </div>
                                             </div>
-                                        @endif
+                                            <div x-cloak x-show="uploading" class="mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                                                <div class="flex items-center justify-between gap-3 text-sm font-medium text-sky-800">
+                                                    <span>Preparing video previews</span>
+                                                    <span x-text="progress + '%'"></span>
+                                                </div>
+                                                <div class="mt-3 h-2 overflow-hidden rounded-full bg-sky-100">
+                                                    <div class="h-full rounded-full bg-sky-500 transition-all duration-300" :style="`width: ${progress}%`"></div>
+                                                </div>
+                                            </div>
+                                            <p class="mt-2 text-xs text-slate-400">Supported: MP4, MOV, AVI, WEBM, MKV. Landscape clips work best for clean storefront playback.</p>
+                                            @error('tempVideos')<span class="mt-1 block text-xs text-rose-500">{{ $message }}</span>@enderror
+                                            @error('tempVideos.*')<span class="mt-1 block text-xs text-rose-500">{{ $message }}</span>@enderror
+
+                                            @if($currentVideos)
+                                                <div class="mt-5">
+                                                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Current videos</p>
+                                                    <div class="grid gap-3 sm:grid-cols-2">
+                                                        @foreach($currentVideos as $index => $videoPath)
+                                                            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                                                                <video src="{{ asset('storage/' . $videoPath) }}" controls preload="metadata" class="h-48 w-full bg-black object-cover"></video>
+                                                                <div class="flex items-center justify-between border-t border-slate-200 bg-white px-3 py-2">
+                                                                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">#{{ $index + 1 }}</span>
+                                                                    <div class="flex items-center gap-1">
+                                                                        <button type="button" wire:click="moveCurrentVideoUp({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === 0 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-left"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="moveCurrentVideoDown({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === count($currentVideos) - 1 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-right"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="removeCurrentVideo({{ $index }})" class="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-600 hover:bg-rose-50">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if($tempVideos)
+                                                <div class="mt-5">
+                                                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">New video uploads</p>
+                                                    <div class="grid gap-3 sm:grid-cols-2">
+                                                        @foreach($tempVideos as $index => $video)
+                                                            <div class="overflow-hidden rounded-2xl border border-sky-200 bg-sky-50/40">
+                                                                <video src="{{ $video->temporaryUrl() }}" controls preload="metadata" class="h-48 w-full bg-black object-cover"></video>
+                                                                <div class="flex items-center justify-between border-t border-sky-200 bg-white px-3 py-2">
+                                                                    <div class="min-w-0 pr-2">
+                                                                        <p class="truncate text-[11px] font-medium text-slate-600">{{ $video->getClientOriginalName() }}</p>
+                                                                        <p class="mt-1 text-[10px] uppercase tracking-[0.16em] text-sky-600">Queued</p>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-1">
+                                                                        <button type="button" wire:click="moveTempVideoUp({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === 0 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-left"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="moveTempVideoDown({{ $index }})" class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 {{ $index === count($tempVideos) - 1 ? 'opacity-40' : 'hover:bg-slate-50' }}">
+                                                                            <i class="fas fa-arrow-right"></i>
+                                                                        </button>
+                                                                        <button type="button" wire:click="removeTempVideo({{ $index }})" class="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-600 hover:bg-rose-50">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             @endif
@@ -994,7 +1119,7 @@
                             @endif
                         </div>
 
-                        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+                        <div class="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
                             <div class="flex items-center gap-3">
                                 @if(!$stock_id)
                                     <label class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">

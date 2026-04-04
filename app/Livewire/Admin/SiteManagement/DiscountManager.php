@@ -138,6 +138,65 @@ class DiscountManager extends Component
         $this->code = strtoupper(\Illuminate\Support\Str::random(8));
     }
 
+    public function openCouponBuilder(): void
+    {
+        $this->openModal();
+        $this->generateCode();
+        $this->type = 'percentage';
+        $this->value = 10;
+        $this->name = 'New coupon';
+    }
+
+    public function openFlashSaleBuilder(): void
+    {
+        $this->openModal();
+        $this->type = 'percentage';
+        $this->value = 15;
+        $this->name = 'Flash sale';
+        $this->has_timer = true;
+        $this->starts_at = now()->format('Y-m-d\TH:i');
+        $this->ends_at = now()->addDays(3)->format('Y-m-d\TH:i');
+        $this->timer_label = 'Offer ends in:';
+        $this->code = '';
+    }
+
+    public function applyPreset(string $preset): void
+    {
+        if (!$this->isOpen) {
+            $this->openModal();
+        }
+
+        if ($preset === 'welcome') {
+            $this->name = 'Welcome coupon';
+            $this->type = 'percentage';
+            $this->value = 10;
+            $this->min_order_amount = 0;
+            $this->usage_limit = 200;
+            $this->generateCode();
+        }
+
+        if ($preset === 'bundle') {
+            $this->name = 'Bundle saving';
+            $this->type = 'fixed';
+            $this->value = 500;
+            $this->min_order_amount = 5000;
+            $this->max_discount_amount = '';
+            $this->code = '';
+        }
+
+        if ($preset === 'weekend') {
+            $this->name = 'Weekend countdown';
+            $this->type = 'percentage';
+            $this->value = 12;
+            $this->has_timer = true;
+            $this->starts_at = now()->startOfDay()->format('Y-m-d\TH:i');
+            $this->ends_at = now()->addDays(2)->endOfDay()->format('Y-m-d\TH:i');
+            $this->show_timer_on_site = true;
+            $this->timer_label = 'Weekend deal ends in:';
+            $this->generateCode();
+        }
+    }
+
     public function render()
     {
         $discounts = Discount::query()
@@ -150,6 +209,14 @@ class DiscountManager extends Component
             'discounts'  => $discounts,
             'categories' => Category::all(),
             'products'   => Stock::select('id','name','sku')->orderBy('name')->get(),
+            'discountStats' => [
+                'active' => Discount::active()->count(),
+                'coupons' => Discount::query()->whereNotNull('code')->where('code', '!=', '')->count(),
+                'auto_apply' => Discount::query()->where(function ($query) {
+                    $query->whereNull('code')->orWhere('code', '');
+                })->count(),
+                'scheduled' => Discount::query()->whereNotNull('ends_at')->where('ends_at', '>', now())->count(),
+            ],
         ]);
     }
 }

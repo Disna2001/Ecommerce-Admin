@@ -5,50 +5,6 @@
 @endphp
 
 <div x-data="{ mobileFilters: @entangle('showFilters') }">
-    <style>
-        .products-shell {
-            background:
-                radial-gradient(circle at top left, rgba(109, 40, 217, 0.10), transparent 24%),
-                radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 18%),
-                linear-gradient(180deg, #f8f8ff 0%, #fdfcff 52%, #f7fbff 100%);
-        }
-        .dark .products-shell {
-            background:
-                radial-gradient(circle at top left, rgba(109, 40, 217, 0.22), transparent 24%),
-                radial-gradient(circle at top right, rgba(6, 182, 212, 0.14), transparent 18%),
-                linear-gradient(180deg, #111428 0%, #10192b 52%, #0c1324 100%);
-        }
-        .products-glass {
-            background: rgba(255,255,255,0.82);
-            border: 1px solid rgba(139,92,246,0.10);
-            backdrop-filter: blur(16px);
-        }
-        .dark .products-glass {
-            background: rgba(15,23,42,0.76);
-            border-color: rgba(255,255,255,0.08);
-        }
-        .products-card {
-            background: rgba(255,255,255,0.92);
-            border: 1px solid rgba(139,92,246,0.10);
-            box-shadow: 0 18px 48px rgba(88,28,135,0.08);
-        }
-        .dark .products-card {
-            background: rgba(15,23,42,0.92);
-            border-color: rgba(255,255,255,0.06);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.32);
-        }
-        .products-chip {
-            background: rgba(255,255,255,0.88);
-            border: 1px solid rgba(139,92,246,0.10);
-            box-shadow: 0 12px 30px rgba(88,28,135,0.06);
-        }
-        .dark .products-chip {
-            background: rgba(15,23,42,0.82);
-            border-color: rgba(255,255,255,0.08);
-            box-shadow: 0 18px 44px rgba(0,0,0,0.22);
-        }
-    </style>
-
     <div x-data="{ show: false, message: '', type: 'success' }"
          x-on:notify.window="show = true; message = $event.detail.message; type = $event.detail.type; setTimeout(() => show = false, 3000)"
          x-show="show" x-transition
@@ -59,9 +15,9 @@
         <span x-text="message"></span>
     </div>
 
-    <div class="products-shell">
+    <div class="storefront-page-shell">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <div class="products-glass rounded-[2rem] p-6 shadow-[0_25px_80px_rgba(88,28,135,0.08)] sm:p-8">
+            <div class="storefront-panel storefront-reveal rounded-[2rem] p-6 shadow-[0_25px_80px_rgba(88,28,135,0.08)] sm:p-8">
                 <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400 dark:text-slate-400">
                     <a href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
                     <i class="fas fa-chevron-right text-[10px]"></i>
@@ -70,10 +26,10 @@
 
                 <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-2xl">
-                        <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color: {{ $primaryColor }}">Browse Store</p>
-                        <h1 class="mt-3 text-3xl font-black text-slate-900 dark:text-slate-50 sm:text-4xl">Find the right product faster.</h1>
+                        <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color: {{ $primaryColor }}">{{ $catalogSettings['badge'] }}</p>
+                        <h1 class="mt-3 text-3xl font-black text-slate-900 dark:text-slate-50 sm:text-4xl">{{ $catalogSettings['title'] }}</h1>
                         <p class="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-300 sm:text-base">
-                            Explore premium digital products, filter by category or brand, and sort results the way you want.
+                            {{ $catalogSettings['subtitle'] }}
                         </p>
                     </div>
 
@@ -99,17 +55,17 @@
                 </div>
 
                 <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    <div class="products-chip rounded-[1.5rem] px-4 py-4">
+                    <div class="storefront-chip rounded-[1.5rem] px-4 py-4">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Live Results</p>
                         <p class="mt-2 text-2xl font-black text-slate-900 dark:text-slate-50">{{ $products->total() }}</p>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Products currently matching your filters.</p>
                     </div>
-                    <div class="products-chip rounded-[1.5rem] px-4 py-4">
+                    <div class="storefront-chip rounded-[1.5rem] px-4 py-4">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Categories</p>
                         <p class="mt-2 text-2xl font-black text-slate-900 dark:text-slate-50">{{ $categories->count() }}</p>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Browse by category for a faster shortlist.</p>
                     </div>
-                    <div class="products-chip rounded-[1.5rem] px-4 py-4">
+                    <div class="storefront-chip rounded-[1.5rem] px-4 py-4">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Brands</p>
                         <p class="mt-2 text-2xl font-black text-slate-900 dark:text-slate-50">{{ $brands->count() }}</p>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Compare trusted brands in one clean view.</p>
@@ -123,26 +79,38 @@
                 </div>
 
                 @if($categories->isNotEmpty())
-                    <div class="mt-6 flex flex-wrap gap-3">
+                    <div class="mt-6">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color: {{ $primaryColor }}">{{ $catalogSettings['category_strip_title'] }}</p>
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">{{ $catalogSettings['category_strip_subtitle'] }}</p>
+                        </div>
+                    <div class="mt-4 {{ $catalogSettings['category_strip_style'] === 'cards' ? 'grid gap-3 sm:grid-cols-2 xl:grid-cols-4' : 'flex flex-wrap gap-3' }}">
                         <button wire:click="$set('category', '')"
-                                class="rounded-full px-4 py-2 text-sm font-semibold transition {{ $category === '' ? 'text-white shadow-lg' : 'products-chip text-slate-600 hover:text-slate-900' }}"
+                                class="{{ $catalogSettings['category_strip_style'] === 'cards' ? 'rounded-[1.5rem] px-4 py-4 text-left' : 'rounded-full px-4 py-2' }} text-sm font-semibold transition {{ $category === '' ? 'text-white shadow-lg' : 'storefront-chip text-slate-600 hover:text-slate-900' }}"
                                 @if($category === '') style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})" @endif>
-                            All Products
+                            <span class="inline-flex items-center gap-2">
+                                @if($catalogSettings['category_show_icons'])<i class="fas fa-table-cells-large"></i>@endif
+                                All Products
+                            </span>
                         </button>
-                        @foreach($categories->take(6) as $cat)
+                        @foreach($categories->take($catalogSettings['category_strip_limit']) as $cat)
                             <button wire:click="$set('category', '{{ $cat->id }}')"
-                                    class="rounded-full px-4 py-2 text-sm font-semibold transition {{ (string) $category === (string) $cat->id ? 'text-white shadow-lg' : 'products-chip text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100' }}"
+                                    class="{{ $catalogSettings['category_strip_style'] === 'cards' ? 'rounded-[1.5rem] px-4 py-4 text-left' : 'rounded-full px-4 py-2' }} text-sm font-semibold transition {{ (string) $category === (string) $cat->id ? 'text-white shadow-lg' : 'storefront-chip text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100' }}"
                                     @if((string) $category === (string) $cat->id) style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})" @endif>
+                                @if($catalogSettings['category_show_icons'])
+                                    <i class="fas {{ $catalogSettings['category_icons'][$cat->id] ?? 'fa-tag' }} mr-2"></i>
+                                @endif
                                 {{ $cat->name }}
                             </button>
                         @endforeach
+                    </div>
                     </div>
                 @endif
             </div>
 
             <div class="mt-8 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
                 <aside class="hidden lg:block">
-                    <div class="products-glass sticky top-24 rounded-[1.75rem] p-5 shadow-[0_20px_60px_rgba(88,28,135,0.06)]">
+                    <div class="storefront-panel storefront-reveal storefront-reveal-delay-1 sticky top-24 rounded-[1.75rem] p-5 shadow-[0_20px_60px_rgba(88,28,135,0.06)]">
                         <div class="mb-5 flex items-center justify-between">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Filters</h2>
                             <button wire:click="clearFilters" class="text-xs font-semibold text-rose-500 hover:underline">Clear all</button>
@@ -206,7 +174,7 @@
 
                 <div class="min-w-0">
                     <div x-show="mobileFilters" x-transition class="mb-5 lg:hidden">
-                        <div class="products-glass rounded-[1.75rem] p-5 shadow-[0_20px_60px_rgba(88,28,135,0.06)]">
+                        <div class="storefront-panel storefront-reveal storefront-reveal-delay-1 rounded-[1.75rem] p-5 shadow-[0_20px_60px_rgba(88,28,135,0.06)]">
                             <div class="mb-5 flex items-center justify-between">
                                 <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Filters</h2>
                                 <button @click="mobileFilters = false" class="text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-100">Close</button>
@@ -274,7 +242,7 @@
                         @forelse($products as $product)
                             @php($inWishlist = in_array($product->id, $wishlist))
 
-                            <article wire:key="product-card-{{ $product->id }}" class="products-card group flex h-full max-w-sm flex-col overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(88,28,135,0.14)]">
+                            <article wire:key="product-card-{{ $product->id }}" class="storefront-card storefront-reveal storefront-reveal-delay-2 group flex h-full max-w-sm flex-col overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(88,28,135,0.14)]">
                                 <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden">
                                     <div class="h-56 bg-gradient-to-br from-white via-violet-50 to-cyan-50 p-4 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
                                         <div class="flex h-full items-center justify-center overflow-hidden rounded-[1.25rem] bg-white dark:bg-slate-900/70">
@@ -372,7 +340,7 @@
                                 </div>
                             </article>
                         @empty
-                            <div class="products-glass col-span-full rounded-[1.75rem] px-6 py-20 text-center">
+                            <div class="storefront-panel col-span-full rounded-[1.75rem] px-6 py-20 text-center">
                                 <i class="fas fa-search text-5xl text-slate-300"></i>
                                 <p class="mt-5 text-xl font-semibold text-slate-700 dark:text-slate-50">No products found</p>
                                 <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">Try a different search or clear the active filters.</p>

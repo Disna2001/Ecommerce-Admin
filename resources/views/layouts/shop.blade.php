@@ -24,14 +24,17 @@
             --primary: {{ $primaryColor }};
             --secondary: {{ $secondaryColor }};
             --accent: {{ $accentColor }};
+            --site-text: {{ $textColor ?? '#111827' }};
+            --site-bg: {{ $bgColor ?? '#f8fafc' }};
+            --nav-bg: {{ $navBgColor ?? '#ffffff' }};
         }
         body { font-family: 'Figtree', sans-serif; }
         .shell {
             background:
                 radial-gradient(circle at top left, rgba(109,40,217,.15), transparent 28%),
                 radial-gradient(circle at top right, rgba(6,182,212,.14), transparent 24%),
-                #f5f3ff;
-            color: #24183f;
+                var(--site-bg);
+            color: var(--site-text);
         }
         .dark .shell {
             background:
@@ -41,7 +44,7 @@
             color: #f5f3ff;
         }
         .glass {
-            background: rgba(255,255,255,.78);
+            background: color-mix(in srgb, var(--nav-bg) 78%, white 22%);
             border: 1px solid rgba(139,92,246,.12);
             backdrop-filter: blur(16px);
         }
@@ -89,6 +92,92 @@
             color: white;
         }
         .btn-gradient:hover { filter: brightness(.96); }
+        .storefront-hero {
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--secondary) 18%, transparent), transparent 28%),
+                linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,252,0.86));
+            border: 1px solid rgba(139,92,246,.10);
+        }
+        .dark .storefront-hero {
+            background:
+                radial-gradient(circle at top right, rgba(139,92,246,.22), transparent 28%),
+                linear-gradient(135deg, rgba(15,23,42,0.92), rgba(17,24,39,0.88));
+            border-color: rgba(255,255,255,.08);
+        }
+        .storefront-stat {
+            background: rgba(255,255,255,.78);
+            border: 1px solid rgba(148,163,184,.16);
+            backdrop-filter: blur(12px);
+        }
+        .dark .storefront-stat {
+            background: rgba(15,23,42,.72);
+            border-color: rgba(255,255,255,.08);
+        }
+        .storefront-page-shell {
+            background:
+                radial-gradient(circle at top left, rgba(109, 40, 217, 0.10), transparent 24%),
+                radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 18%),
+                linear-gradient(180deg, color-mix(in srgb, var(--site-bg) 92%, white 8%) 0%, color-mix(in srgb, var(--site-bg) 96%, white 4%) 52%, var(--site-bg) 100%);
+        }
+        .dark .storefront-page-shell {
+            background:
+                radial-gradient(circle at top left, rgba(109, 40, 217, 0.22), transparent 24%),
+                radial-gradient(circle at top right, rgba(6, 182, 212, 0.14), transparent 18%),
+                linear-gradient(180deg, #111428 0%, #10192b 52%, #0c1324 100%);
+        }
+        .storefront-panel {
+            background: rgba(255,255,255,0.82);
+            border: 1px solid rgba(139,92,246,0.10);
+            backdrop-filter: blur(16px);
+        }
+        .dark .storefront-panel {
+            background: rgba(15,23,42,0.76);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .storefront-card {
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(139,92,246,0.10);
+            box-shadow: 0 18px 48px rgba(88,28,135,0.08);
+        }
+        .dark .storefront-card {
+            background: rgba(15,23,42,0.92);
+            border-color: rgba(255,255,255,0.06);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.32);
+        }
+        .storefront-chip {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(139,92,246,0.10);
+            box-shadow: 0 12px 30px rgba(88,28,135,0.06);
+        }
+        .dark .storefront-chip {
+            background: rgba(15,23,42,0.82);
+            border-color: rgba(255,255,255,0.08);
+            box-shadow: 0 18px 44px rgba(0,0,0,0.22);
+        }
+        .storefront-reveal {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: storefront-fade-up .55s ease forwards;
+        }
+        .storefront-reveal-delay-1 { animation-delay: .08s; }
+        .storefront-reveal-delay-2 { animation-delay: .16s; }
+        .storefront-reveal-delay-3 { animation-delay: .24s; }
+        @keyframes storefront-fade-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .storefront-reveal,
+            .storefront-reveal-delay-1,
+            .storefront-reveal-delay-2,
+            .storefront-reveal-delay-3 {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
+        }
         [wire\:loading] { pointer-events: none; }
     </style>
     @stack('styles')
@@ -120,11 +209,11 @@
                     @endif
                 </a>
                 <nav class="hidden items-center gap-5 text-sm font-medium lg:flex">
-                    <a wire:navigate href="{{ url('/products') }}">Products</a>
+                    <a wire:navigate href="{{ url('/products') }}">{{ $navProductsLabel ?? 'Products' }}</a>
                     <a wire:navigate href="{{ url('/products?sort=newest') }}">New Arrivals</a>
-                    <a wire:navigate href="{{ url('/products?sort=price_asc') }}">Deals</a>
-                    <a wire:navigate href="{{ route('track-order') }}">Track</a>
-                    <a wire:navigate href="{{ route('help-center') }}">Help</a>
+                    <a wire:navigate href="{{ url('/products?sort=price_asc') }}">{{ $navDealsLabel ?? 'Deals' }}</a>
+                    <a wire:navigate href="{{ route('track-order') }}">{{ $navTrackLabel ?? 'Track' }}</a>
+                    <a wire:navigate href="{{ route('help-center') }}">{{ $navHelpLabel ?? 'Help' }}</a>
                 </nav>
             </div>
 
@@ -192,11 +281,11 @@
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Browse</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block" href="{{ url('/products') }}">All Products</a>
+                        <a wire:navigate class="block" href="{{ url('/products') }}">{{ $navProductsLabel ?? 'Products' }}</a>
                         <a wire:navigate class="block" href="{{ url('/products?sort=newest') }}">New Arrivals</a>
-                        <a wire:navigate class="block" href="{{ url('/products?sort=price_asc') }}">Deals</a>
+                        <a wire:navigate class="block" href="{{ url('/products?sort=price_asc') }}">{{ $navDealsLabel ?? 'Deals' }}</a>
                         <a wire:navigate class="block" href="{{ url('/wishlist') }}">Wishlist</a>
-                        <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
+                        <a wire:navigate class="block" href="{{ route('track-order') }}">{{ $navTrackLabel ?? 'Track' }}</a>
                     </div>
                 </div>
                 <div>
@@ -208,18 +297,13 @@
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Account</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Support</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        @guest
-                            <a wire:navigate class="block" href="{{ route('login') }}">Login</a>
-                            <a wire:navigate class="block" href="{{ route('register') }}">Create Account</a>
-                            <a wire:navigate class="block" href="{{ route('help-center') }}">Help Center</a>
-                        @else
-                            <a wire:navigate class="block" href="{{ route('profile.index') }}">My Account</a>
-                            <a wire:navigate class="block" href="{{ url('/cart') }}">Cart</a>
-                            <a wire:navigate class="block" href="{{ url('/checkout') }}">Checkout</a>
-                            <a wire:navigate class="block" href="{{ route('help-center') }}">Help Center</a>
-                        @endguest
+                        <a wire:navigate class="block" href="{{ route('help-center') }}">{{ $navHelpLabel ?? 'Help' }}</a>
+                        @if(!empty($supportEmail))<div>{{ $supportEmail }}</div>@endif
+                        @if(!empty($supportPhone))<div>{{ $supportPhone }}</div>@endif
+                        @if(!empty($supportWhatsapp))<div>WhatsApp: {{ $supportWhatsapp }}</div>@endif
+                        @if(!empty($supportHours))<div>{{ $supportHours }}</div>@endif
                     </div>
                 </div>
             </div>
