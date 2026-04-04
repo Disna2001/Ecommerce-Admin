@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: stock-ai
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: stock-ai-db
+          property: connectionString
+      - key: DB_SSLMODE
+        value: require
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: PUBLIC_STORAGE_PATH
+        value: /var/www/html/storage/app/public
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: MAIL_MAILER
+        value: log
+
+databases:
+  - name: stock-ai-db
+    databaseName: stock_ai
+    user: stock_ai
+    plan: free
