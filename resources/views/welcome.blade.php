@@ -36,65 +36,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
 <body class="shell">
 <div class="min-h-screen">
     <div id="site-progress" class="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-0 opacity-0 transition-[width,opacity] duration-300" style="background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));"></div>
-    @if($topbarEnabled)
-        <div class="px-4 py-2 text-xs font-semibold text-white" style="background:linear-gradient(90deg, {{ $topbarFrom }}, {{ $topbarTo }})">
-            <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-4 sm:justify-between">
-                <span><i class="fas fa-bolt mr-2 text-[10px]"></i>{{ $utilityBadge }}</span>
-                <div class="hidden items-center gap-5 sm:flex">
-                    <span>{{ $utilityLeft }}</span>
-                    <span>{{ $utilityCenter }}</span>
-                    <span>{{ $topbarText }}</span>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <header class="sticky top-0 z-50 px-4 py-4">
-        <div class="glass card mx-auto flex max-w-7xl items-center justify-between rounded-full px-4 py-3 lg:px-6">
-            <div class="flex items-center gap-4">
-                <a href="/" class="flex items-center gap-3">
-                    @if($logoPath)
-                        <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain">
-                    @else
-                        <span class="text-2xl font-black lowercase" style="color:var(--primary)">{{ strtolower($siteName) }}</span>
-                    @endif
-                </a>
-                <nav class="hidden items-center gap-5 text-sm font-medium lg:flex">
-                    <a wire:navigate href="{{ url('/products') }}">{{ $navProductsLabel }}</a>
-                    <a href="#categories">{{ $navCategoriesLabel }}</a>
-                    @if($showDealsLink)
-                        <a href="#deals">{{ $navDealsLabel }}</a>
-                    @endif
-                    <a href="#reviews">{{ $navReviewsLabel }}</a>
-                    <a wire:navigate href="{{ route('track-order') }}">{{ $navTrackLabel }}</a>
-                    <a wire:navigate href="{{ route('help-center') }}">{{ $navHelpLabel }}</a>
-                    <a href="#footer">Contact</a>
-                </nav>
-            </div>
-
-            <form action="{{ url('/products') }}" method="GET" class="relative hidden w-full max-w-md md:block">
-                <input type="text" name="search" placeholder="{{ $searchPlaceholder }}" class="w-full rounded-full border border-white/40 bg-white/70 px-11 py-3 text-sm text-slate-700 outline-none dark:border-white/10 dark:bg-slate-900/60 dark:text-white">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
-            </form>
-
-            <div class="flex items-center gap-2">
-                <button @click="toggle()" type="button" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-slate-900/60 dark:text-white">
-                    <i class="fas" :class="dark ? 'fa-sun' : 'fa-moon'"></i>
-                </button>
-                <a wire:navigate href="{{ url('/wishlist') }}" class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/70 dark:border-white/10 dark:bg-slate-900/60"><i class="far fa-heart"></i>@if($wishCount>0)<span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">{{ $wishCount }}</span>@endif</a>
-                <a wire:navigate href="{{ url('/cart') }}" class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/70 dark:border-white/10 dark:bg-slate-900/60"><i class="fas fa-bag-shopping"></i>@if($cartCount>0)<span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style="background:var(--primary)">{{ $cartCount }}</span>@endif</a>
-                @guest
-                    <a wire:navigate href="{{ route('login') }}" class="hidden rounded-full px-4 py-2 text-sm font-semibold md:inline-flex">Login</a>
-                    <a wire:navigate href="{{ route('register') }}" class="rounded-full px-4 py-2 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">Sign Up</a>
-                @else
-                    <a wire:navigate href="{{ route('profile.index') }}" class="hidden rounded-full px-4 py-2 text-sm font-semibold md:inline-flex">My Account</a>
-                    @can('view-admin-menu')
-                        <a wire:navigate href="{{ route('admin.dashboard') }}" class="rounded-full px-4 py-2 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">Admin Panel</a>
-                    @endcan
-                @endguest
-            </div>
-        </div>
-    </header>
+    <livewire:storefront.header-bar />
 
     <main class="px-4 pb-16">
         <section class="mx-auto mt-4 max-w-7xl rounded-[2rem] px-6 py-12 card
@@ -187,6 +129,42 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                             <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
+                </div>
+            </section>
+        @endif
+
+        @if(($personalizedRecommendations ?? collect())->isNotEmpty())
+            <section class="mx-auto mt-12 max-w-7xl">
+                <div class="mb-6 flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color:var(--primary)">Recommended For You</p>
+                        <h2 class="mt-2 text-3xl font-bold">A smarter shortlist based on your activity</h2>
+                        <p class="muted mt-2 text-sm">The storefront now adapts suggestions from your views, wishlist, reviews, and orders.</p>
+                    </div>
+                    <a wire:navigate href="{{ url('/products') }}" class="text-sm font-semibold" style="color:var(--primary)">Browse All <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                </div>
+                <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach($personalizedRecommendations as $product)
+                        <article class="product-card card overflow-hidden rounded-[1.75rem] p-3">
+                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden rounded-[1.25rem]">
+                                <div class="absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">For You</div>
+                                <div class="flex h-64 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-white to-violet-50 p-6 dark:from-slate-900 dark:to-slate-800">
+                                    @if($product->primary_image_url)
+                                        <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                                    @endif
+                                </div>
+                            </a>
+                            <div class="px-2 pb-2 pt-4">
+                                <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ $product->brand->name ?? ($product->category->name ?? 'Digital Product') }}</p>
+                                <h3 class="mt-2 line-clamp-2 text-base font-semibold">{{ $product->name }}</h3>
+                                <p class="mt-4 text-lg font-black" style="color:var(--primary)">Rs {{ number_format($product->final_price ?? $product->selling_price, 2) }}</p>
+                                <div class="mt-4 flex justify-between gap-3">
+                                    <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="inline-flex h-10 items-center justify-center rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-700">View</a>
+                                    <button type="button" class="shop-cart-btn rounded-full px-4 py-2 text-xs font-bold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">Buy Now</button>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
             </section>
         @endif
@@ -408,7 +386,7 @@ document.addEventListener('livewire:init', () => {
         }, 180);
     });
 });
-document.addEventListener('click', function(e){const cartBtn=e.target.closest('.shop-cart-btn');if(!cartBtn)return;e.preventDefault();const original=cartBtn.innerHTML;cartBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';fetch('/cart/add/'+cartBtn.dataset.id,{method:'POST',headers:{'X-CSRF-TOKEN':window._token,'Content-Type':'application/json'},body:JSON.stringify({quantity:1})}).then(r=>r.json()).then(()=>{cartBtn.innerHTML='Added';setTimeout(()=>cartBtn.innerHTML=original,1400);}).catch(()=>cartBtn.innerHTML=original);});
+document.addEventListener('click', function(e){const cartBtn=e.target.closest('.shop-cart-btn');if(!cartBtn)return;e.preventDefault();const original=cartBtn.innerHTML;cartBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';fetch('/cart/add/'+cartBtn.dataset.id,{method:'POST',headers:{'X-CSRF-TOKEN':window._token,'Content-Type':'application/json'},body:JSON.stringify({quantity:1})}).then(r=>r.json()).then((d)=>{cartBtn.innerHTML='Added';if(window.Livewire){window.Livewire.dispatch('cart-updated',{count:d.count});}setTimeout(()=>cartBtn.innerHTML=original,1400);}).catch(()=>cartBtn.innerHTML=original);});
 </script>
 </body>
 </html>

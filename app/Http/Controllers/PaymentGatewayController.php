@@ -77,10 +77,12 @@ class PaymentGatewayController extends Controller
 
         $statusCode = (string) ($payload['status_code'] ?? '');
         $gatewayData = [
+            'gateway' => 'payhere',
             'payment_reference' => $payload['payment_id'] ?? $order->payment_reference,
             'note' => trim('PayHere callback: ' . ($payload['status_message'] ?? 'Payment update received.')),
             'method' => $payload['method'] ?? null,
             'status_code' => $statusCode,
+            'payload' => $payload,
         ];
 
         if ($statusCode === '2') {

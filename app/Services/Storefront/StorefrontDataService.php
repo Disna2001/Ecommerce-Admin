@@ -132,7 +132,15 @@ class StorefrontDataService
                     ->take(3)
                     ->get();
             }),
+            'personalizedRecommendations' => $this->enrichProducts(
+                app(CustomerPreferenceService::class)->getRecommendedProducts(auth()->user(), 4)
+            ),
         ]);
+    }
+
+    public function enrichForStorefrontCards(Collection $products): Collection
+    {
+        return $this->enrichProducts($products);
     }
 
     protected function getProductsByIds(string $prefix, array $ids): Collection

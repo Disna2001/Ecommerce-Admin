@@ -11,6 +11,7 @@ use Illuminate\Validation\Rules\Password;
 use App\Models\Order;
 use App\Models\Stock;
 use App\Models\Review;
+use App\Models\Address;
 
 class UserProfile extends Component
 {
@@ -147,17 +148,19 @@ class UserProfile extends Component
             'address' => 'nullable|string|max:500',
         ]);
 
+        $preferences = array_merge($user->preferences ?? [], [
+            'email_offers'  => $this->email_offers,
+            'sms_alerts'    => $this->sms_alerts,
+            'order_updates' => $this->order_updates,
+        ]);
+
         $user->update([
             'name'        => $this->name,
             'email'       => $this->email,
             'phone'       => $this->phone    ?: null,
             'dob'         => $this->dob      ?: null,
             'address'     => $this->address  ?: null,
-            'preferences' => [
-                'email_offers'  => $this->email_offers,
-                'sms_alerts'    => $this->sms_alerts,
-                'order_updates' => $this->order_updates,
-            ],
+            'preferences' => $preferences,
         ]);
 
         $this->dispatch('notify', type: 'success', message: 'Profile updated successfully!');
@@ -198,21 +201,49 @@ class UserProfile extends Component
             'addr_postal'  => 'nullable|string|max:20',
         ]);
 
-        if (class_exists(\App\Models\Address::class)) {
-            \App\Models\Address::create([
-                'user_id'     => auth()->id(),
-                'name'        => $this->addr_name,
-                'phone'       => $this->addr_phone,
-                'address'     => $this->addr_address,
-                'city'        => $this->addr_city,
-                'postal_code' => $this->addr_postal,
-                'is_default'  => $this->addr_is_default,
-            ]);
+        if ($this->addr_is_default) {
+            Address::where('user_id', auth()->id())->update(['is_default' => false]);
         }
+
+        Address::create([
+            'user_id'     => auth()->id(),
+            'name'        => $this->addr_name,
+            'phone'       => $this->addr_phone,
+            'address'     => $this->addr_address,
+            'city'        => $this->addr_city,
+            'postal_code' => $this->addr_postal,
+            'is_default'  => $this->addr_is_default,
+        ]);
 
         $this->reset(['addr_name','addr_phone','addr_address','addr_city','addr_postal','addr_is_default']);
         $this->showAddressForm = false;
         $this->dispatch('notify', type: 'success', message: 'Address saved!');
+    }
+
+    public function setDefaultAddress(int $id): void
+    {
+        $address = Address::where('user_id', auth()->id())->findOrFail($id);
+
+        Address::where('user_id', auth()->id())->update(['is_default' => false]);
+        $address->update(['is_default' => true]);
+
+        $fullAddress = trim($address->address . ', ' . $address->city);
+        Auth::user()->update([
+            'phone' => $address->phone ?: Auth::user()->phone,
+            'address' => $fullAddress,
+        ]);
+
+        $this->phone = $address->phone ?: $this->phone;
+        $this->address = $fullAddress;
+
+        $this->dispatch('notify', type: 'success', message: 'Default address updated.');
+    }
+
+    public function deleteAddress(int $id): void
+    {
+        Address::where('user_id', auth()->id())->findOrFail($id)->delete();
+
+        $this->dispatch('notify', type: 'info', message: 'Address removed.');
     }
 
     // ══════════════════════════════════════════════════════════
@@ -346,9 +377,10 @@ class UserProfile extends Component
             ? Stock::with('brand')->whereIn('id', $wishlistIds)->where('status', 'active')->get()
             : collect();
 
-        $addresses = class_exists(\App\Models\Address::class)
-            ? \App\Models\Address::where('user_id', $user->id)->get()
-            : collect();
+        $addresses = Address::where('user_id', $user->id)
+            ->orderByDesc('is_default')
+            ->latest()
+            ->get();
 
         $reviewsQuery = Review::with('stock')->where('user_id', $user->id);
         if ($this->reviewFilter === 'approved') $reviewsQuery->where('is_approved', true);

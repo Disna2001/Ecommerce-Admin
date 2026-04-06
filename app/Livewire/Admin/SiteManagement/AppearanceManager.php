@@ -135,6 +135,15 @@ class AppearanceManager extends Component
     public $payhere_merchant_id = '';
     public $payhere_merchant_secret = '';
     public $payhere_sandbox = true;
+    public $app_public_url = '';
+    public $enable_google_login = false;
+    public $google_client_id = '';
+    public $google_client_secret = '';
+    public $google_redirect_uri = '';
+    public $enable_facebook_login = false;
+    public $facebook_client_id = '';
+    public $facebook_client_secret = '';
+    public $facebook_redirect_uri = '';
 
     // ── Nav Links ─────────────────────────────────────────────
     public $show_deals_link       = true;
@@ -202,10 +211,13 @@ class AppearanceManager extends Component
             str_starts_with((string) $property, 'bank_') ||
             str_starts_with((string) $property, 'card_') ||
             str_starts_with((string) $property, 'payhere_') ||
+            str_starts_with((string) $property, 'google_') ||
+            str_starts_with((string) $property, 'facebook_') ||
             str_starts_with((string) $property, 'nav_') ||
             str_starts_with((string) $property, 'support_') ||
+            $property === 'app_public_url' ||
             $property === 'category_show_icons' ||
-            in_array($property, ['enable_cod', 'enable_bank_transfer', 'enable_card_payment', 'enable_payhere_gateway'], true)
+            in_array($property, ['enable_cod', 'enable_bank_transfer', 'enable_card_payment', 'enable_payhere_gateway', 'enable_google_login', 'enable_facebook_login'], true)
         ) {
             $this->saved = false;
         }
@@ -241,6 +253,9 @@ class AppearanceManager extends Component
             'card_label', 'card_description', 'card_instruction_title', 'card_instruction_body',
             'enable_payhere_gateway', 'payhere_label', 'payhere_description', 'payhere_instruction_title',
             'payhere_instruction_body', 'payhere_merchant_id', 'payhere_merchant_secret', 'payhere_sandbox',
+            'app_public_url',
+            'enable_google_login', 'google_client_id', 'google_client_secret', 'google_redirect_uri',
+            'enable_facebook_login', 'facebook_client_id', 'facebook_client_secret', 'facebook_redirect_uri',
             'show_deals_link', 'show_new_arrivals_link',
             'nav_products_label', 'nav_categories_label', 'nav_deals_label', 'nav_reviews_label', 'nav_track_label', 'nav_help_label',
             'support_email', 'support_phone', 'support_whatsapp', 'support_hours',
@@ -272,6 +287,9 @@ class AppearanceManager extends Component
             'hero_image'      => 'nullable|image|max:5120',
             'support_email'   => 'nullable|email|max:120',
             'category_strip_limit' => 'nullable|integer|min:4|max:12',
+            'app_public_url' => 'nullable|url|max:255',
+            'google_redirect_uri' => 'nullable|url|max:255',
+            'facebook_redirect_uri' => 'nullable|url|max:255',
         ]);
 
         $textSettings = [
@@ -300,6 +318,9 @@ class AppearanceManager extends Component
             'card_label', 'card_description', 'card_instruction_title', 'card_instruction_body',
             'payhere_label', 'payhere_description', 'payhere_instruction_title', 'payhere_instruction_body',
             'payhere_merchant_id', 'payhere_merchant_secret',
+            'app_public_url',
+            'google_client_id', 'google_client_secret', 'google_redirect_uri',
+            'facebook_client_id', 'facebook_client_secret', 'facebook_redirect_uri',
             'nav_products_label', 'nav_categories_label', 'nav_deals_label', 'nav_reviews_label', 'nav_track_label', 'nav_help_label',
             'support_email', 'support_phone', 'support_whatsapp', 'support_hours',
         ];
@@ -321,6 +342,8 @@ class AppearanceManager extends Component
         SiteSetting::set('enable_card_payment', $this->enable_card_payment ? '1' : '0', 'boolean', 'payment');
         SiteSetting::set('enable_payhere_gateway', $this->enable_payhere_gateway ? '1' : '0', 'boolean', 'payment');
         SiteSetting::set('payhere_sandbox', $this->payhere_sandbox ? '1' : '0', 'boolean', 'payment');
+        SiteSetting::set('enable_google_login', $this->enable_google_login ? '1' : '0', 'boolean', 'integrations');
+        SiteSetting::set('enable_facebook_login', $this->enable_facebook_login ? '1' : '0', 'boolean', 'integrations');
 
         // Category icons JSON
         SiteSetting::set('category_icons', json_encode($this->category_icons), 'json', 'appearance');
@@ -406,6 +429,9 @@ class AppearanceManager extends Component
         if (str_starts_with($key, 'card_'))     return 'payment';
         if (str_starts_with($key, 'payhere_'))  return 'payment';
         if (str_starts_with($key, 'cod_'))      return 'payment';
+        if (str_starts_with($key, 'google_'))   return 'integrations';
+        if (str_starts_with($key, 'facebook_')) return 'integrations';
+        if ($key === 'app_public_url')          return 'hosting';
         if (str_starts_with($key, 'enable_'))   return 'payment';
         if (str_starts_with($key, 'site_'))     return 'branding';
         if (str_starts_with($key, 'nav_'))      return 'appearance';
@@ -424,6 +450,11 @@ class AppearanceManager extends Component
                 'branding_ready' => filled($this->site_name) && filled($this->logo_path) && filled($this->favicon_path),
                 'hero_ready' => filled($this->hero_title) && filled($this->hero_button_text),
                 'payments_enabled' => collect([$this->enable_cod, $this->enable_bank_transfer, $this->enable_card_payment, $this->enable_payhere_gateway])->filter()->count(),
+                'integrations_ready' => collect([
+                    $this->enable_payhere_gateway && filled($this->payhere_merchant_id) && filled($this->payhere_merchant_secret),
+                    $this->enable_google_login && filled($this->google_client_id) && filled($this->google_client_secret),
+                    $this->enable_facebook_login && filled($this->facebook_client_id) && filled($this->facebook_client_secret),
+                ])->filter()->count(),
                 'featured_items' => is_array($featuredIds) ? count($featuredIds) : 0,
             ],
             'tabStats' => [
@@ -435,6 +466,7 @@ class AppearanceManager extends Component
                 'topbar' => $this->topbar_enabled ? 'Enabled' : 'Hidden',
                 'detail' => $this->detail_show_related ? 'Related on' : 'Minimal detail',
                 'payment' => collect([$this->enable_cod, $this->enable_bank_transfer, $this->enable_card_payment, $this->enable_payhere_gateway])->filter()->count() . ' active',
+                'integrations' => collect([$this->enable_payhere_gateway, $this->enable_google_login, $this->enable_facebook_login])->filter()->count() . ' active',
                 'categories' => count($this->category_icons) . ' mapped',
                 'navigation' => ($this->show_deals_link || $this->show_new_arrivals_link) ? 'Dynamic links' : 'Minimal nav',
                 'footer' => filled($this->footer_tagline) ? 'Footer ready' : 'Needs copy',

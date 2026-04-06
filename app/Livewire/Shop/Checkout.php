@@ -5,6 +5,8 @@ namespace App\Livewire\Shop;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
+use App\Models\Address;
 use App\Models\Order;
 use App\Models\SiteSetting;
 use App\Services\Notifications\CustomerNotificationService;
@@ -24,6 +26,7 @@ class Checkout extends Component
     public string $city            = '';
     public string $postal_code     = '';
     public string $notes           = '';
+    public ?int $selected_address_id = null;
 
     // Payment
     public string $payment_method  = 'cod';
@@ -57,11 +60,11 @@ class Checkout extends Component
         $total = max(0, $subtotal - $discountAmount + $shipping);
         $paymentProofPath = null;
 
-        if ($this->payment_proof) {
+        if ($this->payment_method === 'bank' && $this->payment_proof) {
             $paymentProofPath = $this->payment_proof->store('orders/payment-proofs', 'public');
         }
 
-        $requiresVerification = in_array($this->payment_method, ['bank', 'card']);
+        $requiresVerification = $this->payment_method === 'bank';
 
         $order = $orderWorkflowService->createOrder(
             [
@@ -80,6 +83,7 @@ class Checkout extends Component
                 'shipping_fee' => $shipping,
                 'total' => $total,
                 'payment_method' => $this->payment_method,
+                'payment_gateway' => $this->payment_method === 'payhere' ? 'payhere' : null,
                 'payment_status' => 'unpaid',
                 'payment_reference' => $this->payment_reference ?: null,
                 'payment_review_status' => $requiresVerification ? 'pending_review' : 'not_required',
@@ -135,7 +139,7 @@ class Checkout extends Component
             'payment_proof'     => 'nullable|image|max:4096',
         ];
 
-        if (in_array($this->payment_method, ['bank', 'card'])) {
+        if ($this->payment_method === 'bank') {
             $rules['payment_reference'] = 'required|string|max:120';
             $rules['payment_proof'] = 'required|image|max:4096';
         }
@@ -156,12 +160,56 @@ class Checkout extends Component
             $this->email      = $user->email;
             $this->phone      = $user->phone ?? '';
             $this->address    = $user->address ?? '';
+
+            $defaultAddress = Address::where('user_id', $user->id)
+                ->orderByDesc('is_default')
+                ->latest()
+                ->first();
+
+            if ($defaultAddress) {
+                $this->applyAddress($defaultAddress->id);
+            }
+        }
+    }
+
+    public function applyAddress(int $addressId): void
+    {
+        $address = Address::where('user_id', auth()->id())->findOrFail($addressId);
+        $nameParts = preg_split('/\s+/', trim($address->name), 2) ?: [];
+
+        $this->selected_address_id = $address->id;
+        $this->first_name = $nameParts[0] ?? $this->first_name;
+        $this->last_name = $nameParts[1] ?? $this->last_name;
+        $this->phone = $address->phone ?: $this->phone;
+        $this->address = $address->address;
+        $this->city = $address->city;
+        $this->postal_code = $address->postal_code ?: '';
+    }
+
+    public function updatedPaymentMethod(string $method): void
+    {
+        if ($method !== 'bank') {
+            $this->payment_reference = '';
+            $this->payment_note = '';
+            $this->payment_proof = null;
         }
     }
 
     public function getCartProperty(): array
     {
         return session('cart', []);
+    }
+
+    public function getSavedAddressesProperty(): Collection
+    {
+        if (!auth()->check()) {
+            return collect();
+        }
+
+        return Address::where('user_id', auth()->id())
+            ->orderByDesc('is_default')
+            ->latest()
+            ->get();
     }
 
     protected function getEnabledPaymentMethods(): array
@@ -244,9 +292,9 @@ class Checkout extends Component
                 'value' => 'card',
                 'enabled' => SiteSetting::get('enable_card_payment', true),
                 'label' => SiteSetting::get('card_label', 'Online / Card Payment'),
-                'description' => SiteSetting::get('card_description', 'Submit your transaction proof for approval'),
-                'instruction_title' => SiteSetting::get('card_instruction_title', 'Online payment verification'),
-                'instruction_body' => SiteSetting::get('card_instruction_body', 'Complete your online or card payment outside the site, then upload the confirmation screenshot or receipt for review.'),
+                'description' => SiteSetting::get('card_description', 'Use card payment without a receipt upload'),
+                'instruction_title' => SiteSetting::get('card_instruction_title', 'Card payment selected'),
+                'instruction_body' => SiteSetting::get('card_instruction_body', 'Card payments should use the secure hosted gateway when PayHere is enabled. If PayHere is not configured yet, our team will contact you with card payment instructions after order placement.'),
                 'icon' => 'fa-credit-card',
                 'text' => 'text-purple-600',
                 'bg' => 'bg-purple-100',
@@ -273,6 +321,6 @@ class Checkout extends Component
 
         return view('livewire.shop.checkout', compact(
             'cart', 'count', 'subtotal', 'discountAmount', 'shipping', 'total', 'paymentOptions', 'selectedPaymentOption'
-        ));
+        ) + ['savedAddresses' => $this->savedAddresses]);
     }
 }

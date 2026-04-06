@@ -7,10 +7,10 @@
 
     <x-admin.settings.summary :status-cards="$statusCards" :integration-summary="$integrationSummary" :checklist="$checklist" />
 
-    <div class="grid gap-6 xl:grid-cols-[250px_minmax(0,1fr)]">
+    <div class="grid min-w-0 gap-6 xl:grid-cols-[250px_minmax(0,1fr)]">
         <x-admin.settings.nav :active-tab="$activeTab" />
 
-        <div class="space-y-6">
+        <div class="min-w-0 space-y-6 overflow-hidden">
             @if($activeTab === 'communications')
                 <x-admin.settings.tab-communications />
             @endif

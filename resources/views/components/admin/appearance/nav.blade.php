@@ -10,6 +10,7 @@
             'topbar' => ['Top Bar', 'fa-bars'],
             'detail' => ['Detail Page', 'fa-box-open'],
             'payment' => ['Payments', 'fa-credit-card'],
+            'integrations' => ['Client Setup', 'fa-plug-circle-bolt'],
             'categories' => ['Categories', 'fa-table-cells-large'],
             'navigation' => ['Navigation', 'fa-compass'],
             'footer' => ['Footer', 'fa-sitemap'],

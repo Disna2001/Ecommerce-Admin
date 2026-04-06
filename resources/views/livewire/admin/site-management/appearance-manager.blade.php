@@ -47,6 +47,10 @@
                 @include('components.admin.appearance.tab-payment')
             @endif
 
+            @if($activeTab === 'integrations')
+                @include('components.admin.appearance.tab-integrations')
+            @endif
+
             @if($activeTab === 'navigation')
                 @include('components.admin.appearance.tab-navigation')
             @endif

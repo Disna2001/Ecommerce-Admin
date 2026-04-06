@@ -2,10 +2,11 @@
     <div class="grid gap-6 xl:grid-cols-[1.7fr_0.9fr]">
         <div class="space-y-5">
             <div class="space-y-3"><span class="inline-flex items-center rounded-full border border-fuchsia-200/70 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-fuchsia-700 dark:border-fuchsia-400/20 dark:bg-fuchsia-400/10 dark:text-fuchsia-200">Customer-Facing Experience</span><div class="space-y-2"><h3 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Control the full storefront without jumping between tools.</h3><p class="max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">Update visual identity, homepage copy, category icons, and checkout payment options from one structured admin flow.</p></div></div>
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                 <x-admin.ui.metric label="Branding" :value="$storefrontSummary['branding_ready'] ? 'Ready' : 'Review'" :hint="$logo_path ? 'Logo uploaded | favicon set' : 'Logo or favicon missing'" tone="slate" />
                 <x-admin.ui.metric label="Hero Block" :value="$storefrontSummary['hero_ready'] ? 'Live' : 'Edit'" :hint="$hero_image_path ? 'Image loaded' : 'Text-only now'" tone="blue" />
                 <x-admin.ui.metric label="Payment Methods" :value="$storefrontSummary['payments_enabled']" hint="Checkout options enabled" tone="emerald" />
+                <x-admin.ui.metric label="Client Setup" :value="$storefrontSummary['integrations_ready']" hint="Gateway and social apps ready" tone="violet" />
                 <x-admin.ui.metric label="Featured Products" :value="$storefrontSummary['featured_items']" hint="Products chosen for homepage rails" tone="accent" />
             </div>
         </div>

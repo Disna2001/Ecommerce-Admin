@@ -2,6 +2,7 @@
 
 use App\Mail\WelcomeAccountMail;
 use App\Models\Merchant;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -143,6 +144,11 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
+@php
+    $googleReady = SiteSetting::get('enable_google_login', false) && filled(SiteSetting::get('google_client_id')) && filled(SiteSetting::get('google_client_secret'));
+    $facebookReady = SiteSetting::get('enable_facebook_login', false) && filled(SiteSetting::get('facebook_client_id')) && filled(SiteSetting::get('facebook_client_secret'));
+@endphp
+
 <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.20),_transparent_38%),linear-gradient(180deg,_#f8fbff_0%,_#eef4ff_42%,_#f8fafc_100%)] px-4 py-8 sm:px-6 lg:py-12">
     <div class="mx-auto w-full max-w-5xl">
         <div class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-[0_25px_80px_rgba(15,23,42,0.12)] backdrop-blur">
@@ -218,6 +224,21 @@ new #[Layout('layouts.guest')] class extends Component
                             Sign in
                         </a>
                     </div>
+
+                    @if($googleReady || $facebookReady)
+                        <div class="mb-6 grid gap-3 sm:grid-cols-2">
+                            @if($googleReady)
+                                <a href="{{ route('auth.social.redirect', 'google') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                                    <i class="fab fa-google text-red-500"></i> Continue with Google
+                                </a>
+                            @endif
+                            @if($facebookReady)
+                                <a href="{{ route('auth.social.redirect', 'facebook') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                                    <i class="fab fa-facebook text-blue-600"></i> Continue with Facebook
+                                </a>
+                            @endif
+                        </div>
+                    @endif
 
                     <form wire:submit="register" enctype="multipart/form-data" class="space-y-6">
                         <div>

@@ -20,7 +20,15 @@ Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify'])->n
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive'])->name('whatsapp.webhook.receive');
 
 // Auth pages
-Route::view('/dashboard', 'dashboard')
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    if ($user && $user->can('view dashboard')) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('home');
+})
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
