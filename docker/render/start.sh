@@ -5,6 +5,8 @@ cd /var/www/html
 
 PORT="${PORT:-10000}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-true}"
+RUN_STARTER_CATALOG_SEED="${RUN_STARTER_CATALOG_SEED:-false}"
+STARTER_CATALOG_SEED_CLASS="${STARTER_CATALOG_SEED_CLASS:-Database\\Seeders\\StarterCatalogSeeder}"
 PUBLIC_STORAGE_PATH="${PUBLIC_STORAGE_PATH:-/var/www/html/storage/app/public}"
 
 ensure_writable_paths() {
@@ -38,6 +40,10 @@ php artisan package:discover --ansi
 
 if [ "${RUN_MIGRATIONS}" = "true" ]; then
   php artisan migrate --force
+fi
+
+if [ "${RUN_STARTER_CATALOG_SEED}" = "true" ]; then
+  php artisan db:seed --force --class="${STARTER_CATALOG_SEED_CLASS}"
 fi
 
 php artisan config:cache || true
