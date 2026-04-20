@@ -8,6 +8,7 @@ use App\Models\Stock;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Services\Storefront\ProductPricingService;
+use App\Services\Tenancy\TenantManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
@@ -85,7 +86,7 @@ class ProductList extends Component
     public function render()
     {
         $productPricingService = app(ProductPricingService::class);
-        $cacheKey = 'product_list_results_'.md5(json_encode([
+        $cacheKey = app(TenantManager::class)->scopedCacheKey('product_list_results_'.md5(json_encode([
             'search' => $this->search,
             'sort' => $this->sort,
             'category' => $this->category,
@@ -94,7 +95,7 @@ class ProductList extends Component
             'max_price' => $this->max_price,
             'per_page' => $this->perPage,
             'page' => request()->query('page', 1),
-        ]));
+        ])));
 
         $query = Stock::with(['category','brand'])
             ->where('status','active')
