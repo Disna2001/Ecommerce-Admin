@@ -23,7 +23,11 @@
         :date-to="$dateTo"
         :per-page="$perPage"
     />
-    <x-admin.orders.table :orders="$orders" />
+    <x-admin.orders.table
+        :orders="$orders"
+        :sort-field="$sortField"
+        :sort-dir="$sortDir"
+    />
 
     @if($showDetail && $viewingOrder)
         <x-admin.orders.detail-modal :viewing-order="$viewingOrder" />
