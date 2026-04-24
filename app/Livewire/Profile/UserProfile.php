@@ -8,10 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use App\Models\Order;
 use App\Models\Stock;
 use App\Models\Review;
 use App\Models\Address;
+use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
+use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
+use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 
 class UserProfile extends Component
 {
@@ -68,6 +73,8 @@ class UserProfile extends Component
 
     // ── Security ──────────────────────────────────────────────
     public string $logoutPassword = '';
+    public string $two_factor_code = '';
+    public string $two_factor_password = '';
 
     // ─────────────────────────────────────────────────────────
     public function mount(): void
@@ -359,6 +366,77 @@ class UserProfile extends Component
         Auth::logoutOtherDevices($this->logoutPassword);
         $this->logoutPassword = '';
         $this->dispatch('notify', type: 'success', message: 'All other sessions signed out.');
+    }
+
+    public function enableTwoFactor(EnableTwoFactorAuthentication $enable): void
+    {
+        $this->resetErrorBag(['two_factor_password', 'two_factor_code']);
+
+        $this->validate([
+            'two_factor_password' => 'required|string',
+        ]);
+
+        if (!Hash::check($this->two_factor_password, Auth::user()->password)) {
+            $this->addError('two_factor_password', 'Current password is incorrect.');
+            return;
+        }
+
+        $enable(Auth::user(), force: true);
+
+        $this->two_factor_code = '';
+        $this->dispatch('notify', type: 'success', message: 'Two-factor setup started. Scan the QR code and confirm with your authenticator app.');
+    }
+
+    public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirm): void
+    {
+        $this->resetErrorBag('two_factor_code');
+
+        $this->validate([
+            'two_factor_code' => 'required|string|min:6|max:10',
+        ]);
+
+        try {
+            $confirm(Auth::user(), $this->two_factor_code);
+        } catch (ValidationException $exception) {
+            $this->addError('two_factor_code', $exception->validator->errors()->first('code') ?: 'The authentication code is invalid.');
+            return;
+        }
+
+        $this->two_factor_code = '';
+        $this->two_factor_password = '';
+        $this->dispatch('notify', type: 'success', message: 'Two-factor authentication is now enabled.');
+    }
+
+    public function disableTwoFactor(DisableTwoFactorAuthentication $disable): void
+    {
+        $this->resetErrorBag('two_factor_password');
+
+        $this->validate([
+            'two_factor_password' => 'required|string',
+        ]);
+
+        if (!Hash::check($this->two_factor_password, Auth::user()->password)) {
+            $this->addError('two_factor_password', 'Current password is incorrect.');
+            return;
+        }
+
+        $disable(Auth::user());
+
+        $this->two_factor_password = '';
+        $this->two_factor_code = '';
+        $this->dispatch('notify', type: 'info', message: 'Two-factor authentication has been disabled.');
+    }
+
+    public function regenerateTwoFactorRecoveryCodes(GenerateNewRecoveryCodes $generate): void
+    {
+        if (!Auth::user()->two_factor_secret) {
+            $this->dispatch('notify', type: 'error', message: 'Enable two-factor authentication first.');
+            return;
+        }
+
+        $generate(Auth::user());
+
+        $this->dispatch('notify', type: 'success', message: 'Recovery codes regenerated.');
     }
 
     // ══════════════════════════════════════════════════════════

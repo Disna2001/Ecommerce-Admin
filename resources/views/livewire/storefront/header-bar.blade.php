@@ -159,25 +159,34 @@
                             <i class="fas fa-chevron-down text-[10px] text-soft"></i>
                         </button>
 
-                        <div x-show="open" @click.away="open=false" x-transition class="absolute right-0 top-14 z-[80] max-h-[75vh] w-80 overflow-y-auto rounded-[1.5rem] border border-white/20 bg-white/95 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.18)] backdrop-blur dark:border-white/10 dark:bg-slate-950/95" style="display:none">
-                            <div class="rounded-2xl bg-slate-50 px-4 py-4 dark:bg-slate-900/70">
-                                <p class="truncate text-sm font-bold text-adapt">{{ auth()->user()->name }}</p>
-                                <p class="mt-1 truncate text-xs text-soft">{{ auth()->user()->email }}</p>
+                        <div x-cloak x-show="open" @click.away="open=false" x-transition.origin.top.right class="absolute right-0 top-[calc(100%+0.85rem)] z-[90] w-[19rem] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-[0_28px_80px_rgba(15,23,42,0.18)] ring-1 ring-black/5 dark:border-white/10 dark:bg-slate-950 dark:ring-white/10" style="display:none">
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-slate-900">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-sm font-black text-white" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ auth()->user()->name }}</p>
+                                        <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ auth()->user()->email }}</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="mt-3 space-y-1.5">
-                                <a wire:navigate href="{{ route('profile.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-adapt transition hover:bg-slate-50 dark:hover:bg-slate-900/70">
-                                    <i class="fas fa-user w-4 text-center text-soft"></i> Profile
+                            <div class="mt-3 space-y-1">
+                                <a wire:navigate href="{{ route('profile.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-900">
+                                    <i class="fas fa-user w-4 text-center text-slate-400 dark:text-slate-500"></i>
+                                    <span>Profile</span>
                                 </a>
-                                <a wire:navigate href="{{ route('profile.index', ['tab' => 'orders']) }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-adapt transition hover:bg-slate-50 dark:hover:bg-slate-900/70">
-                                    <i class="fas fa-bag-shopping w-4 text-center text-soft"></i> My Orders
+                                <a wire:navigate href="{{ route('profile.index', ['tab' => 'orders']) }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-900">
+                                    <i class="fas fa-bag-shopping w-4 text-center text-slate-400 dark:text-slate-500"></i>
+                                    <span>My Orders</span>
                                 </a>
-                                <a wire:navigate href="{{ route('wishlist.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-adapt transition hover:bg-slate-50 dark:hover:bg-slate-900/70">
-                                    <i class="fas fa-heart w-4 text-center text-soft"></i> Wishlist
+                                <a wire:navigate href="{{ route('wishlist.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-900">
+                                    <i class="fas fa-heart w-4 text-center text-slate-400 dark:text-slate-500"></i>
+                                    <span>Wishlist</span>
                                 </a>
                                 @can('view-admin-menu')
-                                    <a wire:navigate href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-white" style="background:linear-gradient(90deg,var(--primary),var(--secondary))">
-                                        <i class="fas fa-gauge-high w-4 text-center"></i> Admin Panel
+                                    <a wire:navigate href="{{ route('admin.dashboard') }}" class="mt-2 flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/20" style="background:linear-gradient(90deg,var(--primary),var(--secondary))">
+                                        <i class="fas fa-gauge-high w-4 text-center"></i>
+                                        <span>Admin Panel</span>
                                     </a>
                                 @endcan
                             </div>
@@ -185,7 +194,8 @@
                             <form method="POST" action="{{ route('logout') }}" class="mt-3 border-t border-slate-200 pt-3 dark:border-white/10">
                                 @csrf
                                 <button type="submit" class="flex w-full items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-left text-sm font-semibold text-rose-600 transition hover:border-rose-200 hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200 dark:hover:bg-rose-500/15">
-                                    <i class="fas fa-arrow-right-from-bracket w-4 text-center"></i> Sign Out
+                                    <i class="fas fa-arrow-right-from-bracket w-4 text-center"></i>
+                                    <span>Sign Out</span>
                                 </button>
                             </form>
                         </div>
