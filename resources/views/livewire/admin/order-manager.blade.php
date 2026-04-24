@@ -13,7 +13,16 @@
     </div>
 
     <x-admin.orders.hero />
-    <x-admin.orders.overview :orders="$orders" :recent-queue="$recentQueue" />
+    <x-admin.orders.overview
+        :orders="$orders"
+        :recent-queue="$recentQueue"
+        :search="$search"
+        :filter-status="$filterStatus"
+        :filter-payment="$filterPayment"
+        :date-from="$dateFrom"
+        :date-to="$dateTo"
+        :per-page="$perPage"
+    />
     <x-admin.orders.table :orders="$orders" />
 
     @if($showDetail && $viewingOrder)
