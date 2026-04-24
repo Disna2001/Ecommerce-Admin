@@ -6,9 +6,12 @@
     <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16 md:h-20">
             <div class="flex items-center space-x-6">
-                <a href="/" class="flex items-center">
+                <a href="/" class="flex items-center gap-3">
                     @if(!empty($logoPath))
-                        <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName ?? '' }}" class="h-9 object-contain">
+                        <span class="flex h-11 items-center rounded-2xl border border-gray-200 bg-white px-3 shadow-sm">
+                            <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName ?? '' }}" class="block h-8 w-auto max-w-[7rem] object-contain">
+                        </span>
+                        <span class="hidden max-w-[9rem] truncate text-xs font-bold uppercase tracking-[0.22em] text-gray-700 md:inline">{{ $siteName ?? 'Shop' }}</span>
                     @else
                         <span class="text-xl font-extrabold" style="color:{{ $textColor ?? '#111' }}">{{ $siteName ?? 'Shop' }}</span>
                     @endif

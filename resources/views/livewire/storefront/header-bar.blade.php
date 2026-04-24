@@ -22,7 +22,10 @@
             <div class="flex items-center gap-4">
                 <a href="/" class="flex items-center gap-3">
                     @if($layout['logoPath'])
-                        <img src="{{ Storage::url($layout['logoPath']) }}" alt="{{ $layout['siteName'] }}" class="h-10 w-auto object-contain">
+                        <span class="flex h-12 items-center rounded-2xl border border-slate-200/70 bg-white/90 px-3 shadow-sm dark:border-white/10 dark:bg-slate-900/70">
+                            <img src="{{ Storage::url($layout['logoPath']) }}" alt="{{ $layout['siteName'] }}" class="block h-9 w-auto max-w-[7.5rem] object-contain">
+                        </span>
+                        <span class="hidden max-w-[9rem] truncate text-sm font-black uppercase tracking-[0.22em] text-slate-700 md:inline dark:text-white">{{ $layout['siteName'] }}</span>
                     @else
                         <span class="text-2xl font-black lowercase" style="color:var(--primary)">{{ strtolower($layout['siteName']) }}</span>
                     @endif
