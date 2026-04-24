@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\Tenancy\TenantManager;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class SocialAuthController extends Controller
     public function redirect(string $provider)
     {
         abort_unless(in_array($provider, $this->providers), 404);
+        abort_unless($this->configureProvider($provider), 404);
 
         // Store redirect intent — 'connect' if logged in, 'login' if guest
         session(['social_intent' => Auth::check() ? 'connect' : 'login']);
@@ -34,6 +36,7 @@ class SocialAuthController extends Controller
     public function callback(string $provider)
     {
         abort_unless(in_array($provider, $this->providers), 404);
+        abort_unless($this->configureProvider($provider), 404);
         $tenantId = app(TenantManager::class)->currentId();
 
         try {
@@ -129,5 +132,34 @@ class SocialAuthController extends Controller
             $provider . '_id'    => $socialUser->getId(),
             $provider . '_token' => $socialUser->token,
         ]);
+    }
+
+    private function configureProvider(string $provider): bool
+    {
+        if (!in_array($provider, ['google', 'facebook'], true)) {
+            return true;
+        }
+
+        if (!SiteSetting::get('enable_'.$provider.'_login', false)) {
+            return false;
+        }
+
+        $clientId = SiteSetting::get($provider.'_client_id');
+        $clientSecret = SiteSetting::get($provider.'_client_secret');
+
+        if (blank($clientId) || blank($clientSecret)) {
+            return false;
+        }
+
+        $redirect = SiteSetting::get($provider.'_redirect_uri')
+            ?: rtrim((string) (SiteSetting::get('app_public_url') ?: config('app.url')), '/').'/auth/'.$provider.'/callback';
+
+        config([
+            'services.'.$provider.'.client_id' => $clientId,
+            'services.'.$provider.'.client_secret' => $clientSecret,
+            'services.'.$provider.'.redirect' => $redirect,
+        ]);
+
+        return true;
     }
 }

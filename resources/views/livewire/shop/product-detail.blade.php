@@ -19,7 +19,7 @@
 
         <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
             <div>
-                <div class="surface card-shadow mb-3 flex h-96 items-center justify-center overflow-hidden rounded-[2rem]">
+                <div class="surface card-shadow storefront-reveal mb-3 flex h-96 items-center justify-center overflow-hidden rounded-[2rem]">
                     @if($imageUrls->isNotEmpty() && !empty($imageUrls[$activeImage]))
                         <picture class="block h-96 w-full">
                             @if(!empty($imageSourceSets[$activeImage]['webp']))
@@ -66,7 +66,7 @@
             </div>
 
             <div>
-                <div class="glass card-shadow rounded-[2rem] p-6">
+                <div class="glass card-shadow storefront-reveal storefront-reveal-delay-1 rounded-[2rem] p-6">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         @if($product->brand)
                             <span class="rounded-full px-3 py-1 text-xs font-semibold" style="background:color-mix(in srgb,var(--primary) 12%,white);color:var(--primary)">{{ $product->brand->name }}</span>
@@ -110,27 +110,15 @@
                     </div>
 
                     <div class="mb-6 grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-2xl border border-slate-200 bg-white/75 p-4 dark:border-white/10 dark:bg-slate-900/60">
-                            <div class="flex items-center gap-2 text-sm font-semibold text-adapt">
-                                <i class="fas fa-bolt" style="color:var(--primary)"></i>
-                                Fast handling
+                        @foreach($detailSettings['trust_cards'] as $index => $trustCard)
+                            <div class="rounded-2xl border border-slate-200 bg-white/75 p-4 dark:border-white/10 dark:bg-slate-900/60">
+                                <div class="flex items-center gap-2 text-sm font-semibold text-adapt">
+                                    <i class="fas {{ ['fa-bolt', 'fa-shield-check', 'fa-headset'][$index] ?? 'fa-star' }}" style="color:var(--primary)"></i>
+                                    {{ $trustCard['title'] }}
+                                </div>
+                                <p class="mt-2 text-xs leading-6 text-soft">{{ $trustCard['text'] }}</p>
                             </div>
-                            <p class="mt-2 text-xs leading-6 text-soft">Orders are processed quickly with status updates sent to your email.</p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 bg-white/75 p-4 dark:border-white/10 dark:bg-slate-900/60">
-                            <div class="flex items-center gap-2 text-sm font-semibold text-adapt">
-                                <i class="fas fa-shield-check" style="color:var(--primary)"></i>
-                                Payment confidence
-                            </div>
-                            <p class="mt-2 text-xs leading-6 text-soft">Bank and online payments are verified, and checkout keeps a full order trail.</p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 bg-white/75 p-4 dark:border-white/10 dark:bg-slate-900/60">
-                            <div class="flex items-center gap-2 text-sm font-semibold text-adapt">
-                                <i class="fas fa-headset" style="color:var(--primary)"></i>
-                                Support ready
-                            </div>
-                            <p class="mt-2 text-xs leading-6 text-soft">You can track each step after ordering and get clear updates if verification is needed.</p>
-                        </div>
+                        @endforeach
                     </div>
 
                     <div class="mb-5 grid grid-cols-2 gap-2 text-sm">
@@ -145,21 +133,21 @@
                     <div class="mb-5 flex items-center gap-2">
                         @if($product->quantity > 0)
                             <span class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
-                            <span class="text-sm font-medium text-green-600">In Stock{{ $product->isLowStock() ? ' - Only '.$product->quantity.' left!' : '' }}</span>
+                            <span class="text-sm font-medium text-green-600">{{ $detailSettings['in_stock_label'] }}{{ $product->isLowStock() ? ' - '.str_replace('{quantity}', $product->quantity, $detailSettings['low_stock_template']) : '' }}</span>
                         @else
                             <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
-                            <span class="text-sm font-medium text-red-600">Out of Stock</span>
+                            <span class="text-sm font-medium text-red-600">{{ $detailSettings['out_of_stock_label'] }}</span>
                         @endif
                     </div>
 
                     <div class="mb-5 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Why shoppers choose this listing</p>
-                                <p class="mt-1 text-sm leading-6 text-emerald-700/90 dark:text-emerald-200/80">Clear pricing, direct checkout, and order notifications at each major status change.</p>
+                                <p class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">{{ $detailSettings['value_title'] }}</p>
+                                <p class="mt-1 text-sm leading-6 text-emerald-700/90 dark:text-emerald-200/80">{{ $detailSettings['value_text'] }}</p>
                             </div>
                             <a wire:navigate href="{{ url('/checkout') }}" class="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-bold text-emerald-700 shadow-sm dark:bg-slate-900 dark:text-emerald-300">
-                                Checkout ready
+                                {{ $detailSettings['value_cta'] }}
                             </a>
                         </div>
                     </div>
@@ -186,9 +174,19 @@
             </div>
         </div>
 
-        <div class="surface card-shadow mt-12 overflow-hidden rounded-[2rem]">
+        <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 mt-12 overflow-hidden rounded-[2rem]">
+            @php
+                $detailTabs = [
+                    'description' => 'Description',
+                    'specs' => 'Specifications',
+                ];
+
+                if ($detailSettings['show_reviews']) {
+                    $detailTabs['reviews'] = 'Reviews ('.$reviews->count().')';
+                }
+            @endphp
             <div class="flex border-b border-slate-200 px-2 dark:border-white/10">
-                @foreach(['description'=>'Description','specs'=>'Specifications','reviews'=>'Reviews ('.$reviews->count().')'] as $tab=>$label)
+                @foreach($detailTabs as $tab=>$label)
                     <button wire:click="setTab('{{ $tab }}')" class="border-b-2 px-5 py-4 text-sm font-semibold transition"
                             style="{{ $activeTab===$tab ? 'border-color:var(--primary);color:var(--primary)' : 'border-color:transparent;color:#6b7280' }}">
                         {{ $label }}
@@ -220,7 +218,7 @@
                 </div>
             @endif
 
-            @if($activeTab === 'reviews')
+            @if($activeTab === 'reviews' && $detailSettings['show_reviews'])
                 <div class="p-8">
                     <div class="mb-8 flex flex-col gap-8 md:flex-row">
                         <div class="text-center md:w-40">
@@ -309,9 +307,9 @@
             @endif
         </div>
 
-        @if($related->isNotEmpty())
-            <div class="mt-12">
-                <h2 class="mb-5 text-2xl font-bold text-adapt">Related Products</h2>
+        @if($detailSettings['show_related'] && $related->isNotEmpty())
+            <div class="storefront-reveal storefront-reveal-delay-3 mt-12">
+                <h2 class="mb-5 text-2xl font-bold text-adapt">{{ $detailSettings['related_title'] }}</h2>
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     @foreach($related as $rp)
                         <a wire:navigate href="{{ url('/products/'.$rp->id) }}" class="surface card-shadow group overflow-hidden rounded-[1.5rem] transition-all hover:-translate-y-1">

@@ -24,14 +24,17 @@
             --primary: {{ $primaryColor }};
             --secondary: {{ $secondaryColor }};
             --accent: {{ $accentColor }};
+            --site-text: {{ $textColor ?? '#111827' }};
+            --site-bg: {{ $bgColor ?? '#f8fafc' }};
+            --nav-bg: {{ $navBgColor ?? '#ffffff' }};
         }
         body { font-family: 'Figtree', sans-serif; }
         .shell {
             background:
                 radial-gradient(circle at top left, rgba(109,40,217,.15), transparent 28%),
                 radial-gradient(circle at top right, rgba(6,182,212,.14), transparent 24%),
-                #f5f3ff;
-            color: #24183f;
+                var(--site-bg);
+            color: var(--site-text);
         }
         .dark .shell {
             background:
@@ -41,7 +44,7 @@
             color: #f5f3ff;
         }
         .glass {
-            background: rgba(255,255,255,.78);
+            background: color-mix(in srgb, var(--nav-bg) 78%, white 22%);
             border: 1px solid rgba(139,92,246,.12);
             backdrop-filter: blur(16px);
         }
@@ -89,6 +92,92 @@
             color: white;
         }
         .btn-gradient:hover { filter: brightness(.96); }
+        .storefront-hero {
+            background:
+                radial-gradient(circle at top right, color-mix(in srgb, var(--secondary) 18%, transparent), transparent 28%),
+                linear-gradient(135deg, rgba(255,255,255,0.94), rgba(248,250,252,0.86));
+            border: 1px solid rgba(139,92,246,.10);
+        }
+        .dark .storefront-hero {
+            background:
+                radial-gradient(circle at top right, rgba(139,92,246,.22), transparent 28%),
+                linear-gradient(135deg, rgba(15,23,42,0.92), rgba(17,24,39,0.88));
+            border-color: rgba(255,255,255,.08);
+        }
+        .storefront-stat {
+            background: rgba(255,255,255,.78);
+            border: 1px solid rgba(148,163,184,.16);
+            backdrop-filter: blur(12px);
+        }
+        .dark .storefront-stat {
+            background: rgba(15,23,42,.72);
+            border-color: rgba(255,255,255,.08);
+        }
+        .storefront-page-shell {
+            background:
+                radial-gradient(circle at top left, rgba(109, 40, 217, 0.10), transparent 24%),
+                radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 18%),
+                linear-gradient(180deg, color-mix(in srgb, var(--site-bg) 92%, white 8%) 0%, color-mix(in srgb, var(--site-bg) 96%, white 4%) 52%, var(--site-bg) 100%);
+        }
+        .dark .storefront-page-shell {
+            background:
+                radial-gradient(circle at top left, rgba(109, 40, 217, 0.22), transparent 24%),
+                radial-gradient(circle at top right, rgba(6, 182, 212, 0.14), transparent 18%),
+                linear-gradient(180deg, #111428 0%, #10192b 52%, #0c1324 100%);
+        }
+        .storefront-panel {
+            background: rgba(255,255,255,0.82);
+            border: 1px solid rgba(139,92,246,0.10);
+            backdrop-filter: blur(16px);
+        }
+        .dark .storefront-panel {
+            background: rgba(15,23,42,0.76);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .storefront-card {
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(139,92,246,0.10);
+            box-shadow: 0 18px 48px rgba(88,28,135,0.08);
+        }
+        .dark .storefront-card {
+            background: rgba(15,23,42,0.92);
+            border-color: rgba(255,255,255,0.06);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.32);
+        }
+        .storefront-chip {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(139,92,246,0.10);
+            box-shadow: 0 12px 30px rgba(88,28,135,0.06);
+        }
+        .dark .storefront-chip {
+            background: rgba(15,23,42,0.82);
+            border-color: rgba(255,255,255,0.08);
+            box-shadow: 0 18px 44px rgba(0,0,0,0.22);
+        }
+        .storefront-reveal {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: storefront-fade-up .55s ease forwards;
+        }
+        .storefront-reveal-delay-1 { animation-delay: .08s; }
+        .storefront-reveal-delay-2 { animation-delay: .16s; }
+        .storefront-reveal-delay-3 { animation-delay: .24s; }
+        @keyframes storefront-fade-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .storefront-reveal,
+            .storefront-reveal-delay-1,
+            .storefront-reveal-delay-2,
+            .storefront-reveal-delay-3 {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
+        }
         [wire\:loading] { pointer-events: none; }
     </style>
     @stack('styles')
@@ -96,67 +185,7 @@
 <body class="shell">
 <div class="min-h-screen">
     <div id="site-progress" class="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-0 opacity-0 transition-[width,opacity] duration-300" style="background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));"></div>
-    @if($topbarEnabled)
-        <div class="px-4 py-2 text-xs font-semibold text-white" style="background:linear-gradient(90deg, {{ $topbarFrom }}, {{ $topbarTo }})">
-            <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-4 sm:justify-between">
-                <span><i class="fas fa-bolt mr-2 text-[10px]"></i>{{ $utilityBadge }}</span>
-                <div class="hidden items-center gap-5 sm:flex">
-                    <span>{{ $utilityLeft }}</span>
-                    <span>{{ $utilityCenter }}</span>
-                    <span>{{ $topbarText }}</span>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <header class="sticky top-0 z-50 px-4 py-4">
-        <div class="glass card-shadow mx-auto flex max-w-7xl items-center justify-between rounded-full px-4 py-3 lg:px-6">
-            <div class="flex items-center gap-4">
-                <a href="/" class="flex items-center gap-3">
-                    @if($logoPath)
-                        <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain">
-                    @else
-                        <span class="text-2xl font-black lowercase" style="color:var(--primary)">{{ strtolower($siteName) }}</span>
-                    @endif
-                </a>
-                <nav class="hidden items-center gap-5 text-sm font-medium lg:flex">
-                    <a wire:navigate href="{{ url('/products') }}">Products</a>
-                    <a wire:navigate href="{{ url('/products?sort=newest') }}">New Arrivals</a>
-                    <a wire:navigate href="{{ url('/products?sort=price_asc') }}">Deals</a>
-                    <a wire:navigate href="{{ route('track-order') }}">Track</a>
-                    <a wire:navigate href="{{ route('help-center') }}">Help</a>
-                </nav>
-            </div>
-
-            <form action="{{ url('/products') }}" method="GET" class="relative hidden w-full max-w-md md:block">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ $searchPlaceholder }}" class="w-full rounded-full border border-white/40 bg-white/70 px-11 py-3 text-sm text-slate-700 outline-none dark:border-white/10 dark:bg-slate-900/60 dark:text-white">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
-            </form>
-
-            <div class="flex items-center gap-2">
-                <button @click="toggle()" type="button" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-slate-900/60 dark:text-white">
-                    <i class="fas" :class="dark ? 'fa-sun' : 'fa-moon'"></i>
-                </button>
-                <a wire:navigate href="{{ url('/wishlist') }}" class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/70 dark:border-white/10 dark:bg-slate-900/60">
-                    <i class="far fa-heart"></i>
-                    @if($wishCount>0)<span class="wishlist-count absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">{{ $wishCount }}</span>@endif
-                </a>
-                <a wire:navigate href="{{ url('/cart') }}" class="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/70 dark:border-white/10 dark:bg-slate-900/60">
-                    <i class="fas fa-bag-shopping"></i>
-                    @if($cartCount>0)<span class="cart-count absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style="background:var(--primary)">{{ $cartCount }}</span>@endif
-                </a>
-                @guest
-                    <a wire:navigate href="{{ route('login') }}" class="hidden rounded-full px-4 py-2 text-sm font-semibold md:inline-flex">Login</a>
-                    <a wire:navigate href="{{ route('register') }}" class="rounded-full px-4 py-2 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">Sign Up</a>
-                @else
-                    <a wire:navigate href="{{ route('profile.index') }}" class="hidden rounded-full px-4 py-2 text-sm font-semibold md:inline-flex">My Account</a>
-                    @can('view-admin-menu')
-                        <a wire:navigate href="{{ route('admin.dashboard') }}" class="rounded-full px-4 py-2 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">Admin Panel</a>
-                    @endcan
-                @endguest
-            </div>
-        </div>
-    </header>
+    <livewire:storefront.header-bar />
 
     @if(session('success'))
         <div class="mx-auto max-w-7xl px-4">
@@ -190,36 +219,37 @@
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Browse</h3>
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Quick Links</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block" href="{{ url('/products') }}">All Products</a>
-                        <a wire:navigate class="block" href="{{ url('/products?sort=newest') }}">New Arrivals</a>
-                        <a wire:navigate class="block" href="{{ url('/products?sort=price_asc') }}">Deals</a>
-                        <a wire:navigate class="block" href="{{ url('/wishlist') }}">Wishlist</a>
+                        <a wire:navigate class="block" href="{{ url('/products') }}">{{ $navProductsLabel ?? 'Products' }}</a>
+                        @if($showDealsLink ?? true)
+                            <a class="block" href="{{ url('/#deals') }}">{{ $navDealsLabel ?? 'Deals' }}</a>
+                        @endif
+                        <a class="block" href="{{ url('/#reviews') }}">{{ $navReviewsLabel ?? 'Reviews' }}</a>
                         <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
-                    </div>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Categories</h3>
-                    <div class="mt-4 space-y-3 text-sm text-white/75">
-                        @foreach($categories->take(4) as $category)
-                            <a wire:navigate class="block" href="{{ url('/products?category='.$category->id) }}">{{ $category->name }}</a>
-                        @endforeach
-                    </div>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Account</h3>
-                    <div class="mt-4 space-y-3 text-sm text-white/75">
                         @guest
                             <a wire:navigate class="block" href="{{ route('login') }}">Login</a>
-                            <a wire:navigate class="block" href="{{ route('register') }}">Create Account</a>
-                            <a wire:navigate class="block" href="{{ route('help-center') }}">Help Center</a>
                         @else
                             <a wire:navigate class="block" href="{{ route('profile.index') }}">My Account</a>
-                            <a wire:navigate class="block" href="{{ url('/cart') }}">Cart</a>
-                            <a wire:navigate class="block" href="{{ url('/checkout') }}">Checkout</a>
-                            <a wire:navigate class="block" href="{{ route('help-center') }}">Help Center</a>
                         @endguest
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Support</h3>
+                    <div class="mt-4 space-y-3 text-sm text-white/75">
+                        <div>{{ $navTrackLabel ?? 'Track' }}</div>
+                        <div>{{ $navHelpLabel ?? 'Help' }}</div>
+                        @if(!empty($supportHours))<div>{{ $supportHours }}</div>@endif
+                        @if(!empty($supportEmail))<div>{{ $supportEmail }}</div>@endif
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Contact</h3>
+                    <div class="mt-4 space-y-3 text-sm text-white/75">
+                        @if(!empty($supportPhone))<div>{{ $supportPhone }}</div>@endif
+                        @if(!empty($supportWhatsapp))<div>WhatsApp: {{ $supportWhatsapp }}</div>@endif
+                        @if(!empty($supportEmail))<div>{{ $supportEmail }}</div>@endif
+                        <div>{{ $utilityCenter ?? '24/7 Support' }}</div>
                     </div>
                 </div>
             </div>
@@ -270,6 +300,9 @@ document.addEventListener('click', function(e) {
             body: JSON.stringify({ quantity: 1 })
         }).then(r => r.json()).then(d => {
             cartBtn.innerHTML = 'Added';
+            if (window.Livewire) {
+                window.Livewire.dispatch('cart-updated', { count: d.count });
+            }
             document.querySelectorAll('.cart-count').forEach(el => { el.textContent = d.count; el.style.display = d.count > 0 ? 'flex' : 'none'; });
             setTimeout(() => cartBtn.innerHTML = prev, 1400);
         }).catch(() => { cartBtn.innerHTML = prev; });
@@ -283,6 +316,9 @@ document.addEventListener('click', function(e) {
             headers: { 'X-CSRF-TOKEN': window._token }
         }).then(r => r.json()).then(d => {
             if (icon) icon.className = d.added ? 'fas fa-heart text-rose-500' : 'far fa-heart text-slate-400';
+            if (window.Livewire) {
+                window.Livewire.dispatch('wishlist-updated', { count: d.count });
+            }
             document.querySelectorAll('.wishlist-count').forEach(el => { el.textContent = d.count; el.style.display = d.count > 0 ? 'flex' : 'none'; });
         }).catch(() => {});
     }

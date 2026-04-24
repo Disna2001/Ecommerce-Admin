@@ -43,9 +43,6 @@ $icons = [
     </svg>
     <span class="nav-link__body">
         <span class="nav-link__label">{{ $slot }}</span>
-        @if($description)
-            <span class="nav-link__description">{{ $description }}</span>
-        @endif
     </span>
     @if($badge)
         <span class="nav-link__badge">{{ $badge }}</span>

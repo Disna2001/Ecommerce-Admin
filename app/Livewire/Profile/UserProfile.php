@@ -8,9 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use App\Models\Order;
 use App\Models\Stock;
 use App\Models\Review;
+use App\Models\Address;
+use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
+use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
+use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 
 class UserProfile extends Component
 {
@@ -67,6 +73,8 @@ class UserProfile extends Component
 
     // ── Security ──────────────────────────────────────────────
     public string $logoutPassword = '';
+    public string $two_factor_code = '';
+    public string $two_factor_password = '';
 
     // ─────────────────────────────────────────────────────────
     public function mount(): void
@@ -147,17 +155,19 @@ class UserProfile extends Component
             'address' => 'nullable|string|max:500',
         ]);
 
+        $preferences = array_merge($user->preferences ?? [], [
+            'email_offers'  => $this->email_offers,
+            'sms_alerts'    => $this->sms_alerts,
+            'order_updates' => $this->order_updates,
+        ]);
+
         $user->update([
             'name'        => $this->name,
             'email'       => $this->email,
             'phone'       => $this->phone    ?: null,
             'dob'         => $this->dob      ?: null,
             'address'     => $this->address  ?: null,
-            'preferences' => [
-                'email_offers'  => $this->email_offers,
-                'sms_alerts'    => $this->sms_alerts,
-                'order_updates' => $this->order_updates,
-            ],
+            'preferences' => $preferences,
         ]);
 
         $this->dispatch('notify', type: 'success', message: 'Profile updated successfully!');
@@ -198,21 +208,49 @@ class UserProfile extends Component
             'addr_postal'  => 'nullable|string|max:20',
         ]);
 
-        if (class_exists(\App\Models\Address::class)) {
-            \App\Models\Address::create([
-                'user_id'     => auth()->id(),
-                'name'        => $this->addr_name,
-                'phone'       => $this->addr_phone,
-                'address'     => $this->addr_address,
-                'city'        => $this->addr_city,
-                'postal_code' => $this->addr_postal,
-                'is_default'  => $this->addr_is_default,
-            ]);
+        if ($this->addr_is_default) {
+            Address::where('user_id', auth()->id())->update(['is_default' => false]);
         }
+
+        Address::create([
+            'user_id'     => auth()->id(),
+            'name'        => $this->addr_name,
+            'phone'       => $this->addr_phone,
+            'address'     => $this->addr_address,
+            'city'        => $this->addr_city,
+            'postal_code' => $this->addr_postal,
+            'is_default'  => $this->addr_is_default,
+        ]);
 
         $this->reset(['addr_name','addr_phone','addr_address','addr_city','addr_postal','addr_is_default']);
         $this->showAddressForm = false;
         $this->dispatch('notify', type: 'success', message: 'Address saved!');
+    }
+
+    public function setDefaultAddress(int $id): void
+    {
+        $address = Address::where('user_id', auth()->id())->findOrFail($id);
+
+        Address::where('user_id', auth()->id())->update(['is_default' => false]);
+        $address->update(['is_default' => true]);
+
+        $fullAddress = trim($address->address . ', ' . $address->city);
+        Auth::user()->update([
+            'phone' => $address->phone ?: Auth::user()->phone,
+            'address' => $fullAddress,
+        ]);
+
+        $this->phone = $address->phone ?: $this->phone;
+        $this->address = $fullAddress;
+
+        $this->dispatch('notify', type: 'success', message: 'Default address updated.');
+    }
+
+    public function deleteAddress(int $id): void
+    {
+        Address::where('user_id', auth()->id())->findOrFail($id)->delete();
+
+        $this->dispatch('notify', type: 'info', message: 'Address removed.');
     }
 
     // ══════════════════════════════════════════════════════════
@@ -330,6 +368,77 @@ class UserProfile extends Component
         $this->dispatch('notify', type: 'success', message: 'All other sessions signed out.');
     }
 
+    public function enableTwoFactor(EnableTwoFactorAuthentication $enable): void
+    {
+        $this->resetErrorBag(['two_factor_password', 'two_factor_code']);
+
+        $this->validate([
+            'two_factor_password' => 'required|string',
+        ]);
+
+        if (!Hash::check($this->two_factor_password, Auth::user()->password)) {
+            $this->addError('two_factor_password', 'Current password is incorrect.');
+            return;
+        }
+
+        $enable(Auth::user(), force: true);
+
+        $this->two_factor_code = '';
+        $this->dispatch('notify', type: 'success', message: 'Two-factor setup started. Scan the QR code and confirm with your authenticator app.');
+    }
+
+    public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirm): void
+    {
+        $this->resetErrorBag('two_factor_code');
+
+        $this->validate([
+            'two_factor_code' => 'required|string|min:6|max:10',
+        ]);
+
+        try {
+            $confirm(Auth::user(), $this->two_factor_code);
+        } catch (ValidationException $exception) {
+            $this->addError('two_factor_code', $exception->validator->errors()->first('code') ?: 'The authentication code is invalid.');
+            return;
+        }
+
+        $this->two_factor_code = '';
+        $this->two_factor_password = '';
+        $this->dispatch('notify', type: 'success', message: 'Two-factor authentication is now enabled.');
+    }
+
+    public function disableTwoFactor(DisableTwoFactorAuthentication $disable): void
+    {
+        $this->resetErrorBag('two_factor_password');
+
+        $this->validate([
+            'two_factor_password' => 'required|string',
+        ]);
+
+        if (!Hash::check($this->two_factor_password, Auth::user()->password)) {
+            $this->addError('two_factor_password', 'Current password is incorrect.');
+            return;
+        }
+
+        $disable(Auth::user());
+
+        $this->two_factor_password = '';
+        $this->two_factor_code = '';
+        $this->dispatch('notify', type: 'info', message: 'Two-factor authentication has been disabled.');
+    }
+
+    public function regenerateTwoFactorRecoveryCodes(GenerateNewRecoveryCodes $generate): void
+    {
+        if (!Auth::user()->two_factor_secret) {
+            $this->dispatch('notify', type: 'error', message: 'Enable two-factor authentication first.');
+            return;
+        }
+
+        $generate(Auth::user());
+
+        $this->dispatch('notify', type: 'success', message: 'Recovery codes regenerated.');
+    }
+
     // ══════════════════════════════════════════════════════════
     // RENDER — all data passed explicitly, NO $this->x in blade
     // ══════════════════════════════════════════════════════════
@@ -346,9 +455,10 @@ class UserProfile extends Component
             ? Stock::with('brand')->whereIn('id', $wishlistIds)->where('status', 'active')->get()
             : collect();
 
-        $addresses = class_exists(\App\Models\Address::class)
-            ? \App\Models\Address::where('user_id', $user->id)->get()
-            : collect();
+        $addresses = Address::where('user_id', $user->id)
+            ->orderByDesc('is_default')
+            ->latest()
+            ->get();
 
         $reviewsQuery = Review::with('stock')->where('user_id', $user->id);
         if ($this->reviewFilter === 'approved') $reviewsQuery->where('is_approved', true);

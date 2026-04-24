@@ -203,6 +203,86 @@ class OrderWorkflowService
         });
     }
 
+    public function syncGatewayPayment(Order $order, string $state, array $gatewayData = [], ?int $actorId = null): Order
+    {
+        return DB::transaction(function () use ($order, $state, $gatewayData, $actorId) {
+            if ($state === 'paid') {
+                if ($order->payment_status === 'paid') {
+                    return $order->fresh(['items']);
+                }
+
+                $nextStatus = $order->status === 'pending' ? 'confirmed' : $order->status;
+                $paymentReference = $gatewayData['payment_reference'] ?? $order->payment_reference;
+                $reviewNote = $gatewayData['note'] ?? 'Gateway payment confirmed automatically.';
+
+                $order->update([
+                    'status' => $nextStatus,
+                    'payment_status' => 'paid',
+                    'payment_reference' => $paymentReference,
+                    'payment_gateway' => $gatewayData['gateway'] ?? $order->payment_gateway,
+                    'payment_gateway_transaction_id' => $gatewayData['payment_reference'] ?? $order->payment_gateway_transaction_id,
+                    'payment_gateway_payload' => $gatewayData['payload'] ?? $order->payment_gateway_payload,
+                    'payment_review_status' => 'not_required',
+                    'payment_review_note' => $reviewNote,
+                    'payment_verified_at' => now(),
+                    'payment_verified_by' => $actorId,
+                ]);
+
+                $this->recordHistory($order, $nextStatus, $reviewNote, $actorId);
+
+                $this->auditLogService->log(
+                    'order.gateway_payment_confirmed',
+                    $order,
+                    $reviewNote,
+                    $gatewayData,
+                    $actorId
+                );
+
+                return $order->fresh(['items']);
+            }
+
+            if ($order->status === 'cancelled') {
+                return $order->fresh(['items']);
+            }
+
+            if ($order->status !== 'cancelled') {
+                $this->stockMovementService->restoreFromOrder($order->loadMissing('items'), 'gateway_payment_failed', [
+                    'reference_type' => Order::class,
+                    'reference_id' => $order->id,
+                    'user_id' => $actorId,
+                    'notes' => 'Stock restored after gateway payment was not completed.',
+                ]);
+            }
+
+            $reviewNote = $gatewayData['note'] ?? 'Gateway payment was not completed.';
+
+            $order->update([
+                'status' => 'cancelled',
+                'payment_status' => 'unpaid',
+                'payment_reference' => $gatewayData['payment_reference'] ?? $order->payment_reference,
+                'payment_gateway' => $gatewayData['gateway'] ?? $order->payment_gateway,
+                'payment_gateway_transaction_id' => $gatewayData['payment_reference'] ?? $order->payment_gateway_transaction_id,
+                'payment_gateway_payload' => $gatewayData['payload'] ?? $order->payment_gateway_payload,
+                'payment_review_status' => 'not_required',
+                'payment_review_note' => $reviewNote,
+                'payment_verified_at' => null,
+                'payment_verified_by' => null,
+            ]);
+
+            $this->recordHistory($order, 'cancelled', $reviewNote, $actorId);
+
+            $this->auditLogService->log(
+                'order.gateway_payment_failed',
+                $order,
+                $reviewNote,
+                $gatewayData,
+                $actorId
+            );
+
+            return $order->fresh(['items']);
+        });
+    }
+
     protected function recordHistory(Order $order, string $status, string $note, ?int $actorId = null): void
     {
         OrderStatusHistory::create([

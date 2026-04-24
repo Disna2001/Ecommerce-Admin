@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -46,6 +47,30 @@ class ProfileController extends Controller
         }
 
         return back()->with('status', 'profile-updated');
+    }
+
+    public function storeAddress(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['required', 'string', 'max:500'],
+            'city' => ['required', 'string', 'max:100'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'is_default' => ['nullable', 'boolean'],
+        ]);
+
+        if ($request->boolean('is_default')) {
+            Address::where('user_id', auth()->id())->update(['is_default' => false]);
+        }
+
+        Address::create([
+            ...$validated,
+            'user_id' => auth()->id(),
+            'is_default' => $request->boolean('is_default'),
+        ]);
+
+        return back()->with('status', 'address-saved');
     }
 
     /**

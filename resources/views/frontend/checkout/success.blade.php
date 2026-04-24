@@ -9,6 +9,9 @@
     $navBgColor   = SiteSetting::get('nav_bg_color',  '#ffffff');
     $placedOrder  = Order::where('order_number', $order)->first();
     $needsVerification = $placedOrder?->needsPaymentVerification() ?? false;
+    $isGatewayOrder = ($placedOrder?->payment_method === 'payhere');
+    $isPaid = ($placedOrder?->payment_status === 'paid');
+    $isCancelled = ($placedOrder?->status === 'cancelled');
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -53,21 +56,35 @@
             <i class="fas fa-check text-white text-4xl"></i>
         </div>
 
-        <h1 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $needsVerification ? 'Order Submitted!' : 'Order Placed!' }}</h1>
-        <p class="text-gray-500 mb-2">{{ $needsVerification ? 'Payment proof received and queued for review.' : 'Thank you for your purchase.' }}</p>
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $isCancelled ? 'Payment Cancelled' : ($needsVerification ? 'Order Submitted!' : ($isPaid ? 'Payment Confirmed!' : 'Order Placed!')) }}</h1>
+        <p class="text-gray-500 mb-2">{{ $isCancelled ? 'The order was cancelled because the payment was not completed.' : ($needsVerification ? 'Payment proof received and queued for review.' : ($isGatewayOrder ? ($isPaid ? 'Your online payment has been confirmed.' : 'We are waiting for the payment gateway confirmation.') : 'Thank you for your purchase.')) }}</p>
         <div class="inline-block px-4 py-2 rounded-xl text-sm font-bold mb-6" style="background:{{ $primaryColor }}15;color:{{ $primaryColor }}">
             Order #{{ $order }}
         </div>
 
         <p class="text-sm text-gray-400 mb-8 leading-relaxed">
-            @if($needsVerification)
+            @if($isCancelled)
+                The hosted payment was cancelled or did not complete, so the reserved stock was released again.<br>
+                You can return to checkout and try the order again.
+            @elseif($needsVerification)
                 We received your order and payment submission. Our team will verify the proof and update the order once approved.<br>
                 You'll receive a confirmation email when payment is reviewed.
+            @elseif($isGatewayOrder && !$isPaid)
+                PayHere returned your browser to the store, but the final paid state only updates after the server callback reaches this app.<br>
+                On a local Herd URL, that callback needs a public domain or tunnel to complete automatically.
             @else
                 We've received your order and will process it shortly.<br>
                 You'll receive a confirmation email with tracking details.
             @endif
         </p>
+
+        @if(session('gateway_notice'))
+            <div class="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">{{ session('gateway_notice') }}</div>
+        @endif
+
+        @if(session('gateway_error'))
+            <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ session('gateway_error') }}</div>
+        @endif
 
         <div class="grid grid-cols-3 gap-4 mb-8 text-center">
             <div>

@@ -66,6 +66,46 @@ class BannerManager extends Component
         $this->resetValidation();
     }
 
+    public function applyPreset(string $preset): void
+    {
+        if (!$this->isOpen) {
+            $this->openModal();
+        }
+
+        if ($preset === 'hero_launch') {
+            $this->title = 'Launch a bold hero campaign';
+            $this->subtitle = 'Hero spotlight';
+            $this->caption = 'Use this for seasonal launches, top-selling collections, or premium storefront announcements.';
+            $this->button_text = 'Shop collection';
+            $this->button_link = '/products';
+            $this->position = 'hero';
+            $this->bg_color = '#312e81';
+            $this->text_color = '#ffffff';
+        }
+
+        if ($preset === 'promo_strip') {
+            $this->title = 'Weekend deal now live';
+            $this->subtitle = 'Promo strip';
+            $this->caption = 'Keep a shorter message here for bundle offers, free shipping, or limited-time coupon pushes.';
+            $this->button_text = 'View deal';
+            $this->button_link = '/products';
+            $this->position = 'promo';
+            $this->bg_color = '#0f766e';
+            $this->text_color = '#ffffff';
+        }
+
+        if ($preset === 'top_notice') {
+            $this->title = 'Free delivery on selected orders';
+            $this->subtitle = 'Top notice';
+            $this->caption = 'A compact line for service updates, delivery promises, or trust-building announcements.';
+            $this->button_text = 'Learn more';
+            $this->button_link = '/help-center';
+            $this->position = 'top_bar';
+            $this->bg_color = '#7c2d12';
+            $this->text_color = '#ffffff';
+        }
+    }
+
     public function edit($id)
     {
         $b = Banner::findOrFail($id);
@@ -122,6 +162,42 @@ class BannerManager extends Component
         $b->update(['is_active' => !$b->is_active]);
     }
 
+    public function moveUp($id): void
+    {
+        $banner = Banner::findOrFail($id);
+        $previous = Banner::query()
+            ->where('position', $banner->position)
+            ->where('sort_order', '<', $banner->sort_order)
+            ->orderByDesc('sort_order')
+            ->first();
+
+        if (!$previous) {
+            return;
+        }
+
+        $currentOrder = (int) $banner->sort_order;
+        $banner->update(['sort_order' => $previous->sort_order]);
+        $previous->update(['sort_order' => $currentOrder]);
+    }
+
+    public function moveDown($id): void
+    {
+        $banner = Banner::findOrFail($id);
+        $next = Banner::query()
+            ->where('position', $banner->position)
+            ->where('sort_order', '>', $banner->sort_order)
+            ->orderBy('sort_order')
+            ->first();
+
+        if (!$next) {
+            return;
+        }
+
+        $currentOrder = (int) $banner->sort_order;
+        $banner->update(['sort_order' => $next->sort_order]);
+        $next->update(['sort_order' => $currentOrder]);
+    }
+
     public function delete($id)
     {
         Banner::findOrFail($id)->delete();
@@ -130,9 +206,17 @@ class BannerManager extends Component
 
     public function render()
     {
+        $banners = Banner::orderBy('position')->orderBy('sort_order')->orderByDesc('created_at')->get();
+
         return view('livewire.admin.site-management.banner-manager', [
-            'banners'   => Banner::orderBy('sort_order')->orderByDesc('created_at')->get(),
+            'banners'   => $banners,
             'positions' => $this->positions,
+            'bannerStats' => [
+                'total' => $banners->count(),
+                'live' => $banners->filter(fn (Banner $banner) => $banner->isLive())->count(),
+                'scheduled' => $banners->filter(fn (Banner $banner) => $banner->is_active && !$banner->isLive())->count(),
+                'hero' => $banners->where('position', 'hero')->count(),
+            ],
         ]);
     }
 }

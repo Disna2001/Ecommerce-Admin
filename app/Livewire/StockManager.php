@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Arr;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class StockManager extends Component
@@ -166,7 +167,9 @@ class StockManager extends Component
             'target_model'        => 'nullable|string',
             'target_model_number' => 'nullable|string',
             'wholesale_price'     => 'nullable|numeric|min:0',
-            'tempImages.*'        => 'nullable|image|max:5120',
+            'tempImages'          => 'nullable|array',
+            'tempImages.*'        => 'nullable|image|max:10240',
+            'tempVideos'          => 'nullable|array',
             'tempVideos.*'        => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
         ];
     }
@@ -248,6 +251,24 @@ class StockManager extends Component
     public function updatedModelNumber()
     {
         if ($this->brand_id) $this->generateBarcode();
+    }
+
+    public function updatedTempImages(): void
+    {
+        $this->tempImages = array_values(array_filter(Arr::wrap($this->tempImages)));
+        $this->validate([
+            'tempImages' => 'nullable|array',
+            'tempImages.*' => 'nullable|image|max:10240',
+        ]);
+    }
+
+    public function updatedTempVideos(): void
+    {
+        $this->tempVideos = array_values(array_filter(Arr::wrap($this->tempVideos)));
+        $this->validate([
+            'tempVideos' => 'nullable|array',
+            'tempVideos.*' => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
+        ]);
     }
 
     // -------------------------------------------------------------------------
@@ -1265,12 +1286,12 @@ class StockManager extends Component
         // FIX: validate() now calls rules() method — no manual mutation needed
         $this->validate();
 
-        $imagePaths = $this->currentImages;
+        $imagePaths = array_values($this->currentImages);
         foreach ($this->tempImages as $image) {
-            $imagePaths[] = $image->store('stock-images', 'public');
+            $imagePaths[] = $this->storeOptimizedImage($image);
         }
 
-        $videoPaths = $this->currentVideos;
+        $videoPaths = array_values($this->currentVideos);
         foreach ($this->tempVideos as $video) {
             $videoPaths[] = $video->store('stock-videos', 'public');
         }
@@ -1320,6 +1341,55 @@ class StockManager extends Component
         }
 
         $this->closeModal();
+    }
+
+    protected function storeOptimizedImage($image): string
+    {
+        $sourcePath = $image->getRealPath();
+        $mime = strtolower((string) $image->getMimeType());
+
+        $resource = match ($mime) {
+            'image/jpeg', 'image/jpg' => @imagecreatefromjpeg($sourcePath),
+            'image/png' => @imagecreatefrompng($sourcePath),
+            'image/gif' => @imagecreatefromgif($sourcePath),
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($sourcePath) : null,
+            default => null,
+        };
+
+        if (!$resource) {
+            return $image->store('stock-images', 'public');
+        }
+
+        $width = imagesx($resource);
+        $height = imagesy($resource);
+        $ratio = min(1800 / max($width, 1), 1800 / max($height, 1), 1);
+        $targetWidth = max(1, (int) round($width * $ratio));
+        $targetHeight = max(1, (int) round($height * $ratio));
+
+        $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+        $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        imagefill($canvas, 0, 0, $transparent);
+        imagecopyresampled($canvas, $resource, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+
+        $path = 'stock-images/' . Str::uuid() . '.webp';
+
+        ob_start();
+        if (function_exists('imagewebp')) {
+            imagewebp($canvas, null, 82);
+        } else {
+            imagejpeg($canvas, null, 84);
+            $path = 'stock-images/' . Str::uuid() . '.jpg';
+        }
+        $binary = ob_get_clean();
+
+        imagedestroy($canvas);
+        imagedestroy($resource);
+
+        Storage::disk('public')->put($path, $binary);
+
+        return $path;
     }
 
     protected function buildStockPayload(array $imagePaths, array $videoPaths, int $quantity): array
@@ -1493,6 +1563,36 @@ class StockManager extends Component
         session()->flash('message', 'Image removed successfully.');
     }
 
+    public function moveCurrentImageUp($index): void
+    {
+        $this->currentImages = $this->moveMediaItem($this->currentImages, (int) $index, -1);
+    }
+
+    public function moveCurrentImageDown($index): void
+    {
+        $this->currentImages = $this->moveMediaItem($this->currentImages, (int) $index, 1);
+    }
+
+    public function moveTempImageUp($index): void
+    {
+        $this->tempImages = $this->moveMediaItem($this->tempImages, (int) $index, -1);
+    }
+
+    public function moveTempImageDown($index): void
+    {
+        $this->tempImages = $this->moveMediaItem($this->tempImages, (int) $index, 1);
+    }
+
+    public function removeTempImage($index): void
+    {
+        if (!isset($this->tempImages[$index])) {
+            return;
+        }
+
+        unset($this->tempImages[$index]);
+        $this->tempImages = array_values($this->tempImages);
+    }
+
     public function removeCurrentVideo($index)
     {
         if (!isset($this->currentVideos[$index])) {
@@ -1519,6 +1619,51 @@ class StockManager extends Component
         }
 
         session()->flash('message', 'Video removed successfully.');
+    }
+
+    public function moveCurrentVideoUp($index): void
+    {
+        $this->currentVideos = $this->moveMediaItem($this->currentVideos, (int) $index, -1);
+    }
+
+    public function moveCurrentVideoDown($index): void
+    {
+        $this->currentVideos = $this->moveMediaItem($this->currentVideos, (int) $index, 1);
+    }
+
+    public function moveTempVideoUp($index): void
+    {
+        $this->tempVideos = $this->moveMediaItem($this->tempVideos, (int) $index, -1);
+    }
+
+    public function moveTempVideoDown($index): void
+    {
+        $this->tempVideos = $this->moveMediaItem($this->tempVideos, (int) $index, 1);
+    }
+
+    public function removeTempVideo($index): void
+    {
+        if (!isset($this->tempVideos[$index])) {
+            return;
+        }
+
+        unset($this->tempVideos[$index]);
+        $this->tempVideos = array_values($this->tempVideos);
+    }
+
+    protected function moveMediaItem(array $items, int $index, int $direction): array
+    {
+        $target = $index + $direction;
+
+        if (!isset($items[$index]) || !isset($items[$target])) {
+            return array_values($items);
+        }
+
+        $current = Arr::pull($items, $index);
+        $items = array_values($items);
+        array_splice($items, $target, 0, [$current]);
+
+        return array_values($items);
     }
 
     public function sortBy($field)

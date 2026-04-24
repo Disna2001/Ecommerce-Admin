@@ -347,7 +347,9 @@ class SystemSettingsManager extends Component
     {
         $statusCards = [
             'email_ready' => filled($this->mail_from_address) && filled($this->mail_mailer) && ($this->mail_mailer !== 'smtp' || filled($this->mail_smtp_host)),
+            'whatsapp_enabled' => $this->whatsapp_enabled,
             'whatsapp_ready' => $this->whatsapp_enabled && filled($this->whatsapp_api_url) && filled($this->whatsapp_api_key) && filled($this->whatsapp_webhook_verify_token),
+            'ai_enabled' => $this->ai_enabled,
             'ai_ready' => $this->ai_enabled && filled($this->ai_provider) && filled($this->ai_model) && filled($this->ai_api_key),
             'ops_contacts_ready' => filled($this->order_notification_email) && filled($this->support_notification_email),
             'hosting_ready' => filled($this->app_public_url) && filled($this->app_timezone) && filled($this->app_locale),

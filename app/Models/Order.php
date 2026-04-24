@@ -22,7 +22,8 @@ class Order extends Model
         'customer_name', 'customer_email', 'customer_phone',
         'shipping_address', 'shipping_city', 'shipping_postal_code', 'shipping_country',
         'status', 'subtotal', 'discount', 'shipping_fee', 'total',
-        'payment_method', 'payment_status', 'payment_reference',
+        'payment_method', 'payment_gateway', 'payment_status', 'payment_reference',
+        'payment_gateway_transaction_id', 'payment_gateway_payload',
         'payment_review_status', 'payment_review_note', 'payment_proof_path',
         'payment_submitted_at', 'payment_verified_at', 'payment_verified_by',
         'tracking_number', 'courier', 'tracking_url',
@@ -39,6 +40,7 @@ class Order extends Model
         'payment_verified_at'  => 'datetime',
         'return_requested_at'  => 'datetime',
         'return_approved_at'   => 'datetime',
+        'payment_gateway_payload' => 'array',
     ];
 
     // ── Status labels & colors ────────────────────────────────
@@ -120,6 +122,11 @@ class Order extends Model
     public function needsPaymentVerification(): bool
     {
         return in_array($this->payment_method, ['bank', 'card']);
+    }
+
+    public function usesGateway(): bool
+    {
+        return filled($this->payment_gateway) || in_array($this->payment_method, ['payhere'], true);
     }
 
     public function scopeByStatus($query, string $status)

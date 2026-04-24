@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use BelongsToTenant, HasFactory, Notifiable, HasRoles;
+    use BelongsToTenant, HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     protected $fillable = [
         'tenant_id',
@@ -104,6 +105,11 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
     }
 
     public function tenant()

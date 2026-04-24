@@ -9,7 +9,7 @@
     </div>
 
     <div class="mx-auto max-w-6xl py-8">
-        <div class="glass card-shadow mb-8 rounded-[2rem] px-6 py-7">
+        <div class="storefront-hero card-shadow storefront-reveal mb-8 rounded-[2rem] px-5 py-6 sm:px-6 sm:py-7">
             <div class="mb-6 flex items-center justify-center gap-0">
                 @foreach(['Cart'=>'fa-shopping-cart','Shipping'=>'fa-truck','Payment'=>'fa-credit-card','Done'=>'fa-check'] as $step=>$icon)
                     <div class="flex items-center">
@@ -27,8 +27,27 @@
                 @endforeach
             </div>
 
-            <h1 class="text-adapt text-3xl font-black">Checkout</h1>
-            <p class="mt-3 text-sm leading-7 text-soft">Complete shipping and payment details in the same premium storefront style used across the site.</p>
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Secure Checkout</p>
+                    <h1 class="text-adapt mt-3 text-3xl font-black">Checkout</h1>
+                    <p class="mt-3 max-w-2xl text-sm leading-7 text-soft">Complete shipping and payment details in the same premium storefront style used across the site.</p>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Items</p>
+                        <p class="mt-2 text-2xl font-black text-adapt">{{ $count }}</p>
+                    </div>
+                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Payment</p>
+                        <p class="mt-2 text-2xl font-black text-adapt">{{ count($paymentOptions) }}</p>
+                    </div>
+                    <div class="rounded-[1.25rem] px-4 py-4 text-white shadow-[0_16px_42px_rgba(109,40,217,0.18)]" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">Total</p>
+                        <p class="mt-2 text-lg font-black">Rs {{ number_format($total,2) }}</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="mt-6 grid gap-3 md:grid-cols-3">
                 <div class="rounded-2xl border border-slate-200 bg-white/70 px-4 py-4 dark:border-white/10 dark:bg-slate-900/60">
@@ -38,8 +57,8 @@
                 </div>
                 <div class="rounded-2xl border border-slate-200 bg-white/70 px-4 py-4 dark:border-white/10 dark:bg-slate-900/60">
                     <p class="text-xs font-semibold uppercase tracking-[0.22em] text-soft">Verification</p>
-                    <p class="mt-2 text-sm font-semibold text-adapt">Proof support built in</p>
-                    <p class="mt-1 text-xs leading-6 text-soft">Bank and online payments can be submitted with reference and receipt.</p>
+                    <p class="mt-2 text-sm font-semibold text-adapt">Clear payment paths</p>
+                    <p class="mt-1 text-xs leading-6 text-soft">Only bank transfers need receipt upload. Card payments stay separate.</p>
                 </div>
                 <div class="rounded-2xl border border-slate-200 bg-white/70 px-4 py-4 dark:border-white/10 dark:bg-slate-900/60">
                     <p class="text-xs font-semibold uppercase tracking-[0.22em] text-soft">Updates</p>
@@ -51,10 +70,33 @@
 
         <div class="grid grid-cols-1 gap-7 lg:grid-cols-3">
             <div class="space-y-5 lg:col-span-2">
-                <div class="surface card-shadow rounded-[1.75rem] p-6">
+                <div class="surface card-shadow storefront-reveal storefront-reveal-delay-1 rounded-[1.75rem] p-6">
                     <h2 class="mb-5 flex items-center gap-2 font-bold text-adapt">
                         <i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> Shipping Information
                     </h2>
+                    @if($savedAddresses->isNotEmpty())
+                        <div class="mb-5 grid gap-3 md:grid-cols-2">
+                            @foreach($savedAddresses as $savedAddress)
+                                <button
+                                    type="button"
+                                    wire:click="applyAddress({{ $savedAddress->id }})"
+                                    class="rounded-2xl border-2 p-4 text-left transition hover:border-violet-300 {{ $selected_address_id === $savedAddress->id ? 'bg-violet-50' : 'bg-white/80 dark:bg-slate-900/50' }}"
+                                    style="{{ $selected_address_id === $savedAddress->id ? 'border-color:var(--primary)' : 'border-color:#e2e8f0' }}"
+                                >
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-sm font-bold text-adapt">{{ $savedAddress->name }}</p>
+                                            <p class="mt-1 text-xs leading-5 text-soft">{{ $savedAddress->address }}, {{ $savedAddress->city }}</p>
+                                            <p class="mt-1 text-xs text-soft">{{ $savedAddress->phone ?: 'No phone saved' }}{{ $savedAddress->postal_code ? ' | '.$savedAddress->postal_code : '' }}</p>
+                                        </div>
+                                        @if($savedAddress->is_default)
+                                            <span class="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">Default</span>
+                                        @endif
+                                    </div>
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                             <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-soft">First Name *</label>
@@ -93,7 +135,7 @@
                     </div>
                 </div>
 
-                <div class="surface card-shadow rounded-[1.75rem] p-6">
+                <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 rounded-[1.75rem] p-6">
                     <h2 class="mb-5 flex items-center gap-2 font-bold text-adapt">
                         <i class="fas fa-credit-card" style="color:var(--primary)"></i> Payment Method
                     </h2>
@@ -119,7 +161,7 @@
                         @endforeach
                     </div>
 
-                    @if(in_array($payment_method, ['bank', 'card']) && $selectedPaymentOption)
+                    @if($payment_method === 'bank' && $selectedPaymentOption)
                         <div class="mt-4 space-y-4 rounded-[1.5rem] bg-slate-50 p-5 dark:bg-slate-900/60">
                             <div class="rounded-2xl border border-violet-100 bg-white/80 p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-slate-950/50 dark:text-slate-300">
                                 <p class="font-semibold text-adapt">{{ $selectedPaymentOption['instruction_title'] ?? 'Payment verification' }}</p>
@@ -183,11 +225,64 @@
                             </p>
                         </div>
                     @endif
+
+                    @if($payment_method === 'card' && $selectedPaymentOption)
+                        <div class="mt-4 space-y-4 rounded-[1.5rem] border border-purple-100 bg-purple-50/70 p-5 text-sm text-slate-700 dark:border-purple-500/20 dark:bg-purple-500/10 dark:text-slate-200">
+                            <div class="rounded-2xl border border-white/70 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-950/40">
+                                <p class="font-semibold text-adapt">{{ $selectedPaymentOption['instruction_title'] ?? 'Card payment selected' }}</p>
+                                <p class="mt-2 leading-7">
+                                    {{ $selectedPaymentOption['instruction_body'] ?? 'Card payments do not need bank transfer receipt upload. Use the hosted payment gateway when it is available.' }}
+                                </p>
+                            </div>
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <div class="rounded-2xl bg-white/80 p-4 dark:bg-slate-950/40">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-soft">No Receipt</p>
+                                    <p class="mt-2 font-semibold text-adapt">Card orders no longer ask for bank proof.</p>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 p-4 dark:bg-slate-950/40">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-soft">Best Option</p>
+                                    <p class="mt-2 font-semibold text-adapt">Enable PayHere for instant card checkout.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($payment_method === 'payhere' && $selectedPaymentOption)
+                        <div class="mt-4 space-y-4 rounded-[1.5rem] bg-slate-50 p-5 dark:bg-slate-900/60">
+                            <div class="rounded-2xl border border-amber-100 bg-white/80 p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-slate-950/50 dark:text-slate-300">
+                                <p class="font-semibold text-adapt">{{ $selectedPaymentOption['instruction_title'] ?? 'Secure online payment' }}</p>
+                                <p class="mt-2 leading-7">
+                                    {{ $selectedPaymentOption['instruction_body'] ?? 'You will be redirected to the secure payment gateway after order confirmation.' }}
+                                </p>
+                            </div>
+
+                            <div class="grid gap-3 md:grid-cols-3">
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm dark:border-white/10 dark:bg-slate-950/50">
+                                    <p class="text-xs uppercase tracking-[0.22em] text-soft">Checkout</p>
+                                    <p class="mt-2 font-semibold text-adapt">Hosted by PayHere</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm dark:border-white/10 dark:bg-slate-950/50">
+                                    <p class="text-xs uppercase tracking-[0.22em] text-soft">Confirmation</p>
+                                    <p class="mt-2 font-semibold text-adapt">Verified by server callback</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm dark:border-white/10 dark:bg-slate-950/50">
+                                    <p class="text-xs uppercase tracking-[0.22em] text-soft">Methods</p>
+                                    <p class="mt-2 font-semibold text-adapt">Cards, wallets, local apps</p>
+                                </div>
+                            </div>
+
+                            @if(empty($selectedPaymentOption['merchant_ready']))
+                                <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-200">
+                                    This gateway is visible, but merchant credentials are not configured yet. Save the PayHere merchant ID and secret in admin before customers use this option.
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
 
             <div>
-                <div class="surface card-shadow sticky top-24 rounded-[1.75rem] p-5">
+                <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 sticky top-24 rounded-[1.75rem] p-5">
                     <h3 class="mb-5 font-bold text-adapt">Order Summary</h3>
                     <div class="mb-4 max-h-52 space-y-2 overflow-y-auto">
                         @foreach($cart as $id => $item)
@@ -228,7 +323,7 @@
                         <div class="mt-3 space-y-2 text-xs leading-6 text-soft">
                             <p><i class="fas fa-check-circle mr-2 text-emerald-500"></i>Your order is created immediately after confirmation.</p>
                             <p><i class="fas fa-envelope mr-2" style="color:var(--primary)"></i>You’ll receive email updates for placement, verification, and next status changes.</p>
-                            <p><i class="fas fa-receipt mr-2 text-amber-500"></i>If you use bank or online payment, the team reviews your proof before progressing the order.</p>
+                            <p><i class="fas fa-receipt mr-2 text-amber-500"></i>Bank transfer needs proof review, while card and PayHere stay separate from receipt uploads.</p>
                         </div>
                     </div>
 
@@ -237,7 +332,7 @@
                             <i class="fas fa-shield-check mt-0.5 text-emerald-600 dark:text-emerald-300"></i>
                             <div>
                                 <p class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Checkout confidence</p>
-                                <p class="mt-1 text-xs leading-6 text-emerald-700/90 dark:text-emerald-200/80">Totals are shown before payment, proof uploads are previewed, and order progress stays traceable after checkout.</p>
+                                <p class="mt-1 text-xs leading-6 text-emerald-700/90 dark:text-emerald-200/80">Totals are shown before payment, saved addresses can be selected, and order progress stays traceable after checkout.</p>
                             </div>
                         </div>
                     </div>
