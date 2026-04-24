@@ -46,9 +46,9 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
-        'dob'               => 'date',
-        'preferences'       => 'array',
+        'password' => 'hashed',
+        'dob' => 'date',
+        'preferences' => 'array',
     ];
 
     // ── Profile photo URL ─────────────────────────────────────
@@ -59,15 +59,17 @@ class User extends Authenticatable
         }
         // Gravatar fallback
         $hash = md5(strtolower(trim($this->email)));
+
         return "https://www.gravatar.com/avatar/{$hash}?d=mp&s=200";
     }
 
     public function getInitialsAttribute(): string
     {
         $parts = explode(' ', $this->name);
+
         return strtoupper(
             count($parts) >= 2
-                ? $parts[0][0] . $parts[1][0]
+                ? $parts[0][0].$parts[1][0]
                 : $parts[0][0]
         );
     }
@@ -75,20 +77,20 @@ class User extends Authenticatable
     // ── Social connections helper ─────────────────────────────
     public function isConnected(string $provider): bool
     {
-        return match($provider) {
-            'google'   => !empty($this->google_id),
-            'facebook' => !empty($this->facebook_id),
-            'github'   => !empty($this->github_id),
-            default    => false,
+        return match ($provider) {
+            'google' => ! empty($this->google_id),
+            'facebook' => ! empty($this->facebook_id),
+            'github' => ! empty($this->github_id),
+            default => false,
         };
     }
 
     public function disconnectSocial(string $provider): void
     {
-        match($provider) {
-            'google'   => $this->update(['google_id' => null,   'google_token' => null]),
+        match ($provider) {
+            'google' => $this->update(['google_id' => null,   'google_token' => null]),
             'facebook' => $this->update(['facebook_id' => null, 'facebook_token' => null]),
-            'github'   => $this->update(['github_id' => null,   'github_token' => null]),
+            'github' => $this->update(['github_id' => null,   'github_token' => null]),
         };
     }
 
@@ -112,5 +114,10 @@ class User extends Authenticatable
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function merchant()
+    {
+        return $this->hasOne(Merchant::class);
     }
 }
