@@ -19,6 +19,10 @@
                 <x-admin.settings.tab-hosting />
             @endif
 
+            @if($activeTab === 'billing')
+                <x-admin.settings.tab-billing :billing-profiles="$billing_profiles" :billing-default-profiles="$billing_default_profiles" />
+            @endif
+
             @if($activeTab === 'api_keys')
                 <x-admin.settings.tab-api-keys />
             @endif

@@ -2,12 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Invoice;
 use App\Services\AuditLogService;
+use App\Services\Billing\BillCustomizationService;
 use App\Services\Inventory\StockMovementService;
 use App\Services\Notifications\CustomerNotificationService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\Invoice;
-use App\Models\SiteSetting;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -17,14 +17,23 @@ class InvoiceManager extends Component
     use WithPagination;
 
     public $search = '';
+
     public $statusFilter = '';
+
     public $dateFrom;
+
     public $dateTo;
+
     public $sortField = 'created_at';
+
     public $sortDirection = 'desc';
+
     public $perPage = 10;
+
     public ?int $viewingInvoiceId = null;
+
     public bool $showDetailModal = false;
+
     public ?string $focusInvoice = null;
 
     protected $queryString = [
@@ -140,10 +149,10 @@ class InvoiceManager extends Component
         $query = Invoice::with(['user', 'supplier', 'items'])
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $q) {
-                    $q->where('invoice_number', 'like', '%' . $this->search . '%')
-                      ->orWhere('customer_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('customer_email', 'like', '%' . $this->search . '%')
-                      ->orWhere('customer_phone', 'like', '%' . $this->search . '%');
+                    $q->where('invoice_number', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_email', 'like', '%'.$this->search.'%')
+                        ->orWhere('customer_phone', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function (Builder $query) {
@@ -195,7 +204,7 @@ class InvoiceManager extends Component
     public function delete($id, StockMovementService $stockMovementService, AuditLogService $auditLogService)
     {
         $invoice = Invoice::with('items')->findOrFail($id);
-        
+
         if ($invoice->status === 'sent' || $invoice->status === 'paid') {
             $stockMovementService->restoreFromInvoice($invoice, 'invoice_deleted', [
                 'reference_type' => Invoice::class,
@@ -204,7 +213,7 @@ class InvoiceManager extends Component
                 'notes' => 'Stock restored after invoice deletion.',
             ]);
         }
-        
+
         $invoice->delete();
         $auditLogService->log('invoice.deleted', $invoice, 'Invoice deleted and stock restored when required.', [
             'invoice_number' => $invoice->invoice_number,
@@ -232,7 +241,7 @@ class InvoiceManager extends Component
     public function markAsCancelled($id, StockMovementService $stockMovementService, AuditLogService $auditLogService)
     {
         $invoice = Invoice::with('items')->find($id);
-        
+
         if ($invoice->status === 'sent') {
             $stockMovementService->restoreFromInvoice($invoice, 'invoice_cancelled', [
                 'reference_type' => Invoice::class,
@@ -241,7 +250,7 @@ class InvoiceManager extends Component
                 'notes' => 'Stock restored after invoice cancellation.',
             ]);
         }
-        
+
         $invoice->status = 'cancelled';
         $invoice->save();
         $auditLogService->log('invoice.cancelled', $invoice, 'Invoice cancelled and stock restored when required.', [
@@ -255,8 +264,9 @@ class InvoiceManager extends Component
     {
         $invoice = Invoice::findOrFail($id);
 
-        if (!$invoice->customer_email) {
+        if (! $invoice->customer_email) {
             session()->flash('message', 'This invoice does not have a customer email address.');
+
             return;
         }
 
@@ -264,26 +274,24 @@ class InvoiceManager extends Component
         session()->flash('message', $sent ? 'Invoice email sent successfully.' : 'Failed to send invoice email.');
     }
 
-    public function downloadPdf($id)
+    public function downloadPdf($id, BillCustomizationService $billCustomizationService)
     {
         $invoice = Invoice::with(['items', 'user', 'supplier'])->findOrFail($id);
-        
-        $data = [
-            'invoice' => $invoice,
-            'company' => [
-                'name' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
-                'email' => SiteSetting::get('support_email', config('mail.from.address', 'company@example.com')),
-                'phone' => SiteSetting::get('support_phone', '+94 11 234 5678'),
-                'address' => SiteSetting::get('company_address', 'Sri Lanka'),
-                'tax_id' => SiteSetting::get('company_tax_id', 'N/A'),
-            ]
-        ];
+        $data = $billCustomizationService->invoiceViewData($invoice, [
+            'device_type' => 'desktop',
+            'input_mode' => 'manual',
+            'printer_hint' => 'Office A4',
+        ]);
+        $billProfile = $data['billProfile'];
+        $pdf = Pdf::loadView('exports.invoice-pdf', $data)
+            ->setPaper(
+                $billCustomizationService->paperConfig($billProfile),
+                $billCustomizationService->paperOrientation($billProfile)
+            );
 
-        $pdf = Pdf::loadView('exports.invoice-pdf', $data);
-        
         return response()->streamDownload(
-            fn () => print($pdf->output()),
-            'invoice-' . $invoice->invoice_number . '.pdf'
+            fn () => print ($pdf->output()),
+            'invoice-'.$invoice->invoice_number.'.pdf'
         );
     }
 

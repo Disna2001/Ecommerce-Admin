@@ -3,8 +3,30 @@
     showSuccessModal: @entangle('showSuccessModal'),
     toastOpen: false,
     toastMessage: '',
-    toastTone: 'success'
-}"
+    toastTone: 'success',
+    defaultPrinterHint: @js($receiptProfile['printer_match'] ?? ''),
+    printerHint: '',
+    inputMode: '',
+    deviceType: 'desktop',
+    initPrintRouting() {
+        this.printerHint = localStorage.getItem('posPreferredPrinter') || this.defaultPrinterHint;
+        this.inputMode = localStorage.getItem('posInputMode') || 'keyboard_scanner';
+        const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+        if (window.innerWidth < 640) {
+            this.deviceType = 'mobile';
+        } else if (coarsePointer || window.innerWidth < 1024) {
+            this.deviceType = 'tablet';
+        } else {
+            this.deviceType = 'desktop';
+        }
+    },
+    persistPrinterHint() {
+        localStorage.setItem('posPreferredPrinter', this.printerHint || '');
+    },
+    persistInputMode() {
+        localStorage.setItem('posInputMode', this.inputMode || 'keyboard_scanner');
+    }
+}" x-init="initPrintRouting()"
     x-on:item-added.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'success'; setTimeout(() => toastOpen = false, 2600)"
     x-on:show-success.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'success'; setTimeout(() => toastOpen = false, 3200)"
     x-on:show-error.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'error'; setTimeout(() => toastOpen = false, 3200)"
@@ -284,6 +306,52 @@
             </div>
 
             <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Print Routing</p>
+                <h3 class="mt-2 text-lg font-bold text-slate-900">Device and printer recognition</h3>
+
+                <div class="mt-5 grid gap-4">
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detected Device</p>
+                            <p class="mt-2 text-lg font-bold text-slate-900" x-text="deviceType"></p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Default Receipt Profile</p>
+                            <p class="mt-2 text-sm font-bold text-slate-900">{{ $receiptProfile['name'] ?? 'POS Receipt' }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Paper Size</p>
+                            <p class="mt-2 text-sm font-bold text-slate-900">{{ strtoupper(str_replace('_', ' ', $receiptProfile['paper_size'] ?? 'thermal_80')) }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Preferred printer alias</label>
+                            <select x-model="printerHint" x-on:change="persistPrinterHint()" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
+                                <option value="">Use default routing</option>
+                                @foreach($printerOptions as $printerOption)
+                                    <option value="{{ $printerOption }}">{{ $printerOption }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Primary input mode</label>
+                            <select x-model="inputMode" x-on:change="persistInputMode()" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
+                                <option value="keyboard_scanner">Keyboard / Barcode Scanner</option>
+                                <option value="touch">Touch Screen</option>
+                                <option value="manual">Manual Keyboard Entry</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-900">
+                        Receipt routing uses the browser-detected device type plus these saved operator hints. Installed printer names are not directly available in normal browsers, so the selected printer alias is used as the printer recognition signal.
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Recent Activity</p>
@@ -457,4 +525,273 @@
             </div>
         </div>
     </div>
+
+    @php($receiptInvoice = $createdInvoice?->loadMissing('items'))
+    @if($receiptInvoice)
+        <div
+            id="pos-receipt-print-zone"
+            class="hidden"
+            data-profiles='@json($billingProfiles)'
+            data-default-profile='@json($receiptProfile)'
+            data-default-printer='@json($receiptProfile['printer_match'] ?? '')'
+        >
+            <div id="pos-receipt-sheet" class="receipt-paper">
+                <div class="receipt-header">
+                    <p class="receipt-site">{{ $company['name'] }}</p>
+                    <p data-receipt-company-phone>{{ $company['phone'] }}</p>
+                    <p>{{ $company['email'] }}</p>
+                    <p>{{ $company['address'] }}</p>
+                    <p data-receipt-tax-id>Tax ID: {{ $company['tax_id'] }}</p>
+                    <p data-receipt-header-note class="receipt-muted"></p>
+                </div>
+
+                <div class="receipt-section">
+                    <div class="receipt-row"><span>Invoice</span><strong>{{ $receiptInvoice->invoice_number }}</strong></div>
+                    <div class="receipt-row"><span>Date</span><strong>{{ $receiptInvoice->invoice_date?->format('Y-m-d H:i') }}</strong></div>
+                    <div class="receipt-row"><span>Customer</span><strong>{{ $receiptInvoice->customer_name }}</strong></div>
+                    <div class="receipt-row" data-receipt-customer-email><span>Email</span><strong>{{ $receiptInvoice->customer_email ?: '-' }}</strong></div>
+                    <div class="receipt-row" data-receipt-customer-phone><span>Phone</span><strong>{{ $receiptInvoice->customer_phone ?: '-' }}</strong></div>
+                    <div class="receipt-row" data-receipt-customer-address><span>Address</span><strong>{{ $receiptInvoice->customer_address ?: '-' }}</strong></div>
+                    <div class="receipt-row" data-receipt-payment-method><span>Payment</span><strong>{{ $paymentMethods[$receiptInvoice->payment_method] ?? $receiptInvoice->payment_method }}</strong></div>
+                </div>
+
+                <div class="receipt-section">
+                    <table class="receipt-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th class="number">Qty</th>
+                                <th class="number">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($receiptInvoice->items as $item)
+                                <tr>
+                                    <td>{{ $item->item_name }}</td>
+                                    <td class="number">{{ $item->quantity }}</td>
+                                    <td class="number">{{ $company['currency_symbol'] }} {{ number_format($item->total, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="receipt-section">
+                    <div class="receipt-row"><span>Subtotal</span><strong>{{ $company['currency_symbol'] }} {{ number_format($receiptInvoice->subtotal, 2) }}</strong></div>
+                    <div class="receipt-row"><span>Total</span><strong>{{ $company['currency_symbol'] }} {{ number_format($receiptInvoice->total, 2) }}</strong></div>
+                    <div class="receipt-row"><span>Paid</span><strong>{{ $company['currency_symbol'] }} {{ number_format($receiptInvoice->amount_paid, 2) }}</strong></div>
+                    <div class="receipt-row"><span>Balance</span><strong>{{ $company['currency_symbol'] }} {{ number_format($receiptInvoice->balance_due, 2) }}</strong></div>
+                </div>
+
+                <div class="receipt-section" data-receipt-notes>
+                    <p class="receipt-label">Notes</p>
+                    <p>{{ $receiptInvoice->notes ?: 'No additional notes.' }}</p>
+                </div>
+
+                <div class="receipt-section" data-receipt-terms>
+                    <p class="receipt-label">Terms</p>
+                    <p>{{ $receiptInvoice->terms_conditions ?: 'Thank you for shopping with us.' }}</p>
+                </div>
+
+                <div class="receipt-footer">
+                    <p data-receipt-footer-note></p>
+                    <p class="receipt-muted">Printed from {{ $siteName }} POS</p>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
+
+@push('styles')
+    <style>
+        #pos-receipt-print-zone {
+            display: none;
+        }
+
+        .receipt-paper {
+            width: 80mm;
+            padding: 8px 10px;
+            font-family: "Courier New", monospace;
+            color: #0f172a;
+            background: #fff;
+        }
+
+        .receipt-paper[data-paper-size="thermal_58"] {
+            width: 58mm;
+        }
+
+        .receipt-paper[data-paper-size="a4"],
+        .receipt-paper[data-paper-size="letter"] {
+            width: 210mm;
+            padding: 18px 20px;
+            font-family: "Helvetica", sans-serif;
+        }
+
+        .receipt-header,
+        .receipt-footer {
+            text-align: center;
+        }
+
+        .receipt-site {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 6px;
+        }
+
+        .receipt-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #94a3b8;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+
+        .receipt-row strong,
+        .receipt-table .number {
+            text-align: right;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .receipt-table th,
+        .receipt-table td {
+            padding: 5px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .receipt-label,
+        .receipt-muted {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        @media print {
+            body.pos-receipt-print-active * {
+                visibility: hidden !important;
+            }
+
+            body.pos-receipt-print-active #pos-receipt-print-zone,
+            body.pos-receipt-print-active #pos-receipt-print-zone * {
+                visibility: visible !important;
+            }
+
+            body.pos-receipt-print-active #pos-receipt-print-zone {
+                display: block !important;
+                position: absolute;
+                inset: 0;
+                background: #fff;
+            }
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script>
+        (() => {
+            const detectDeviceType = () => {
+                const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
+                if (window.innerWidth < 640) return 'mobile';
+                if (coarsePointer || window.innerWidth < 1024) return 'tablet';
+                return 'desktop';
+            };
+
+            const matchScore = (expected, actual, score) => {
+                if (expected === 'any') return 4;
+                return expected === actual ? score : -20;
+            };
+
+            const printerScore = (expected, actual) => {
+                const normalizedExpected = (expected || '').trim().toLowerCase();
+                const normalizedActual = (actual || '').trim().toLowerCase();
+
+                if (!normalizedExpected) return 3;
+                return normalizedActual.includes(normalizedExpected) ? 22 : -10;
+            };
+
+            const resolveProfile = (profiles, defaultProfile, context) => {
+                const eligible = (profiles || []).filter((profile) => {
+                    return profile.enabled && ['pos_receipt', 'any'].includes(profile.bill_type);
+                });
+
+                if (!eligible.length) return defaultProfile;
+
+                return eligible
+                    .map((profile) => {
+                        let score = profile.id === defaultProfile.id ? 50 : 0;
+                        score += profile.bill_type === 'pos_receipt' ? 30 : 10;
+                        score += matchScore(profile.device_match, context.deviceType, 18);
+                        score += matchScore(profile.input_match, context.inputMode, 12);
+                        score += printerScore(profile.printer_match, context.printerHint);
+                        return { profile, score };
+                    })
+                    .sort((left, right) => right.score - left.score)[0]?.profile || defaultProfile;
+            };
+
+            const toggleVisibility = (selector, visible) => {
+                document.querySelectorAll(selector).forEach((node) => {
+                    node.style.display = visible ? '' : 'none';
+                });
+            };
+
+            window.addEventListener('print-receipt', () => {
+                const printZone = document.getElementById('pos-receipt-print-zone');
+                const receiptSheet = document.getElementById('pos-receipt-sheet');
+
+                if (!printZone || !receiptSheet) {
+                    return;
+                }
+
+                const defaultProfile = JSON.parse(printZone.dataset.defaultProfile || '{}');
+                const profiles = JSON.parse(printZone.dataset.profiles || '[]');
+                const context = {
+                    deviceType: detectDeviceType(),
+                    inputMode: localStorage.getItem('posInputMode') || 'keyboard_scanner',
+                    printerHint: localStorage.getItem('posPreferredPrinter') || printZone.dataset.defaultPrinter || '',
+                };
+                const profile = resolveProfile(profiles, defaultProfile, context);
+
+                receiptSheet.dataset.paperSize = profile.paper_size || 'thermal_80';
+                receiptSheet.style.fontSize = `${profile.font_scale || 1}rem`;
+
+                toggleVisibility('[data-receipt-company-phone]', !!profile.show_company_phone);
+                toggleVisibility('[data-receipt-tax-id]', !!profile.show_tax_id);
+                toggleVisibility('[data-receipt-customer-address]', !!profile.show_customer_address);
+                toggleVisibility('[data-receipt-customer-email]', !!profile.show_customer_email);
+                toggleVisibility('[data-receipt-customer-phone]', !!profile.show_customer_phone);
+                toggleVisibility('[data-receipt-payment-method]', !!profile.show_payment_method);
+                toggleVisibility('[data-receipt-notes]', !!profile.show_notes);
+                toggleVisibility('[data-receipt-terms]', !!profile.show_terms);
+
+                const headerNoteNode = document.querySelector('[data-receipt-header-note]');
+                if (headerNoteNode) {
+                    headerNoteNode.textContent = profile.header_note || '';
+                    headerNoteNode.style.display = profile.header_note ? '' : 'none';
+                }
+
+                const footerNoteNode = document.querySelector('[data-receipt-footer-note]');
+                if (footerNoteNode) {
+                    footerNoteNode.textContent = profile.footer_note || '';
+                    footerNoteNode.style.display = profile.footer_note ? '' : 'none';
+                }
+
+                document.body.classList.add('pos-receipt-print-active');
+                setTimeout(() => window.print(), 60);
+            });
+
+            window.addEventListener('afterprint', () => {
+                document.body.classList.remove('pos-receipt-print-active');
+            });
+        })();
+    </script>
+@endpush

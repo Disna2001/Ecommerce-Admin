@@ -4,7 +4,7 @@
             <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">System Readiness</p>
             <h3 class="mt-2 text-2xl font-black text-slate-900 dark:text-white">Setup status at a glance</h3>
             <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                Keep the settings screen compact: configure hosting first, then email, WhatsApp, AI, and secrets.
+                Keep the settings screen compact: configure hosting first, then email, billing output, WhatsApp, AI, and secrets.
             </p>
         </div>
 
@@ -17,11 +17,12 @@
         </div>
     </div>
 
-    <div class="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+    <div class="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
         <x-admin.ui.metric label="Email" :value="$statusCards['email_ready'] ? 'Ready' : 'Setup'" hint="Sender and transport." />
         <x-admin.ui.metric label="WhatsApp" :value="$statusCards['whatsapp_ready'] ? 'Live' : ($statusCards['whatsapp_enabled'] ? 'Review' : 'Off')" hint="Automation state." />
         <x-admin.ui.metric label="AI" :value="$statusCards['ai_ready'] ? 'Ready' : ($statusCards['ai_enabled'] ? 'Review' : 'Off')" hint="Assistant setup." />
         <x-admin.ui.metric label="Hosting" :value="$statusCards['hosting_ready'] ? 'Ready' : 'Review'" hint="URL and locale." />
+        <x-admin.ui.metric label="Billing" :value="$statusCards['billing_ready'] ? 'Ready' : 'Review'" hint="PDF and printer routing." />
         <x-admin.ui.metric label="Business" :value="$statusCards['business_ready'] ? 'Ready' : 'Review'" hint="Contact details." />
         <x-admin.ui.metric label="Secrets" :value="$integrationSummary['configured_secrets']" hint="Encrypted credentials." tone="accent" />
     </div>
@@ -30,7 +31,7 @@
         <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900">
             <p class="text-sm font-semibold text-slate-800 dark:text-white">Operator guide</p>
             <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                Finish hosting and business identity first, then email delivery, WhatsApp automation, and AI credentials.
+                Finish hosting and business identity first, then email delivery, bill profile routing, WhatsApp automation, and AI credentials.
             </p>
         </div>
 

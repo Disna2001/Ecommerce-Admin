@@ -2,47 +2,60 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\Stock;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
-use App\Models\Supplier;
 use App\Models\SiteSetting;
+use App\Models\Stock;
 use App\Services\AuditLogService;
+use App\Services\Billing\BillCustomizationService;
 use App\Services\Inventory\StockMovementService;
 use App\Services\Notifications\CustomerNotificationService;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use Livewire\Component;
 
 class PosInvoice extends Component
 {
     // Cart items
     public $cart = [];
+
     public $cartSubtotal = 0;
+
     public $cartTax = 0;
+
     public $cartDiscount = 0;
+
     public $cartTotal = 0;
-    
+
     // Customer info
     public $customer_name = '';
+
     public $customer_email = '';
+
     public $customer_phone = '';
+
     public $customer_address = '';
-    
+
     // Invoice info
     public $invoice_number;
+
     public $notes = '';
+
     public $payment_method = 'cash';
+
     public $amount_paid = 0;
+
     public $change_due = 0;
-    
+
     // Search
     public $searchTerm = '';
+
     public $searchResults = [];
+
     public $showResults = false;
-    
+
     // Payment methods
     public $paymentMethods = [
         'cash' => 'Cash',
@@ -52,19 +65,21 @@ class PosInvoice extends Component
         'cheque' => 'Cheque',
         'credit' => 'Store Credit',
     ];
-    
+
     // UI State
     public $showPaymentModal = false;
+
     public $showSuccessModal = false;
+
     public $createdInvoice = null;
 
     // Add this property
     public $sendInvoiceEmail = true;
 
     protected $listeners = [
-        'productSelected', 
+        'productSelected',
         'clearSearch',
-        'confirmResendEmail' // Add this listener
+        'confirmResendEmail', // Add this listener
     ];
 
     public function mount()
@@ -88,7 +103,7 @@ class PosInvoice extends Component
             $newNumber = '0001';
         }
 
-        $this->invoice_number = 'POS-' . $year . $month . '-' . $newNumber;
+        $this->invoice_number = 'POS-'.$year.$month.'-'.$newNumber;
     }
 
     public function updatedSearchTerm()
@@ -97,12 +112,12 @@ class PosInvoice extends Component
             $this->searchResults = Stock::with(['brand', 'make'])
                 ->where('quantity', '>', 0)
                 ->where(function (Builder $query) {
-                    $query->where('name', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('sku', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('item_code', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('barcode', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('model_name', 'like', '%' . $this->searchTerm . '%')
-                        ->orWhere('model_number', 'like', '%' . $this->searchTerm . '%');
+                    $query->where('name', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('sku', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('item_code', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('barcode', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('model_name', 'like', '%'.$this->searchTerm.'%')
+                        ->orWhere('model_number', 'like', '%'.$this->searchTerm.'%');
                 })
                 ->limit(10)
                 ->get();
@@ -116,7 +131,7 @@ class PosInvoice extends Component
     public function selectProduct($productId)
     {
         $product = Stock::find($productId);
-        
+
         if ($product && $product->quantity > 0) {
             // Check if product already in cart
             $existingItemKey = collect($this->cart)->search(function ($item) use ($productId) {
@@ -148,7 +163,7 @@ class PosInvoice extends Component
             $this->searchTerm = '';
             $this->searchResults = [];
             $this->showResults = false;
-            
+
             $this->dispatch('item-added', message: 'Product added to cart');
         }
     }
@@ -190,13 +205,13 @@ class PosInvoice extends Component
 
         $this->cartTotal = collect($this->cart)->sum('total');
         $this->cartTax = $this->cartTotal * 0; // You can implement tax logic here
-        
+
         $this->calculateChange();
     }
 
     private function recalculateLineItem($index): void
     {
-        if (!isset($this->cart[$index])) {
+        if (! isset($this->cart[$index])) {
             return;
         }
 
@@ -277,15 +292,17 @@ class PosInvoice extends Component
     {
         if (empty($this->cart)) {
             $this->dispatch('show-error', message: 'Cart is empty. Add items to continue.');
+
             return;
         }
 
         // Validate customer email if send invoice is checked
         if ($this->sendInvoiceEmail && empty($this->customer_email)) {
             $this->dispatch('show-error', message: 'Customer email is required to send invoice.');
+
             return;
         }
-        
+
         $this->amount_paid = $this->cartTotal;
         $this->calculateChange();
         $this->showPaymentModal = true;
@@ -299,8 +316,8 @@ class PosInvoice extends Component
         $sent = $customerNotificationService->sendInvoice($invoice);
 
         if ($sent) {
-            Log::info('Invoice email queued successfully to: ' . $invoice->customer_email);
-            $this->dispatch('show-success', message: 'Invoice email sent to ' . $invoice->customer_email);
+            Log::info('Invoice email queued successfully to: '.$invoice->customer_email);
+            $this->dispatch('show-success', message: 'Invoice email sent to '.$invoice->customer_email);
         } else {
             $this->dispatch('show-warning', message: 'Payment processed but failed to send email. Please send manually.');
         }
@@ -312,13 +329,12 @@ class PosInvoice extends Component
         StockMovementService $stockMovementService,
         CustomerNotificationService $customerNotificationService,
         AuditLogService $auditLogService
-    )
-    {
+    ) {
         $rules = [
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:50',
             'payment_method' => 'required|string',
-            'amount_paid' => 'required|numeric|min:' . ($this->cartTotal * 0.5),
+            'amount_paid' => 'required|numeric|min:'.($this->cartTotal * 0.5),
         ];
 
         // Make email required if send invoice is checked
@@ -402,7 +418,7 @@ class PosInvoice extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Payment processing error: ' . $e->getMessage());
+            Log::error('Payment processing error: '.$e->getMessage());
             $this->dispatch('show-error', message: 'Error processing payment. Please try again.');
         }
     }
@@ -413,26 +429,29 @@ class PosInvoice extends Component
     public function resendInvoiceEmail($invoiceId = null)
     {
         $invoiceId = $invoiceId ?? ($this->createdInvoice->id ?? null);
-        
-        if (!$invoiceId) {
+
+        if (! $invoiceId) {
             $this->dispatch('show-error', message: 'No invoice found to resend.');
+
             return;
         }
 
         $invoice = Invoice::find($invoiceId);
-        
-        if (!$invoice) {
+
+        if (! $invoice) {
             $this->dispatch('show-error', message: 'Invoice not found.');
+
             return;
         }
 
-        if (!$invoice->customer_email) {
+        if (! $invoice->customer_email) {
             $this->dispatch('show-error', message: 'No email address found for this invoice.');
+
             return;
         }
 
         $sent = $this->sendInvoiceEmail($invoice, app(CustomerNotificationService::class));
-        
+
         if ($sent) {
             $this->dispatch('show-success', message: 'Invoice email resent successfully!');
         }
@@ -461,9 +480,27 @@ class PosInvoice extends Component
 
     public function render()
     {
+        $billCustomizationService = app(BillCustomizationService::class);
+        $billingProfiles = $billCustomizationService->configuredProfiles();
+        $receiptProfile = $billCustomizationService->resolveProfile('pos_receipt', [
+            'device_type' => 'desktop',
+            'input_mode' => 'keyboard_scanner',
+            'printer_hint' => 'Counter Thermal',
+        ]);
+        $printerOptions = collect($billingProfiles)
+            ->pluck('printer_match')
+            ->filter(fn ($printer) => filled($printer))
+            ->unique()
+            ->values()
+            ->all();
+
         return view('livewire.pos-invoice', [
             'recent_invoices' => Invoice::latest()->take(5)->get(),
             'siteName' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
+            'receiptProfile' => $receiptProfile,
+            'billingProfiles' => $billingProfiles,
+            'printerOptions' => $printerOptions,
+            'company' => $billCustomizationService->companyPayload(),
         ])->layout('layouts.admin');
     }
 }
