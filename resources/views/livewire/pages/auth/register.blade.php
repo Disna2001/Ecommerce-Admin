@@ -5,10 +5,13 @@ use App\Models\Merchant;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -38,7 +41,7 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'user_type' => ['required', 'in:regular,merchant'],
         ];
@@ -74,6 +77,13 @@ new #[Layout('layouts.guest')] class extends Component
         $this->validateOnly($propertyName);
     }
 
+    public function updatedUserType(string $value): void
+    {
+        if ($value !== 'merchant') {
+            $this->resetMerchantFields();
+        }
+    }
+
     protected function sendWelcomeEmail(User $user, bool $isFirstUser, bool $isMerchant): void
     {
         try {
@@ -87,52 +97,128 @@ new #[Layout('layouts.guest')] class extends Component
         }
     }
 
+    protected function resetMerchantFields(): void
+    {
+        $this->reset([
+            'nic_number',
+            'br_number',
+            'nic_image',
+            'shop_image',
+            'merchant_selfie',
+            'shop_name',
+            'shop_address',
+            'phone_number',
+        ]);
+
+        $this->resetErrorBag([
+            'nic_number',
+            'br_number',
+            'nic_image',
+            'shop_image',
+            'merchant_selfie',
+            'shop_name',
+            'shop_address',
+            'phone_number',
+        ]);
+    }
+
+    protected function normalizeWhitespace(string $value): string
+    {
+        return preg_replace('/\s+/', ' ', trim($value)) ?: '';
+    }
+
+    protected function normalizeIdentifier(string $value): string
+    {
+        return strtoupper(preg_replace('/\s+/', '', trim($value)) ?: '');
+    }
+
+    protected function normalizePhoneNumber(string $value): string
+    {
+        return preg_replace('/\s+/', ' ', trim($value)) ?: '';
+    }
+
     public function register(): void
     {
         $validated = $this->validate();
         $isFirstUser = User::count() === 0;
         $userType = $isFirstUser ? 'admin' : $validated['user_type'];
 
-        $user = User::create([
-            'name' => trim($validated['name']),
-            'email' => strtolower(trim($validated['email'])),
+        $userData = [
+            'name' => $this->normalizeWhitespace($validated['name']),
+            'email' => Str::lower(trim($validated['email'])),
             'password' => Hash::make($validated['password']),
             'user_type' => $userType,
-        ]);
+        ];
 
-        if ($isFirstUser) {
-            $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
-            $user->assignRole($adminRole);
+        $isMerchantRegistration = $userType === 'merchant';
 
-            Log::info('First user registered as admin: '.$user->email);
-        } elseif ($this->user_type === 'merchant') {
-            $nicImagePath = $this->nic_image->store('merchant-documents/nic', 'public');
-            $shopImagePath = $this->shop_image->store('merchant-documents/shop', 'public');
-            $selfiePath = $this->merchant_selfie->store('merchant-documents/selfies', 'public');
-
-            Merchant::create([
-                'user_id' => $user->id,
-                'nic_number' => trim($this->nic_number),
-                'br_number' => trim($this->br_number),
-                'nic_image_path' => $nicImagePath,
-                'shop_image_path' => $shopImagePath,
-                'merchant_selfie_path' => $selfiePath,
-                'shop_name' => trim($this->shop_name),
+        $merchantData = $isMerchantRegistration
+            ? [
+                'nic_number' => $this->normalizeIdentifier($this->nic_number),
+                'br_number' => $this->normalizeIdentifier($this->br_number),
+                'shop_name' => $this->normalizeWhitespace($this->shop_name),
                 'shop_address' => trim($this->shop_address),
-                'phone_number' => trim($this->phone_number),
+                'phone_number' => $this->normalizePhoneNumber($this->phone_number),
                 'verification_status' => 'pending',
-            ]);
+            ]
+            : [];
 
-            $merchantRole = Role::firstOrCreate(['name' => 'Merchant', 'guard_name' => 'web']);
-            $user->assignRole($merchantRole);
-        } else {
-            $userRole = Role::firstOrCreate(['name' => 'User', 'guard_name' => 'web']);
-            $user->assignRole($userRole);
+        $storedFiles = [];
+
+        try {
+            if ($isMerchantRegistration) {
+                $storedFiles = [
+                    'nic_image_path' => $this->nic_image->store('merchant-documents/nic', 'public'),
+                    'shop_image_path' => $this->shop_image->store('merchant-documents/shop', 'public'),
+                    'merchant_selfie_path' => $this->merchant_selfie->store('merchant-documents/selfies', 'public'),
+                ];
+            }
+
+            $user = DB::transaction(function () use ($isFirstUser, $userType, $userData, $merchantData, $storedFiles) {
+                $user = User::create($userData);
+
+                if ($isFirstUser) {
+                    $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+                    $user->assignRole($adminRole);
+
+                    Log::info('First user registered as admin: ' . $user->email);
+
+                    return $user;
+                }
+
+                if ($userType === 'merchant') {
+                    Merchant::create([
+                        'user_id' => $user->id,
+                        ...$merchantData,
+                        ...$storedFiles,
+                    ]);
+
+                    $merchantRole = Role::firstOrCreate(['name' => 'Merchant', 'guard_name' => 'web']);
+                    $user->assignRole($merchantRole);
+
+                    return $user;
+                }
+
+                $userRole = Role::firstOrCreate(['name' => 'User', 'guard_name' => 'web']);
+                $user->assignRole($userRole);
+
+                return $user;
+            });
+        } catch (\Throwable $exception) {
+            foreach ($storedFiles as $path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            report($exception);
+
+            $this->addError('user_type', 'We could not complete your registration right now. Please try again.');
+
+            return;
         }
 
         event(new Registered($user));
         Auth::login($user);
-        $this->sendWelcomeEmail($user, $isFirstUser, $this->user_type === 'merchant');
+        $this->sendWelcomeEmail($user, $isFirstUser, $isMerchantRegistration);
 
         if ($isFirstUser) {
             $this->redirect(route('admin.dashboard', absolute: false), navigate: true);
@@ -307,6 +393,13 @@ new #[Layout('layouts.guest')] class extends Component
                                         </p>
                                     </div>
                                     <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">Verification required</span>
+                                </div>
+
+                                <div class="mt-5 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4 text-sm text-sky-900">
+                                    <p class="font-semibold">Before you submit</p>
+                                    <p class="mt-2 leading-6 text-sky-800">
+                                        Make sure your NIC number, business registration number, and uploaded photos match the same business owner details. Clear documents help the review team approve merchant access faster.
+                                    </p>
                                 </div>
 
                                 <div class="mt-5 grid gap-4 sm:grid-cols-2">
