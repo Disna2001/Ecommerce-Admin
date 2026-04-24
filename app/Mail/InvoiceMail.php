@@ -3,20 +3,21 @@
 namespace App\Mail;
 
 use App\Models\Invoice;
-use App\Models\SiteSetting;
+use App\Services\Billing\BillCustomizationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $invoice;
+
     public $company;
 
     /**
@@ -25,19 +26,7 @@ class InvoiceMail extends Mailable
     public function __construct(Invoice $invoice)
     {
         $this->invoice = $invoice;
-        $siteName = SiteSetting::get('site_name', config('app.name', 'Display Lanka'));
-        $siteEmail = SiteSetting::get('support_email', config('mail.from.address', 'company@example.com'));
-        $sitePhone = SiteSetting::get('support_phone', '+94 11 234 5678');
-        $siteAddress = SiteSetting::get('company_address', 'Sri Lanka');
-        $this->company = [
-            'name' => $siteName,
-            'email' => $siteEmail,
-            'phone' => $sitePhone,
-            'address' => $siteAddress,
-            'tax_id' => SiteSetting::get('company_tax_id', 'N/A'),
-            'currency' => 'LKR',
-            'currency_symbol' => 'Rs',
-        ];
+        $this->company = app(BillCustomizationService::class)->companyPayload();
     }
 
     /**
@@ -46,7 +35,7 @@ class InvoiceMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Invoice #' . $this->invoice->invoice_number . ' - Payment Confirmation',
+            subject: 'Invoice #'.$this->invoice->invoice_number.' - Payment Confirmation',
         );
     }
 
@@ -69,13 +58,20 @@ class InvoiceMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = PDF::loadView('exports.invoice-pdf', [
-            'invoice' => $this->invoice,
-            'company' => $this->company
+        $billCustomizationService = app(BillCustomizationService::class);
+        $data = $billCustomizationService->invoiceViewData($this->invoice, [
+            'device_type' => 'desktop',
+            'input_mode' => 'manual',
+            'printer_hint' => 'Email PDF',
         ]);
+        $pdf = PDF::loadView('exports.invoice-pdf', $data)
+            ->setPaper(
+                $billCustomizationService->paperConfig($data['billProfile']),
+                $billCustomizationService->paperOrientation($data['billProfile'])
+            );
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'invoice-' . $this->invoice->invoice_number . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'invoice-'.$this->invoice->invoice_number.'.pdf')
                 ->withMime('application/pdf'),
         ];
     }

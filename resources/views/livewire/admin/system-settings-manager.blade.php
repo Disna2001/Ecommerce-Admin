@@ -137,6 +137,10 @@
                 </div>
             @endif
 
+            @if($activeTab === 'billing')
+                <x-admin.settings.tab-billing :billing-profiles="$billing_profiles" :billing-default-profiles="$billing_default_profiles" />
+            @endif
+
             @if($activeTab === 'api_keys')
                 <div class="admin-surface rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-950/75">
                     <div class="mb-6"><h3 class="text-xl font-bold text-slate-900 dark:text-white">API credentials vault</h3><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Keep core platform keys in one place so integrations are easier to identify and rotate.</p></div>

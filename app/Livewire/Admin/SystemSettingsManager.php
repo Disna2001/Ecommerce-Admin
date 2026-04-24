@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\SiteSetting;
 use App\Services\AuditLogService;
+use App\Services\Billing\BillCustomizationService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
@@ -11,59 +12,102 @@ use Spatie\Permission\Models\Permission;
 class SystemSettingsManager extends Component
 {
     public string $activeTab = 'communications';
+
     public bool $saved = false;
 
     // Email
     public string $mail_mailer = 'smtp';
+
     public string $mail_from_name = '';
+
     public string $mail_from_address = '';
+
     public string $mail_smtp_host = '';
+
     public string $mail_smtp_port = '587';
+
     public string $mail_smtp_username = '';
+
     public string $mail_smtp_password = '';
+
     public string $mail_smtp_encryption = 'tls';
+
     public string $mail_api_key = '';
+
     public string $mail_api_secret = '';
+
     public string $order_notification_email = '';
+
     public string $support_notification_email = '';
+
     public string $test_email_recipient = '';
 
     // Hosting / storefront identity
     public string $app_public_url = '';
+
     public bool $force_https = false;
+
     public string $app_timezone = 'Asia/Colombo';
+
     public string $app_locale = 'en';
+
     public string $support_email = '';
+
     public string $support_phone = '';
+
     public string $company_address = '';
+
     public string $company_tax_id = '';
+
     public string $currency_code = 'LKR';
+
     public string $currency_symbol = 'Rs';
+
     public string $asset_cdn_url = '';
+
+    public array $billing_profiles = [];
+
+    public array $billing_default_profiles = [];
 
     // WhatsApp
     public bool $whatsapp_enabled = false;
+
     public string $whatsapp_provider = 'meta_cloud';
+
     public string $whatsapp_phone_number = '';
+
     public string $whatsapp_api_url = '';
+
     public string $whatsapp_api_key = '';
+
     public string $whatsapp_webhook_verify_token = '';
+
     public string $whatsapp_order_template = 'Your order {order_number} has been placed successfully.';
+
     public string $whatsapp_payment_template = 'Payment update for order {order_number}: {payment_status}.';
 
     // AI
     public bool $ai_enabled = true;
+
     public string $ai_provider = 'openai';
+
     public string $ai_model = 'gpt-4o-mini';
+
     public string $ai_api_key = '';
+
     public string $custom_integrations_api_key = '';
+
     public bool $ai_sales_tracking_enabled = true;
+
     public bool $ai_inventory_guidance_enabled = true;
+
     public bool $ai_management_guidance_enabled = true;
+
     public string $ai_prompt_context = 'You are a helpful business assistant specializing in retail, sales tracking, and inventory management.';
+
     public string $ai_goal_text = 'Help the team manage sales, stock levels, and operational decisions quickly.';
 
-    public function mount(): void
+    public function mount(BillCustomizationService $billCustomizationService): void
     {
         $keys = [
             'mail_mailer', 'mail_from_name', 'mail_from_address', 'mail_smtp_host', 'mail_smtp_port',
@@ -80,15 +124,17 @@ class SystemSettingsManager extends Component
 
         foreach ($keys as $key) {
             $value = SiteSetting::get($key);
-            if (!is_null($value)) {
+            if (! is_null($value)) {
                 $this->$key = $value;
             }
         }
 
+        $this->billing_profiles = $billCustomizationService->configuredProfiles();
+        $this->billing_default_profiles = $billCustomizationService->configuredAssignments();
         $this->test_email_recipient = $this->support_notification_email ?: $this->mail_from_address;
     }
 
-    public function save(AuditLogService $auditLogService): void
+    public function save(AuditLogService $auditLogService, BillCustomizationService $billCustomizationService): void
     {
         $this->validate($this->rules());
 
@@ -99,6 +145,24 @@ class SystemSettingsManager extends Component
         foreach ($this->booleanKeys() as $key) {
             SiteSetting::set($key, $this->$key ? '1' : '0', 'boolean', $this->groupFor($key));
         }
+
+        $normalizedProfiles = array_values(array_map(
+            fn (array $profile) => $billCustomizationService->normalizeProfile($profile),
+            array_filter($this->billing_profiles, 'is_array')
+        ));
+
+        if ($normalizedProfiles === []) {
+            $normalizedProfiles = $billCustomizationService->defaultProfiles();
+        }
+
+        $this->billing_profiles = $normalizedProfiles;
+        $this->billing_default_profiles = array_merge(
+            $billCustomizationService->defaultAssignments(),
+            $this->billing_default_profiles
+        );
+
+        SiteSetting::set('billing_profiles', $this->billing_profiles, 'json', 'billing', 'Bill customization profiles');
+        SiteSetting::set('billing_default_profiles', $this->billing_default_profiles, 'json', 'billing', 'Bill default profile assignments');
 
         $auditLogService->log(
             'settings.updated',
@@ -112,6 +176,7 @@ class SystemSettingsManager extends Component
                 'whatsapp_webhook_ready' => filled($this->whatsapp_webhook_verify_token),
                 'ai_enabled' => $this->ai_enabled,
                 'ai_model' => $this->ai_model,
+                'billing_profile_count' => count($this->billing_profiles),
             ],
             auth()->id()
         );
@@ -134,9 +199,9 @@ class SystemSettingsManager extends Component
         try {
             Mail::raw(
                 "This is a live test email from {$this->mail_from_name}.\n\n".
-                "App URL: ".($this->app_public_url ?: config('app.url'))."\n".
-                "Support Email: ".($this->support_email ?: $this->support_notification_email ?: 'not set')."\n".
-                "Time: ".now()->toDateTimeString(),
+                'App URL: '.($this->app_public_url ?: config('app.url'))."\n".
+                'Support Email: '.($this->support_email ?: $this->support_notification_email ?: 'not set')."\n".
+                'Time: '.now()->toDateTimeString(),
                 function ($message) {
                     $message
                         ->to($this->test_email_recipient)
@@ -207,6 +272,23 @@ class SystemSettingsManager extends Component
             'custom_integrations_api_key' => 'nullable|string|max:255',
             'ai_prompt_context' => 'nullable|string|max:4000',
             'ai_goal_text' => 'nullable|string|max:1000',
+
+            'billing_profiles' => 'nullable|array',
+            'billing_profiles.*.id' => 'required|string|max:100',
+            'billing_profiles.*.name' => 'required|string|max:120',
+            'billing_profiles.*.bill_type' => 'required|in:invoice_pdf,pos_receipt,any',
+            'billing_profiles.*.output_mode' => 'required|in:pdf,browser_print,either',
+            'billing_profiles.*.paper_size' => 'required|in:a4,letter,thermal_80,thermal_58',
+            'billing_profiles.*.orientation' => 'required|in:portrait,landscape',
+            'billing_profiles.*.device_match' => 'required|in:any,desktop,tablet,mobile',
+            'billing_profiles.*.input_match' => 'required|in:any,keyboard_scanner,touch,manual',
+            'billing_profiles.*.printer_match' => 'nullable|string|max:120',
+            'billing_profiles.*.copies' => 'nullable|integer|min:1|max:5',
+            'billing_profiles.*.font_scale' => 'nullable|numeric|min:0.7|max:1.4',
+            'billing_profiles.*.header_note' => 'nullable|string|max:255',
+            'billing_profiles.*.footer_note' => 'nullable|string|max:255',
+            'billing_default_profiles.invoice_pdf' => 'nullable|string|max:100',
+            'billing_default_profiles.pos_receipt' => 'nullable|string|max:100',
         ];
     }
 
@@ -246,6 +328,10 @@ class SystemSettingsManager extends Component
             return 'hosting';
         }
 
+        if (str_starts_with($key, 'billing_')) {
+            return 'billing';
+        }
+
         if (str_starts_with($key, 'whatsapp_')) {
             return 'whatsapp';
         }
@@ -266,6 +352,7 @@ class SystemSettingsManager extends Component
             'ops_contacts_ready' => filled($this->order_notification_email) && filled($this->support_notification_email),
             'hosting_ready' => filled($this->app_public_url) && filled($this->app_timezone) && filled($this->app_locale),
             'business_ready' => filled($this->support_email) && filled($this->support_phone) && filled($this->company_address),
+            'billing_ready' => count($this->billing_profiles) > 0 && filled($this->billing_default_profiles['invoice_pdf'] ?? null) && filled($this->billing_default_profiles['pos_receipt'] ?? null),
         ];
 
         $checklist = [
@@ -274,6 +361,7 @@ class SystemSettingsManager extends Component
             ['label' => 'Mail sender and ops alerts', 'ready' => $statusCards['email_ready'] && $statusCards['ops_contacts_ready']],
             ['label' => 'Timezone and locale', 'ready' => filled($this->app_timezone) && filled($this->app_locale)],
             ['label' => 'Currency display', 'ready' => filled($this->currency_code) && filled($this->currency_symbol)],
+            ['label' => 'Bill profiles and printer routing', 'ready' => $statusCards['billing_ready']],
         ];
 
         return view('livewire.admin.system-settings-manager', [
@@ -296,5 +384,40 @@ class SystemSettingsManager extends Component
             ],
             'checklist' => $checklist,
         ]);
+    }
+
+    public function addBillingProfile(BillCustomizationService $billCustomizationService, string $billType = 'invoice_pdf'): void
+    {
+        $this->billing_profiles[] = $billCustomizationService->normalizeProfile([
+            'id' => 'profile-'.str()->lower(str()->random(8)),
+            'name' => $billType === 'pos_receipt' ? 'New POS Receipt Profile' : 'New Invoice PDF Profile',
+            'bill_type' => $billType,
+            'output_mode' => $billType === 'pos_receipt' ? 'browser_print' : 'pdf',
+            'paper_size' => $billType === 'pos_receipt' ? 'thermal_80' : 'a4',
+            'printer_match' => $billType === 'pos_receipt' ? 'Counter Thermal' : 'Office A4',
+        ]);
+    }
+
+    public function removeBillingProfile(int $index): void
+    {
+        if (! isset($this->billing_profiles[$index])) {
+            return;
+        }
+
+        $removedId = $this->billing_profiles[$index]['id'] ?? null;
+        unset($this->billing_profiles[$index]);
+        $this->billing_profiles = array_values($this->billing_profiles);
+
+        foreach (['invoice_pdf', 'pos_receipt'] as $billType) {
+            if (($this->billing_default_profiles[$billType] ?? null) === $removedId) {
+                $this->billing_default_profiles[$billType] = $this->billing_profiles[0]['id'] ?? '';
+            }
+        }
+    }
+
+    public function resetBillingProfiles(BillCustomizationService $billCustomizationService): void
+    {
+        $this->billing_profiles = $billCustomizationService->defaultProfiles();
+        $this->billing_default_profiles = $billCustomizationService->defaultAssignments();
     }
 }
