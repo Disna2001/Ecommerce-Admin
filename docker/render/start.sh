@@ -52,6 +52,8 @@ php artisan view:cache || true
 
 ensure_writable_paths
 
+php artisan queue:work --queue=default --sleep=3 --tries=3 --timeout=60 --no-interaction > /proc/1/fd/1 2>/proc/1/fd/2 &
+
 sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf
 sed -i "s/<VirtualHost \\*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
 

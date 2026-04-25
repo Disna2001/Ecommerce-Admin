@@ -2,6 +2,7 @@
 
 namespace App\Services\Notifications;
 
+use App\Jobs\SendOrderStatusEmailJob;
 use App\Jobs\SendWhatsAppNotificationJob;
 use App\Mail\InvoiceMail;
 use App\Models\Invoice;
@@ -27,7 +28,13 @@ class CustomerNotificationService
             'queued_at' => now(),
         ]);
 
-        $order->sendCustomerProgressEmail($stage, $message, $emailOutbox->id);
+        SendOrderStatusEmailJob::dispatch(
+            $order->id,
+            $stage,
+            $message,
+            $emailOutbox->id,
+            $order->tenant_id
+        );
 
         $whatsAppOutbox = NotificationOutbox::create([
             'channel' => 'whatsapp',

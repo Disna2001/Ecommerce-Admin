@@ -6,7 +6,7 @@
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Order Control</p>
                     <h3 class="mt-2 text-xl font-semibold text-slate-900">Update Status</h3>
                 </div>
-                <button wire:click="closeStatusModal" class="rounded-full border border-slate-200 bg-slate-50 p-3 text-slate-500 transition hover:bg-slate-100"><i class="fas fa-xmark"></i></button>
+                <button wire:click="closeStatusModal" wire:loading.attr="disabled" wire:target="updateStatus" class="rounded-full border border-slate-200 bg-slate-50 p-3 text-slate-500 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"><i class="fas fa-xmark"></i></button>
             </div>
         </div>
         <div class="space-y-4 p-6">
@@ -24,8 +24,11 @@
             </div>
         </div>
         <div class="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-            <button wire:click="closeStatusModal" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">Cancel</button>
-            <button wire:click="updateStatus" class="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Save status</button>
+            <button wire:click="closeStatusModal" wire:loading.attr="disabled" wire:target="updateStatus" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50">Cancel</button>
+            <button wire:click="updateStatus" wire:loading.attr="disabled" wire:target="updateStatus" class="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                <span wire:loading.remove wire:target="updateStatus">Save status</span>
+                <span wire:loading.inline wire:target="updateStatus"><i class="fas fa-spinner fa-spin mr-2"></i>Saving...</span>
+            </button>
         </div>
     </div>
 </div>
