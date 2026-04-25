@@ -257,6 +257,7 @@
         </div>
     </footer>
 
+    @include('frontend.partials.support-chatbox')
 </div>
 
 @livewireScripts

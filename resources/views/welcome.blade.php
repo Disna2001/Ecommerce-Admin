@@ -357,6 +357,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
         </div>
     </footer>
 
+    @include('frontend.partials.support-chatbox')
 </div>
 
 @livewireScripts

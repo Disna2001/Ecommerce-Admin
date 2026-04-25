@@ -111,8 +111,5 @@
         }
     </script>
 
-    @if(\App\Models\SiteSetting::get('ai_enabled', true))
-        @livewire('a-i-assistant')
-    @endif
 </body>
 </html>
