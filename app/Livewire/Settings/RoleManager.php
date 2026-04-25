@@ -69,7 +69,7 @@ class RoleManager extends Component
             'systemRoles' => Role::whereIn('name', ['Admin', 'Super Admin'])->count(),
             'rolesWithoutUsers' => Role::doesntHave('users')->count(),
             'recentRoles' => Role::withCount(['permissions', 'users'])->latest('updated_at')->take(5)->get(),
-        ]);
+        ])->layout('layouts.admin');
     }
 
     public function openModal()
