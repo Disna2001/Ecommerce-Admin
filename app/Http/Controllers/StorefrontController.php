@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Services\Storefront\StorefrontDataService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StorefrontController extends Controller
 {
@@ -162,6 +163,20 @@ class StorefrontController extends Controller
         return view('frontend.pages.track-order', [
             'order' => $order,
             'searched' => $request->filled('order_number'),
+        ]);
+    }
+
+    public function orderDetails(Order $order)
+    {
+        abort_unless(Auth::id() === $order->user_id, 404);
+
+        $order->load([
+            'items.stock',
+            'statusHistory.changedBy',
+        ]);
+
+        return view('frontend.pages.order-details', [
+            'order' => $order,
         ]);
     }
 
