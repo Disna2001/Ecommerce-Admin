@@ -28,6 +28,15 @@
         .header {
             text-align: {{ $isThermal ? 'left' : 'center' }};
             margin-bottom: {{ $isThermal ? 14 : 28 }}px;
+            position: relative;
+        }
+        .header-brand {
+            margin-bottom: 12px;
+        }
+        .header-brand img {
+            max-height: {{ $isThermal ? 42 : 72 }}px;
+            max-width: {{ $isThermal ? 150 : 220 }}px;
+            object-fit: contain;
         }
         .header h1 {
             margin: 0 0 6px;
@@ -120,11 +129,30 @@
             margin-top: {{ $isThermal ? 16 : 30 }}px;
             text-align: {{ $isThermal ? 'left' : 'center' }};
         }
+        .watermark {
+            position: fixed;
+            top: 42%;
+            left: 10%;
+            right: 10%;
+            text-align: center;
+            font-size: {{ $isThermal ? 34 : 92 }}px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            color: {{ $invoice->isPaid() ? 'rgba(16,185,129,0.10)' : 'rgba(245,158,11,0.11)' }};
+            transform: rotate(-24deg);
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
+    <div class="watermark">{{ $invoice->isPaid() ? 'PAID' : 'UNPAID' }}</div>
     <div class="page">
         <div class="header">
+            @if(filled($company['logo_data_uri'] ?? ''))
+                <div class="header-brand">
+                    <img src="{{ $company['logo_data_uri'] }}" alt="{{ $company['name'] }} logo">
+                </div>
+            @endif
             <h1>{{ $company['name'] }}</h1>
             <p>{{ $company['address'] }}</p>
             @if(($profile['show_company_phone'] ?? true) && filled($company['phone']))
@@ -132,7 +160,7 @@
             @endif
             <p>Email: {{ $company['email'] }}</p>
             @if(($profile['show_tax_id'] ?? true) && filled($company['tax_id']))
-                <p>Tax ID: {{ $company['tax_id'] }}</p>
+                <p>Business / Tax ID: {{ $company['tax_id'] }}</p>
             @endif
             @if(filled($profile['header_note'] ?? ''))
                 <p class="meta-note">{{ $profile['header_note'] }}</p>

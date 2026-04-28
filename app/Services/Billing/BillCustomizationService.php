@@ -4,6 +4,7 @@ namespace App\Services\Billing;
 
 use App\Models\Invoice;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Storage;
 
 class BillCustomizationService
 {
@@ -148,6 +149,24 @@ class BillCustomizationService
 
     public function companyPayload(): array
     {
+        $logoPath = SiteSetting::get('logo_path', '');
+        $logoFullPath = '';
+        $logoDataUri = '';
+
+        if (filled($logoPath)) {
+            try {
+                $candidate = Storage::disk('public')->path($logoPath);
+                if (is_string($candidate) && is_file($candidate)) {
+                    $logoFullPath = $candidate;
+                    $mimeType = mime_content_type($candidate) ?: 'image/png';
+                    $logoDataUri = 'data:'.$mimeType.';base64,'.base64_encode((string) file_get_contents($candidate));
+                }
+            } catch (\Throwable) {
+                $logoFullPath = '';
+                $logoDataUri = '';
+            }
+        }
+
         return [
             'name' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
             'email' => SiteSetting::get('support_email', config('mail.from.address', 'company@example.com')),
@@ -156,6 +175,9 @@ class BillCustomizationService
             'tax_id' => SiteSetting::get('company_tax_id', 'N/A'),
             'currency' => SiteSetting::get('currency_code', 'LKR'),
             'currency_symbol' => SiteSetting::get('currency_symbol', 'Rs'),
+            'logo_path' => $logoPath,
+            'logo_full_path' => $logoFullPath,
+            'logo_data_uri' => $logoDataUri,
         ];
     }
 
