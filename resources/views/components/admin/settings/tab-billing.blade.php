@@ -346,7 +346,7 @@
                                             <span class="text-slate-500 dark:text-slate-400">{{ ucfirst($preview['status'] ?? 'paid') }}</span>
                                         </div>
                                         @if(($profile['show_customer_phone'] ?? true) && filled($preview['customer_phone'] ?? null))
-                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ $preview['customer_name'] ?? 'Walk-in customer' }} · {{ $preview['customer_phone'] }}</p>
+                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ $preview['customer_name'] ?? 'Walk-in customer' }} | {{ $preview['customer_phone'] }}</p>
                                         @endif
                                         @if(($profile['show_payment_method'] ?? true) && filled($preview['payment_method'] ?? null))
                                             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Payment: {{ $preview['payment_method'] }}</p>
@@ -387,6 +387,97 @@
                             <p>Company contact details come from the current system settings form, so update email, phone, address, and tax ID here before saving.</p>
                             <p>For PDF invoices, logo and watermark styling are applied on the generated file. The live panel here focuses on structure and visibility behavior.</p>
                         </div>
+
+                        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Branding</p>
+                            <div class="mt-3 flex items-center gap-3">
+                                <div class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
+                                    @if(filled($billingPreviewCompany['logo_url'] ?? null))
+                                        <img src="{{ $billingPreviewCompany['logo_url'] }}" alt="Logo preview" class="h-full w-full object-contain p-2">
+                                    @else
+                                        <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">No logo</span>
+                                    @endif
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $billingPreviewCompany['display_name'] ?? 'Display Lanka' }}</p>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">PDF downloads use the live site logo and apply the invoice watermark automatically.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($isInvoiceProfile)
+                            <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Invoice Preview Controls</p>
+                                <div class="mt-4 grid gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Payment state</label>
+                                        <select wire:model.live="billing_preview_invoice_status" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                            <option value="paid">Paid</option>
+                                            <option value="unpaid">Unpaid</option>
+                                            <option value="overdue">Overdue</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer name</label>
+                                        <input type="text" wire:model.live.debounce.250ms="billing_preview_invoice_customer_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer email</label>
+                                        <input type="text" wire:model.live.debounce.250ms="billing_preview_invoice_customer_email" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer phone</label>
+                                        <input type="text" wire:model.live.debounce.250ms="billing_preview_invoice_customer_phone" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer address</label>
+                                        <textarea wire:model.live.debounce.250ms="billing_preview_invoice_customer_address" rows="3" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></textarea>
+                                    </div>
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Item one</label>
+                                            <input type="text" wire:model.live.debounce.250ms="billing_preview_invoice_item_one_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Item two</label>
+                                            <input type="text" wire:model.live.debounce.250ms="billing_preview_invoice_item_two_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Receipt Preview Controls</p>
+                                <div class="mt-4 grid gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Receipt state</label>
+                                        <select wire:model.live="billing_preview_receipt_status" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                            <option value="paid">Paid</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="refunded">Refunded</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer name</label>
+                                        <input type="text" wire:model.live.debounce.250ms="billing_preview_receipt_customer_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer phone</label>
+                                        <input type="text" wire:model.live.debounce.250ms="billing_preview_receipt_customer_phone" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                    </div>
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Item one</label>
+                                            <input type="text" wire:model.live.debounce.250ms="billing_preview_receipt_item_one_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Item two</label>
+                                            <input type="text" wire:model.live.debounce.250ms="billing_preview_receipt_item_two_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

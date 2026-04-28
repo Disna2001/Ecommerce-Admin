@@ -69,6 +69,34 @@ class SystemSettingsManager extends Component
 
     public array $billing_default_profiles = [];
 
+    public string $billing_preview_invoice_status = 'paid';
+
+    public string $billing_preview_invoice_customer_name = 'Dishna Chamuditha';
+
+    public string $billing_preview_invoice_customer_email = 'customer@example.com';
+
+    public string $billing_preview_invoice_customer_phone = '0702615076';
+
+    public string $billing_preview_invoice_customer_address = 'Weliwita, Ratnapura, Sri Lanka';
+
+    public string $billing_preview_invoice_item_one_name = 'Netflix Premium Plan';
+
+    public string $billing_preview_invoice_item_one_description = '1 month digital access';
+
+    public string $billing_preview_invoice_item_two_name = 'Spotify Family';
+
+    public string $billing_preview_invoice_item_two_description = '30-day activation';
+
+    public string $billing_preview_receipt_status = 'paid';
+
+    public string $billing_preview_receipt_customer_name = 'Walk-in customer';
+
+    public string $billing_preview_receipt_customer_phone = '0712345678';
+
+    public string $billing_preview_receipt_item_one_name = 'Gift Card Top-up';
+
+    public string $billing_preview_receipt_item_two_name = 'Service Fee';
+
     // WhatsApp
     public bool $whatsapp_enabled = false;
 
@@ -374,6 +402,7 @@ class SystemSettingsManager extends Component
             'address' => $this->company_address ?: 'Colombo, Sri Lanka',
             'tax_id' => $this->company_tax_id ?: 'Pending',
             'currency_symbol' => $this->currency_symbol ?: 'Rs',
+            'logo_url' => ($logoPath = SiteSetting::get('logo_path', '')) ? \Storage::url($logoPath) : '',
         ];
 
         $billingPreviewDocuments = [
@@ -381,34 +410,34 @@ class SystemSettingsManager extends Component
                 'number' => 'INV-2026-0042',
                 'date' => now()->format('M d, Y'),
                 'due_date' => now()->addDays(2)->format('M d, Y'),
-                'status' => 'paid',
+                'status' => $this->billing_preview_invoice_status,
                 'payment_method' => 'PayHere',
-                'customer_name' => 'Dishna Chamuditha',
-                'customer_email' => 'customer@example.com',
-                'customer_phone' => '0702615076',
-                'customer_address' => 'Weliwita, Ratnapura, Sri Lanka',
+                'customer_name' => $this->billing_preview_invoice_customer_name,
+                'customer_email' => $this->billing_preview_invoice_customer_email,
+                'customer_phone' => $this->billing_preview_invoice_customer_phone,
+                'customer_address' => $this->billing_preview_invoice_customer_address,
                 'items' => [
-                    ['name' => 'Netflix Premium Plan', 'description' => '1 month digital access', 'quantity' => 1, 'price' => 2490.00, 'discount' => 0, 'tax' => 0, 'total' => 2490.00],
-                    ['name' => 'Spotify Family', 'description' => '30-day activation', 'quantity' => 1, 'price' => 1290.00, 'discount' => 0, 'tax' => 0, 'total' => 1290.00],
+                    ['name' => $this->billing_preview_invoice_item_one_name, 'description' => $this->billing_preview_invoice_item_one_description, 'quantity' => 1, 'price' => 2490.00, 'discount' => 0, 'tax' => 0, 'total' => 2490.00],
+                    ['name' => $this->billing_preview_invoice_item_two_name, 'description' => $this->billing_preview_invoice_item_two_description, 'quantity' => 1, 'price' => 1290.00, 'discount' => 0, 'tax' => 0, 'total' => 1290.00],
                 ],
                 'subtotal' => 3780.00,
                 'tax_amount' => 0.00,
                 'discount_amount' => 0.00,
                 'total' => 3780.00,
-                'amount_paid' => 3780.00,
-                'balance_due' => 0.00,
+                'amount_paid' => $this->billing_preview_invoice_status === 'paid' ? 3780.00 : 0.00,
+                'balance_due' => $this->billing_preview_invoice_status === 'paid' ? 0.00 : 3780.00,
                 'notes' => 'Digital delivery completed to the customer email.',
                 'terms' => 'Valid for the purchased digital product only. Keep this invoice for support requests.',
             ],
             'receipt' => [
                 'number' => 'POS-0138',
-                'status' => 'paid',
-                'customer_name' => 'Walk-in customer',
-                'customer_phone' => '0712345678',
+                'status' => $this->billing_preview_receipt_status,
+                'customer_name' => $this->billing_preview_receipt_customer_name,
+                'customer_phone' => $this->billing_preview_receipt_customer_phone,
                 'payment_method' => 'Cash',
                 'items' => [
-                    ['name' => 'Gift Card Top-up', 'quantity' => 1, 'price' => 3500.00, 'total' => 3500.00],
-                    ['name' => 'Service Fee', 'quantity' => 1, 'price' => 150.00, 'total' => 150.00],
+                    ['name' => $this->billing_preview_receipt_item_one_name, 'quantity' => 1, 'price' => 3500.00, 'total' => 3500.00],
+                    ['name' => $this->billing_preview_receipt_item_two_name, 'quantity' => 1, 'price' => 150.00, 'total' => 150.00],
                 ],
                 'total' => 3650.00,
                 'notes' => 'Thank you for shopping with us.',
