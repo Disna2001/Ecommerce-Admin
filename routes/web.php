@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::get('/checkout/payhere/{order}/redirect', [PaymentGatewayController::class, 'payhereRedirect'])->name('checkout.payhere.redirect');
     Route::get('/orders/{order}', [StorefrontController::class, 'orderDetails'])->name('orders.show');
+    Route::get('/orders/{order}/invoice', [StorefrontController::class, 'downloadInvoice'])->name('orders.invoice');
     Route::get('/orders/{order}/receipt', [StorefrontController::class, 'downloadReceipt'])->name('orders.receipt');
     Route::post('/orders/{order}/return-request', [StorefrontController::class, 'requestReturn'])->name('orders.return-request');
 

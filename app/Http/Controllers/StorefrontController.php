@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Services\Billing\BillCustomizationService;
@@ -241,6 +243,81 @@ class StorefrontController extends Controller
         );
 
         return $pdf->download('order-'.$order->order_number.'.pdf');
+    }
+
+    public function downloadInvoice(Order $order, BillCustomizationService $billCustomizationService)
+    {
+        abort_unless(Auth::id() === $order->user_id, 404);
+
+        $order->loadMissing(['items.stock']);
+
+        $invoice = new Invoice();
+        $invoice->forceFill([
+            'tenant_id' => $order->tenant_id,
+            'invoice_number' => 'INV-'.$order->order_number,
+            'user_id' => $order->user_id,
+            'customer_name' => $order->customer_name,
+            'customer_email' => $order->customer_email,
+            'customer_phone' => $order->customer_phone,
+            'customer_address' => trim(collect([
+                $order->shipping_address,
+                $order->shipping_city,
+                $order->shipping_postal_code,
+                $order->shipping_country,
+            ])->filter()->implode(', ')),
+            'invoice_date' => $order->created_at,
+            'due_date' => null,
+            'subtotal' => $order->subtotal,
+            'tax_rate' => 0,
+            'tax_amount' => 0,
+            'discount' => 0,
+            'total' => $order->total,
+            'amount_paid' => $order->payment_status === 'paid' ? $order->total : 0,
+            'balance_due' => $order->payment_status === 'paid' ? 0 : $order->total,
+            'status' => $order->payment_status === 'paid' ? 'paid' : 'sent',
+            'notes' => $order->notes,
+            'terms_conditions' => 'Customer purchases are subject to the published Terms & Conditions and Refund Policy available on the website.',
+            'payment_method' => $order->payment_method,
+            'payment_reference' => $order->payment_reference,
+            'paid_at' => $order->payment_status === 'paid' ? ($order->payment_verified_at ?? $order->updated_at) : null,
+        ]);
+
+        $invoiceItems = $order->items->map(function ($item) {
+            $unitPrice = (float) ($item->sale_price ?? $item->unit_price ?? 0);
+            $lineTotal = (float) ($item->subtotal ?? ($unitPrice * (int) $item->quantity));
+
+            $invoiceItem = new InvoiceItem();
+            $invoiceItem->forceFill([
+                'tenant_id' => $item->tenant_id,
+                'stock_id' => $item->stock_id,
+                'item_name' => $item->product_name ?: ($item->stock?->name ?: 'Ordered item'),
+                'item_code' => $item->product_sku,
+                'description' => data_get($item->product_snapshot, 'description'),
+                'quantity' => $item->quantity,
+                'unit_price' => $unitPrice,
+                'discount' => 0,
+                'tax_rate' => 0,
+                'tax_amount' => 0,
+                'total' => $lineTotal,
+            ]);
+
+            return $invoiceItem;
+        });
+
+        $invoice->setRelation('items', $invoiceItems);
+
+        $data = $billCustomizationService->invoiceViewData($invoice, [
+            'device_type' => 'desktop',
+            'input_mode' => 'any',
+            'printer_hint' => 'customer invoice',
+        ]);
+
+        $pdf = Pdf::loadView('exports.invoice-pdf', $data)->setPaper(
+            $billCustomizationService->paperConfig($data['billProfile']),
+            $billCustomizationService->paperOrientation($data['billProfile'])
+        );
+
+        return $pdf->download('invoice-'.$order->order_number.'.pdf');
     }
 
     protected function policyPage(string $title, string $eyebrow, string $intro, array $sections)
