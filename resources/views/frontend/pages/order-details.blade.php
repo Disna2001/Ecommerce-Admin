@@ -60,7 +60,9 @@
                         </div>
                         <div class="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
                             @foreach(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed'] as $index => $stage)
-                                @php($active = $currentProgress >= $index)
+                                @php
+                                    $active = $currentProgress >= $index;
+                                @endphp
                                 <div class="rounded-2xl border px-3 py-3 text-center {{ $active ? 'border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-200' : 'border-slate-200 bg-white text-slate-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-500' }}">
                                     <p class="text-[11px] font-black uppercase tracking-[0.18em]">{{ str_replace('_', ' ', $stage) }}</p>
                                 </div>
