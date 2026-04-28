@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Services\Billing\BillCustomizationService;
 use App\Services\Storefront\StorefrontDataService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -215,6 +217,30 @@ class StorefrontController extends Controller
         return redirect()
             ->route('orders.show', $order->fresh())
             ->with('success', 'Your return request has been submitted. The team will review it shortly.');
+    }
+
+    public function downloadReceipt(Order $order, BillCustomizationService $billCustomizationService)
+    {
+        abort_unless(Auth::id() === $order->user_id, 404);
+
+        $order->loadMissing(['items.stock']);
+
+        $billProfile = $billCustomizationService->resolveProfile('invoice_pdf', [
+            'device_type' => 'desktop',
+            'input_mode' => 'any',
+            'printer_hint' => 'customer receipt',
+        ]);
+
+        $pdf = Pdf::loadView('exports.order-receipt-pdf', [
+            'order' => $order,
+            'company' => $billCustomizationService->companyPayload(),
+            'billProfile' => $billProfile,
+        ])->setPaper(
+            $billCustomizationService->paperConfig($billProfile),
+            $billCustomizationService->paperOrientation($billProfile)
+        );
+
+        return $pdf->download('order-'.$order->order_number.'.pdf');
     }
 
     protected function policyPage(string $title, string $eyebrow, string $intro, array $sections)

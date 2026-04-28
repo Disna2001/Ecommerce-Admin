@@ -234,6 +234,7 @@
                 <h2 class="text-xl font-bold text-adapt">Need help?</h2>
                 <p class="mt-3 text-sm leading-7 text-soft">If anything looks incorrect, use the help center or the support chat on the storefront and mention this order number.</p>
                 <div class="mt-4 flex flex-wrap gap-3">
+                    <a href="{{ route('orders.receipt', $order) }}" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Download Receipt</a>
                     <a wire:navigate href="{{ route('help-center') }}" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Open Help Center</a>
                     <a wire:navigate href="{{ route('track-order', ['order_number' => $order->order_number, 'email' => $order->customer_email]) }}" class="btn-gradient rounded-full px-5 py-3 text-sm font-semibold">Open Public Tracker</a>
                 </div>
