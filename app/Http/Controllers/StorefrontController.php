@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderStatusHistory;
 use App\Services\Storefront\StorefrontDataService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StorefrontController extends Controller
 {
@@ -178,6 +180,41 @@ class StorefrontController extends Controller
         return view('frontend.pages.order-details', [
             'order' => $order,
         ]);
+    }
+
+    public function requestReturn(Request $request, Order $order)
+    {
+        abort_unless(Auth::id() === $order->user_id, 404);
+
+        if (! $order->canBeReturned() || $order->isReturnPending() || in_array($order->status, ['returned', 'refunded'], true)) {
+            return back()->with('error', 'This order is not eligible for a new return request.');
+        }
+
+        $validated = $request->validate([
+            'return_reason' => 'required|string|max:255',
+            'return_notes' => 'nullable|string|max:2000',
+        ]);
+
+        DB::transaction(function () use ($order, $validated) {
+            $order->update([
+                'status' => 'return_requested',
+                'return_reason' => $validated['return_reason'],
+                'return_notes' => $validated['return_notes'] ?? null,
+                'return_requested_at' => now(),
+            ]);
+
+            OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'status' => 'return_requested',
+                'note' => 'Customer requested a return: '.$validated['return_reason'].(filled($validated['return_notes'] ?? null) ? ' — '.$validated['return_notes'] : ''),
+                'changed_by' => Auth::id(),
+                'created_at' => now(),
+            ]);
+        });
+
+        return redirect()
+            ->route('orders.show', $order->fresh())
+            ->with('success', 'Your return request has been submitted. The team will review it shortly.');
     }
 
     protected function policyPage(string $title, string $eyebrow, string $intro, array $sections)

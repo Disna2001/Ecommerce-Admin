@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::get('/checkout/payhere/{order}/redirect', [PaymentGatewayController::class, 'payhereRedirect'])->name('checkout.payhere.redirect');
     Route::get('/orders/{order}', [StorefrontController::class, 'orderDetails'])->name('orders.show');
+    Route::post('/orders/{order}/return-request', [StorefrontController::class, 'requestReturn'])->name('orders.return-request');
 
     Route::view('/profile', 'frontend.pages.profile')->name('profile.index');
     Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
