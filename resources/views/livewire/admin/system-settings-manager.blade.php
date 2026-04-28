@@ -20,11 +20,12 @@
             @endif
 
             @if($activeTab === 'billing')
-                <x-admin.settings.tab-billing :billing-profiles="$billing_profiles" :billing-default-profiles="$billing_default_profiles" />
-            @endif
-
-            @if($activeTab === 'billing')
-                <x-admin.settings.tab-billing :billing-profiles="$billing_profiles" :billing-default-profiles="$billing_default_profiles" />
+                <x-admin.settings.tab-billing
+                    :billing-profiles="$billing_profiles"
+                    :billing-default-profiles="$billing_default_profiles"
+                    :billing-preview-company="$billingPreviewCompany"
+                    :billing-preview-documents="$billingPreviewDocuments"
+                />
             @endif
 
             @if($activeTab === 'api_keys')

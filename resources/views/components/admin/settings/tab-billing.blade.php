@@ -1,3 +1,10 @@
+@props([
+    'billingProfiles' => [],
+    'billingDefaultProfiles' => [],
+    'billingPreviewCompany' => [],
+    'billingPreviewDocuments' => [],
+])
+
 <x-admin.ui.panel padding="p-6">
     <x-slot:header>
         <div class="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -56,6 +63,11 @@
 
     <div class="mt-6 space-y-5">
         @forelse($billingProfiles as $index => $profile)
+            @php
+                $isInvoiceProfile = in_array($profile['bill_type'], ['invoice_pdf', 'any'], true);
+                $preview = $isInvoiceProfile ? ($billingPreviewDocuments['invoice'] ?? []) : ($billingPreviewDocuments['receipt'] ?? []);
+                $currency = $billingPreviewCompany['currency_symbol'] ?? 'Rs';
+            @endphp
             <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
                 <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                     <div class="min-w-0">
@@ -181,6 +193,201 @@
                             <span>{{ $label }}</span>
                         </label>
                     @endforeach
+                </div>
+
+                <div class="mt-6 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+                    <div class="rounded-[1.5rem] border border-violet-100 bg-violet-50/70 p-5 dark:border-violet-500/15 dark:bg-violet-500/5">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">Live Preview</p>
+                                <h4 class="mt-2 text-lg font-bold text-slate-900 dark:text-white">{{ $isInvoiceProfile ? 'Invoice PDF' : 'POS Receipt' }}</h4>
+                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Changes here update the preview instantly before you save.</p>
+                            </div>
+                            <div class="rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-slate-950 dark:text-violet-200">
+                                {{ strtoupper(str_replace('_', ' ', $profile['paper_size'] ?? 'a4')) }}
+                            </div>
+                        </div>
+
+                        @if($isInvoiceProfile)
+                            <div class="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                                <div class="relative p-5">
+                                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center text-5xl font-black tracking-[0.35em] {{ ($preview['status'] ?? 'unpaid') === 'paid' ? 'text-emerald-100 dark:text-emerald-500/10' : 'text-amber-100 dark:text-amber-500/10' }} -rotate-[24deg]">
+                                        {{ strtoupper(($preview['status'] ?? 'unpaid') === 'paid' ? 'PAID' : 'UNPAID') }}
+                                    </div>
+                                    <div class="relative">
+                                        <div class="border-b border-slate-200 pb-4 dark:border-slate-800">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <h5 class="text-2xl font-black text-slate-900 dark:text-white">{{ $billingPreviewCompany['display_name'] ?? 'Display Lanka' }}</h5>
+                                                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ $billingPreviewCompany['address'] ?? 'Sri Lanka' }}</p>
+                                                    @if(($profile['show_company_phone'] ?? true) && filled($billingPreviewCompany['phone'] ?? null))
+                                                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Phone: {{ $billingPreviewCompany['phone'] }}</p>
+                                                    @endif
+                                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Email: {{ $billingPreviewCompany['email'] ?? 'support@example.com' }}</p>
+                                                    @if(($profile['show_tax_id'] ?? true) && filled($billingPreviewCompany['tax_id'] ?? null))
+                                                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Business / Tax ID: {{ $billingPreviewCompany['tax_id'] }}</p>
+                                                    @endif
+                                                    @if(filled($profile['header_note'] ?? null))
+                                                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ $profile['header_note'] }}</p>
+                                                    @endif
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Invoice</p>
+                                                    <p class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ $preview['number'] ?? 'INV-0001' }}</p>
+                                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $preview['date'] ?? now()->format('M d, Y') }}</p>
+                                                    <span class="mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ ($preview['status'] ?? 'unpaid') === 'paid' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200' }}">
+                                                        {{ ucfirst($preview['status'] ?? 'paid') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid gap-4 border-b border-slate-200 py-4 text-sm dark:border-slate-800 md:grid-cols-2">
+                                            <div>
+                                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Bill To</p>
+                                                <p class="mt-2 font-semibold text-slate-900 dark:text-white">{{ $preview['customer_name'] ?? 'Customer Name' }}</p>
+                                                @if(($profile['show_customer_email'] ?? true) && filled($preview['customer_email'] ?? null))
+                                                    <p class="mt-1 text-slate-500 dark:text-slate-400">{{ $preview['customer_email'] }}</p>
+                                                @endif
+                                                @if(($profile['show_customer_phone'] ?? true) && filled($preview['customer_phone'] ?? null))
+                                                    <p class="mt-1 text-slate-500 dark:text-slate-400">{{ $preview['customer_phone'] }}</p>
+                                                @endif
+                                                @if(($profile['show_customer_address'] ?? true) && filled($preview['customer_address'] ?? null))
+                                                    <p class="mt-1 text-slate-500 dark:text-slate-400">{{ $preview['customer_address'] }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="md:text-right">
+                                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Payment</p>
+                                                @if(($profile['show_payment_method'] ?? true) && filled($preview['payment_method'] ?? null))
+                                                    <p class="mt-2 font-semibold text-slate-900 dark:text-white">{{ $preview['payment_method'] }}</p>
+                                                @endif
+                                                <p class="mt-1 text-slate-500 dark:text-slate-400">Due: {{ $preview['due_date'] ?? now()->addDay()->format('M d, Y') }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="overflow-hidden py-4">
+                                            <div class="grid grid-cols-[minmax(0,1.6fr)_0.7fr_0.8fr_0.9fr] gap-3 border-b border-slate-200 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:border-slate-800">
+                                                <span>Item</span>
+                                                <span class="text-right">Qty</span>
+                                                <span class="text-right">Price</span>
+                                                <span class="text-right">Total</span>
+                                            </div>
+                                            <div class="space-y-3 pt-3">
+                                                @foreach(($preview['items'] ?? []) as $item)
+                                                    <div class="grid grid-cols-[minmax(0,1.6fr)_0.7fr_0.8fr_0.9fr] gap-3 text-sm">
+                                                        <div class="min-w-0">
+                                                            <p class="font-semibold text-slate-900 dark:text-white">{{ $item['name'] }}</p>
+                                                            @if(filled($item['description'] ?? null))
+                                                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $item['description'] }}</p>
+                                                            @endif
+                                                        </div>
+                                                        <span class="text-right text-slate-500 dark:text-slate-400">{{ $item['quantity'] }}</span>
+                                                        <span class="text-right text-slate-500 dark:text-slate-400">{{ $currency }} {{ number_format((float) $item['price'], 2) }}</span>
+                                                        <span class="text-right font-semibold text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) $item['total'], 2) }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <div class="grid gap-3 border-t border-slate-200 pt-4 text-sm dark:border-slate-800 sm:grid-cols-2">
+                                            <div>
+                                                @if(($profile['show_notes'] ?? true) && filled($preview['notes'] ?? null))
+                                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Notes</p>
+                                                    <p class="mt-2 text-slate-500 dark:text-slate-400">{{ $preview['notes'] }}</p>
+                                                @endif
+                                                @if(($profile['show_terms'] ?? true) && filled($preview['terms'] ?? null))
+                                                    <p class="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Terms</p>
+                                                    <p class="mt-2 text-slate-500 dark:text-slate-400">{{ $preview['terms'] }}</p>
+                                                @endif
+                                                @if(filled($profile['footer_note'] ?? null))
+                                                    <p class="mt-4 text-slate-500 dark:text-slate-400">{{ $profile['footer_note'] }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="space-y-2 sm:text-right">
+                                                <div class="flex items-center justify-between gap-4 sm:justify-end sm:gap-8">
+                                                    <span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+                                                    <span class="font-medium text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) ($preview['subtotal'] ?? 0), 2) }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-4 sm:justify-end sm:gap-8">
+                                                    <span class="text-slate-500 dark:text-slate-400">Tax</span>
+                                                    <span class="font-medium text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) ($preview['tax_amount'] ?? 0), 2) }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-4 sm:justify-end sm:gap-8">
+                                                    <span class="text-slate-500 dark:text-slate-400">Discount</span>
+                                                    <span class="font-medium text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) ($preview['discount_amount'] ?? 0), 2) }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-4 border-t border-slate-200 pt-2 sm:justify-end sm:gap-8 dark:border-slate-800">
+                                                    <span class="font-semibold text-slate-900 dark:text-white">Total</span>
+                                                    <span class="text-lg font-black text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) ($preview['total'] ?? 0), 2) }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#f8fafc] shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                                <div class="mx-auto max-w-[360px] bg-white p-5 text-sm shadow-sm dark:bg-slate-900">
+                                    <div class="text-center">
+                                        <p class="text-lg font-black text-slate-900 dark:text-white">{{ $billingPreviewCompany['display_name'] ?? 'Display Lanka' }}</p>
+                                        @if(($profile['show_company_phone'] ?? true) && filled($billingPreviewCompany['phone'] ?? null))
+                                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $billingPreviewCompany['phone'] }}</p>
+                                        @endif
+                                        @if(($profile['show_tax_id'] ?? true) && filled($billingPreviewCompany['tax_id'] ?? null))
+                                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tax ID: {{ $billingPreviewCompany['tax_id'] }}</p>
+                                        @endif
+                                        @if(filled($profile['header_note'] ?? null))
+                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ $profile['header_note'] }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="mt-4 border-y border-dashed border-slate-300 py-3 dark:border-slate-700">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-semibold text-slate-900 dark:text-white">{{ $preview['number'] ?? 'POS-0001' }}</span>
+                                            <span class="text-slate-500 dark:text-slate-400">{{ ucfirst($preview['status'] ?? 'paid') }}</span>
+                                        </div>
+                                        @if(($profile['show_customer_phone'] ?? true) && filled($preview['customer_phone'] ?? null))
+                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ $preview['customer_name'] ?? 'Walk-in customer' }} · {{ $preview['customer_phone'] }}</p>
+                                        @endif
+                                        @if(($profile['show_payment_method'] ?? true) && filled($preview['payment_method'] ?? null))
+                                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Payment: {{ $preview['payment_method'] }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="space-y-2 py-3">
+                                        @foreach(($preview['items'] ?? []) as $item)
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div class="min-w-0">
+                                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $item['name'] }}</p>
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400">Qty {{ $item['quantity'] }}</p>
+                                                </div>
+                                                <p class="whitespace-nowrap font-semibold text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) $item['total'], 2) }}</p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="border-t border-dashed border-slate-300 pt-3 dark:border-slate-700">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-semibold text-slate-900 dark:text-white">Total</span>
+                                            <span class="text-base font-black text-slate-900 dark:text-white">{{ $currency }} {{ number_format((float) ($preview['total'] ?? 0), 2) }}</span>
+                                        </div>
+                                        @if(($profile['show_notes'] ?? true) && filled($preview['notes'] ?? null))
+                                            <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">{{ $preview['notes'] }}</p>
+                                        @endif
+                                        @if(filled($profile['footer_note'] ?? null))
+                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ $profile['footer_note'] }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Preview Notes</p>
+                        <div class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                            <p>The preview uses your current unsaved values for paper size, notes, visibility toggles, and tax display.</p>
+                            <p>Company contact details come from the current system settings form, so update email, phone, address, and tax ID here before saving.</p>
+                            <p>For PDF invoices, logo and watermark styling are applied on the generated file. The live panel here focuses on structure and visibility behavior.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         @empty

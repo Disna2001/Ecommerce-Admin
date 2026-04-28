@@ -366,9 +366,60 @@ class SystemSettingsManager extends Component
             ['label' => 'Bill profiles and printer routing', 'ready' => $statusCards['billing_ready']],
         ];
 
+        $billingPreviewCompany = [
+            'name' => $this->app_public_url !== '' ? parse_url($this->app_public_url, PHP_URL_HOST) ?: config('app.name') : config('app.name'),
+            'display_name' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
+            'email' => $this->support_email ?: $this->mail_from_address ?: 'support@example.com',
+            'phone' => $this->support_phone ?: '+94 70 000 0000',
+            'address' => $this->company_address ?: 'Colombo, Sri Lanka',
+            'tax_id' => $this->company_tax_id ?: 'Pending',
+            'currency_symbol' => $this->currency_symbol ?: 'Rs',
+        ];
+
+        $billingPreviewDocuments = [
+            'invoice' => [
+                'number' => 'INV-2026-0042',
+                'date' => now()->format('M d, Y'),
+                'due_date' => now()->addDays(2)->format('M d, Y'),
+                'status' => 'paid',
+                'payment_method' => 'PayHere',
+                'customer_name' => 'Dishna Chamuditha',
+                'customer_email' => 'customer@example.com',
+                'customer_phone' => '0702615076',
+                'customer_address' => 'Weliwita, Ratnapura, Sri Lanka',
+                'items' => [
+                    ['name' => 'Netflix Premium Plan', 'description' => '1 month digital access', 'quantity' => 1, 'price' => 2490.00, 'discount' => 0, 'tax' => 0, 'total' => 2490.00],
+                    ['name' => 'Spotify Family', 'description' => '30-day activation', 'quantity' => 1, 'price' => 1290.00, 'discount' => 0, 'tax' => 0, 'total' => 1290.00],
+                ],
+                'subtotal' => 3780.00,
+                'tax_amount' => 0.00,
+                'discount_amount' => 0.00,
+                'total' => 3780.00,
+                'amount_paid' => 3780.00,
+                'balance_due' => 0.00,
+                'notes' => 'Digital delivery completed to the customer email.',
+                'terms' => 'Valid for the purchased digital product only. Keep this invoice for support requests.',
+            ],
+            'receipt' => [
+                'number' => 'POS-0138',
+                'status' => 'paid',
+                'customer_name' => 'Walk-in customer',
+                'customer_phone' => '0712345678',
+                'payment_method' => 'Cash',
+                'items' => [
+                    ['name' => 'Gift Card Top-up', 'quantity' => 1, 'price' => 3500.00, 'total' => 3500.00],
+                    ['name' => 'Service Fee', 'quantity' => 1, 'price' => 150.00, 'total' => 150.00],
+                ],
+                'total' => 3650.00,
+                'notes' => 'Thank you for shopping with us.',
+            ],
+        ];
+
         return view('livewire.admin.system-settings-manager', [
             'permissionCount' => Permission::count(),
             'statusCards' => $statusCards,
+            'billingPreviewCompany' => $billingPreviewCompany,
+            'billingPreviewDocuments' => $billingPreviewDocuments,
             'integrationSummary' => [
                 'enabled_channels' => collect([
                     $this->whatsapp_enabled ? 'WhatsApp' : null,
