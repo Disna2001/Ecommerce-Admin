@@ -227,6 +227,9 @@
                         @endif
                         <a class="block" href="{{ url('/#reviews') }}">{{ $navReviewsLabel ?? 'Reviews' }}</a>
                         <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
+                        <a wire:navigate class="block" href="{{ route('refund-policy') }}">Refund Policy</a>
+                        <a wire:navigate class="block" href="{{ route('privacy-policy') }}">Privacy Policy</a>
+                        <a wire:navigate class="block" href="{{ route('terms-and-conditions') }}">Terms & Conditions</a>
                         @guest
                             <a wire:navigate class="block" href="{{ route('login') }}">Login</a>
                         @else
@@ -237,8 +240,9 @@
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Support</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <div>{{ $navTrackLabel ?? 'Track' }}</div>
-                        <div>{{ $navHelpLabel ?? 'Help' }}</div>
+                        <a wire:navigate class="block hover:text-white" href="{{ route('track-order') }}">{{ $navTrackLabel ?? 'Track' }}</a>
+                        <a wire:navigate class="block hover:text-white" href="{{ route('help-center') }}">{{ $navHelpLabel ?? 'Help' }}</a>
+                        <a wire:navigate class="block hover:text-white" href="{{ route('help-center') }}">Payment Help</a>
                         @if(!empty($supportHours))<div>{{ $supportHours }}</div>@endif
                         @if(!empty($supportEmail))<div>{{ $supportEmail }}</div>@endif
                     </div>

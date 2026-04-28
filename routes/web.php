@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 Route::get('/help-center', [StorefrontController::class, 'helpCenter'])->name('help-center');
 Route::get('/track-order', [StorefrontController::class, 'trackOrder'])->name('track-order');
+Route::get('/refund-policy', [StorefrontController::class, 'refundPolicy'])->name('refund-policy');
+Route::get('/privacy-policy', [StorefrontController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-and-conditions', [StorefrontController::class, 'termsConditions'])->name('terms-and-conditions');
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify'])->name('whatsapp.webhook.verify');
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive'])->name('whatsapp.webhook.receive');
 

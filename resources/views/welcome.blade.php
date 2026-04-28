@@ -331,14 +331,18 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                         @endif
                         <a class="block" href="#reviews">Reviews</a>
                         <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
+                        <a wire:navigate class="block" href="{{ route('refund-policy') }}">Refund Policy</a>
+                        <a wire:navigate class="block" href="{{ route('privacy-policy') }}">Privacy Policy</a>
+                        <a wire:navigate class="block" href="{{ route('terms-and-conditions') }}">Terms & Conditions</a>
                         <a wire:navigate class="block" href="{{ route('login') }}">Login</a>
                     </div>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Support</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <div>{{ $navTrackLabel }}</div>
-                        <div>{{ $navHelpLabel }}</div>
+                        <a wire:navigate class="block hover:text-white" href="{{ route('track-order') }}">{{ $navTrackLabel }}</a>
+                        <a wire:navigate class="block hover:text-white" href="{{ route('help-center') }}">{{ $navHelpLabel }}</a>
+                        <a wire:navigate class="block hover:text-white" href="{{ route('help-center') }}">Payment Help</a>
                         <div>{{ $supportHours }}</div>
                         @if($supportEmail)<div>{{ $supportEmail }}</div>@endif
                     </div>

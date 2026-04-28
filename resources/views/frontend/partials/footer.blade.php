@@ -38,6 +38,9 @@
                     <li><a href="{{ url('/products?sort=newest') }}" class="hover:text-white transition">New Arrivals</a></li>
                     <li><a href="{{ url('/products?sort=price_asc') }}" class="hover:text-white transition">Best Deals</a></li>
                     <li><a href="{{ route('track-order') }}" class="hover:text-white transition">Track Order</a></li>
+                    <li><a href="{{ route('refund-policy') }}" class="hover:text-white transition">Refund Policy</a></li>
+                    <li><a href="{{ route('privacy-policy') }}" class="hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="{{ route('terms-and-conditions') }}" class="hover:text-white transition">Terms & Conditions</a></li>
                 </ul>
             </div>
             <div>
@@ -53,6 +56,7 @@
                 <ul class="space-y-2 text-gray-400 text-sm">
                     <li><a href="{{ route('help-center') }}" class="hover:text-white transition">Help Center</a></li>
                     <li><a href="{{ route('track-order') }}" class="hover:text-white transition">Track Order</a></li>
+                    <li><a href="{{ route('privacy-policy') }}" class="hover:text-white transition">Privacy Policy</a></li>
                     @if($supportEmail)
                         <li><a href="mailto:{{ $supportEmail }}" class="hover:text-white transition">{{ $supportEmail }}</a></li>
                     @endif
