@@ -41,6 +41,19 @@
         } else {
             await document.exitFullscreen?.();
         }
+    },
+    printReceipt() {
+        const printZone = document.getElementById('pos-receipt-print-zone');
+
+        if (!printZone) {
+            this.toastOpen = true;
+            this.toastMessage = 'Receipt preview is not ready yet.';
+            this.toastTone = 'warning';
+            setTimeout(() => this.toastOpen = false, 3200);
+            return;
+        }
+
+        window.dispatchEvent(new CustomEvent('print-receipt'));
     }
 }" x-init="initPrintRouting(); initFullscreen(); $nextTick(() => { if (window.innerWidth >= 768) { $refs.productSearch?.focus(); } })"
     x-on:keydown.window="
@@ -801,7 +814,7 @@
                     @endif
 
                     <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                        <button wire:click="printReceipt" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                        <button type="button" x-on:click="printReceipt()" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
                             <i class="fas fa-print"></i>
                             <span>Print Receipt</span>
                         </button>
