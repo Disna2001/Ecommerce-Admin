@@ -7,7 +7,7 @@
 ])
 
 <section {{ $attributes->class([
-    'admin-surface rounded-[2rem] border border-white/60 bg-white/90 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-950/75',
+    'admin-surface rounded-2xl border border-slate-200/80 bg-white/78 shadow-sm dark:border-slate-800 dark:bg-slate-950/58',
 ]) }}>
     @if($title || $description || $eyebrow || isset($header))
         <div class="{{ $padding }} {{ $bodyClass }}">

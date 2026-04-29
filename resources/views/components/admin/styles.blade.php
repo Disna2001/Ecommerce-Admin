@@ -18,8 +18,8 @@
         --admin-success: #10b981;
         --admin-warning: #f59e0b;
         --admin-danger: #ef4444;
-        --admin-shadow: 0 22px 60px -26px rgba(15, 23, 42, 0.24);
-        --admin-shadow-soft: 0 16px 34px -24px rgba(15, 23, 42, 0.2);
+        --admin-shadow: 0 18px 40px -28px rgba(15, 23, 42, 0.18);
+        --admin-shadow-soft: 0 10px 24px -22px rgba(15, 23, 42, 0.14);
         --admin-navbar: rgba(15, 23, 42, 0.82);
         --admin-navbar-border: rgba(255, 255, 255, 0.08);
         --admin-navbar-text: #f8fafc;
@@ -45,8 +45,8 @@
         --admin-primary: #818cf8;
         --admin-primary-strong: #a855f7;
         --admin-primary-soft: rgba(99, 102, 241, 0.18);
-        --admin-shadow: 0 28px 80px -28px rgba(2, 6, 23, 0.72);
-        --admin-shadow-soft: 0 18px 36px -24px rgba(2, 6, 23, 0.8);
+        --admin-shadow: 0 20px 50px -30px rgba(2, 6, 23, 0.58);
+        --admin-shadow-soft: 0 12px 26px -22px rgba(2, 6, 23, 0.52);
         --admin-navbar: rgba(2, 6, 23, 0.88);
         --admin-navbar-border: rgba(148, 163, 184, 0.12);
         --admin-navbar-text: #f8fafc;
@@ -322,31 +322,31 @@
     }
 
     .admin-content {
-        padding: 1.1rem;
+        padding: 1rem 1.1rem 1.25rem;
     }
 
     .admin-page-wrap {
-        border: 1px solid var(--admin-border);
-        background: var(--admin-surface);
-        border-radius: 2rem;
-        box-shadow: var(--admin-shadow-soft);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        padding: 0.95rem;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        padding: 0;
     }
 
     .admin-header-card {
-        background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(14, 165, 233, 0.06), transparent);
+        background: rgba(255, 255, 255, 0.62);
         border: 1px solid var(--admin-border);
-        border-radius: 1.6rem;
-        box-shadow: var(--admin-shadow-soft);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        border-radius: 1.25rem;
+        box-shadow: none;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 
     .admin-surface {
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 
     .admin-search {
@@ -725,11 +725,11 @@
     }
 
     .admin-page-wrap > .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 1rem !important;
+        margin-top: 0.85rem !important;
     }
 
     .admin-page-wrap > .space-y-5 > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 0.85rem !important;
+        margin-top: 0.75rem !important;
     }
 
     .admin-page-wrap [class*="rounded-[1.75rem]"][class*="p-6"] {
@@ -900,8 +900,8 @@
         }
 
         .admin-page-wrap {
-            padding: 0.9rem;
-            border-radius: 1.5rem;
+            padding: 0;
+            border-radius: 0;
         }
     }
 

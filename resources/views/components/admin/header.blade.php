@@ -125,7 +125,7 @@
     $headerIcon = $headerIcons[$resolvedTitle] ?? $headerIcons['default'];
 @endphp
 
-<div class="admin-header-card" style="margin-bottom:1.25rem;padding:1.35rem 1.5rem;">
+<div class="admin-header-card" style="margin-bottom:0.9rem;padding:1rem 1.15rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
         <div style="display:flex;align-items:flex-start;gap:1rem;">
             <span style="display:inline-flex;align-items:center;justify-content:center;width:3rem;height:3rem;border-radius:1rem;background:{{ $headerIcon['bg'] }};color:{{ $headerIcon['color'] }};flex-shrink:0;">
