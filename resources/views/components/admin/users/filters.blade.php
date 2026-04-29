@@ -1,5 +1,7 @@
+@props(['roles', 'teams'])
+
 <x-admin.ui.panel padding="p-5">
-    <div class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr_0.8fr_0.45fr]">
+    <div class="grid gap-4 xl:grid-cols-[1.1fr_0.75fr_0.75fr_0.75fr_0.45fr]">
         <label class="space-y-2">
             <span class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Search</span>
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by name or email" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-500/20">
@@ -11,6 +13,16 @@
                 <option value="__no_role__">No role assigned</option>
                 @foreach($roles as $role)
                     <option value="{{ $role->name }}">{{ $role->name }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label class="space-y-2">
+            <span class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Team</span>
+            <select wire:model.live="selectedTeam" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-500/20">
+                <option value="">All teams</option>
+                <option value="__no_team__">No team assigned</option>
+                @foreach($teams as $team)
+                    <option value="{{ $team->slug }}">{{ $team->name }}</option>
                 @endforeach
             </select>
         </label>

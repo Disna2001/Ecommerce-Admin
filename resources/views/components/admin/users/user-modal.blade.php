@@ -1,6 +1,7 @@
 @props([
     'selectedUser',
     'roles',
+    'teams',
 ])
 
 @php($permissions = $selectedUser->roles->flatMap->permissions->pluck('name')->unique()->values())
@@ -52,6 +53,17 @@
                 </div>
 
                 <div class="rounded-[1.75rem] border border-slate-200 p-5 dark:border-slate-800">
+                    <h4 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">Operations Teams</h4>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @forelse($selectedUser->teams as $team)
+                            <span class="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-200">{{ $team->name }}</span>
+                        @empty
+                            <span class="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-200">No team assigned</span>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="rounded-[1.75rem] border border-slate-200 p-5 dark:border-slate-800">
                     <h4 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">Permission Reach</h4>
                     <div class="mt-4 flex flex-wrap gap-2">
                         @forelse($permissions as $permission)
@@ -75,6 +87,31 @@
                         @if($selectedUser->id === auth()->id())
                             <p class="text-xs text-slate-400 dark:text-slate-500">Your own role is locked here for safety.</p>
                         @endif
+                    </div>
+                </div>
+
+                <div class="rounded-[1.75rem] border border-slate-200 p-5 dark:border-slate-800">
+                    <h4 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">Assign Teams</h4>
+                    <div class="mt-4 space-y-3">
+                        @foreach($teams as $team)
+                            <label class="flex items-start gap-3 rounded-2xl border border-slate-200 px-4 py-3 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">
+                                <input
+                                    type="checkbox"
+                                    class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                    wire:click="toggleTeamAssignment({{ $selectedUser->id }}, {{ $team->id }})"
+                                    {{ $selectedUser->teams->contains('id', $team->id) ? 'checked' : '' }}
+                                >
+                                <span class="block">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-white">{{ $team->name }}</span>
+                                    <span class="block text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                        {{ $team->description ?: 'No team description yet.' }}
+                                        @if($team->default_role_name)
+                                            · Default role: {{ $team->default_role_name }}
+                                        @endif
+                                    </span>
+                                </span>
+                            </label>
+                        @endforeach
                     </div>
                 </div>
 

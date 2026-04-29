@@ -1,3 +1,15 @@
+@props([
+    'attentionQueues',
+    'filteredUsers',
+    'totalUsers',
+    'verifiedUsers',
+    'roles',
+    'teams',
+    'selectedRole',
+    'selectedTeam',
+    'statusFilter',
+])
+
 <section class="admin-surface rounded-[2rem] border border-white/60 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-6 shadow-[0_25px_80px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.22),_transparent_32%),linear-gradient(135deg,rgba(15,23,42,0.95),rgba(17,24,39,0.92))]">
     <div class="grid gap-6 xl:grid-cols-[1.7fr_0.9fr]">
         <div class="space-y-5">
@@ -15,12 +27,15 @@
                 </div>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                 <button type="button" wire:click="$set('statusFilter', 'admin')">
                     <x-admin.ui.metric label="Admins" :value="$attentionQueues['admins']" hint="Users with platform-wide access." tone="blue" :active="$statusFilter === 'admin'" />
                 </button>
                 <button type="button" wire:click="$set('selectedRole', '__no_role__')">
                     <x-admin.ui.metric label="No Role" :value="$attentionQueues['without_roles']" hint="Accounts that still need access rules." tone="amber" :active="$selectedRole === '__no_role__'" />
+                </button>
+                <button type="button" wire:click="$set('selectedTeam', '__no_team__')">
+                    <x-admin.ui.metric label="No Team" :value="$attentionQueues['without_teams']" hint="Users waiting for an operations team." tone="slate" :active="$selectedTeam === '__no_team__'" />
                 </button>
                 <button type="button" wire:click="$set('statusFilter', 'pending')">
                     <x-admin.ui.metric label="Pending" :value="$attentionQueues['unverified']" hint="Users waiting on verification." tone="emerald" :active="$statusFilter === 'pending'" />
@@ -52,12 +67,17 @@
                     <p class="text-xs font-semibold uppercase tracking-[0.28em] text-amber-600 dark:text-amber-300">Roles Available</p>
                     <p class="mt-2 text-2xl font-black text-amber-700 dark:text-amber-200">{{ $roles->count() }}</p>
                 </div>
+                <div class="rounded-2xl bg-violet-50 px-4 py-3 dark:bg-violet-500/10">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-300">Teams Active</p>
+                    <p class="mt-2 text-2xl font-black text-violet-700 dark:text-violet-200">{{ $teams->count() }}</p>
+                </div>
             </div>
 
             <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-4 dark:border-slate-700">
                 <p class="text-sm font-semibold text-slate-800 dark:text-white">Operating guide</p>
                 <ul class="mt-3 space-y-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                     <li>Review users without roles first so nobody stays outside your permission system.</li>
+                    <li>Use teams to group store, warehouse, site, order, and POS responsibilities without rebuilding roles every time.</li>
                     <li>Use pending verification as a holding state instead of deleting accounts too early.</li>
                     <li>Open a user card before changing access so you can confirm their current permissions.</li>
                 </ul>

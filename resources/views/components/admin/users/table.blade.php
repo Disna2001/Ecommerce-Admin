@@ -24,6 +24,7 @@
                     <th class="px-5 py-4">User</th>
                     <th class="px-5 py-4 cursor-pointer" wire:click="sortBy('email')">Email</th>
                     <th class="px-5 py-4">Current access</th>
+                    <th class="px-5 py-4">Teams</th>
                     <th class="px-5 py-4">State</th>
                     <th class="px-5 py-4 cursor-pointer" wire:click="sortBy('created_at')">Joined</th>
                     <th class="px-5 py-4 text-right">Actions</th>
@@ -54,6 +55,15 @@
                             </div>
                         </td>
                         <td class="px-5 py-4">
+                            <div class="flex max-w-xs flex-wrap gap-2">
+                                @forelse($user->teams as $team)
+                                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ $team->name }}</span>
+                                @empty
+                                    <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-200">No team</span>
+                                @endforelse
+                            </div>
+                        </td>
+                        <td class="px-5 py-4">
                             @if($user->email_verified_at)
                                 <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">Verified</span>
                             @else
@@ -76,7 +86,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-5 py-16 text-center">
+                        <td colspan="7" class="px-5 py-16 text-center">
                             <x-admin.ui.empty-state title="No users matched this view." description="Try clearing the filters or broaden the role and status selection." />
                         </td>
                     </tr>

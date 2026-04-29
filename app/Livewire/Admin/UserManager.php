@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Team;
 use App\Models\User;
+use App\Services\Tenancy\TenantManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -17,56 +20,78 @@ class UserManager extends Component
 
     public string $search = '';
     public string $selectedRole = '';
+    public string $selectedTeam = '';
     public string $statusFilter = '';
     public string $sortField = 'created_at';
     public string $sortDirection = 'desc';
     public int $perPage = 10;
     public ?int $selectedUserId = null;
+    public string $newTeamName = '';
+    public string $newTeamDescription = '';
+    public string $newTeamColor = 'sky';
+    public string $newTeamDefaultRole = '';
+    public bool $showTeamCreator = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedRole' => ['except' => ''],
+        'selectedTeam' => ['except' => ''],
         'statusFilter' => ['except' => ''],
         'sortField' => ['except' => 'created_at'],
         'sortDirection' => ['except' => 'desc'],
         'perPage' => ['except' => 10],
     ];
 
+    protected function rules(): array
+    {
+        return [
+            'newTeamName' => ['required', 'string', 'max:255'],
+            'newTeamDescription' => ['nullable', 'string', 'max:500'],
+            'newTeamColor' => ['required', 'string', 'max:32'],
+            'newTeamDefaultRole' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
     public function render()
     {
+        Team::ensureDefaultTeamsForCurrentTenant();
+
         $filteredQuery = $this->usersQuery();
         $summaryQuery = clone $filteredQuery;
         $adminRoleNames = $this->existingAdminRoleNames();
 
         $users = $filteredQuery
-            ->with('roles')
+            ->with(['roles', 'teams'])
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
         $roles = Role::withCount('users')->orderBy('name')->get();
+        $teams = Team::withCount('users')->orderBy('name')->get();
 
         $attentionQueues = [
             'admins' => empty($adminRoleNames)
                 ? 0
                 : User::whereHas('roles', fn (Builder $query) => $query->whereIn('name', $adminRoleNames))->count(),
             'without_roles' => User::doesntHave('roles')->count(),
+            'without_teams' => User::doesntHave('teams')->count(),
             'unverified' => User::whereNull('email_verified_at')->count(),
             'new_this_week' => User::where('created_at', '>=', now()->subDays(7))->count(),
         ];
 
         $selectedUser = $this->selectedUserId
-            ? User::with('roles.permissions')->find($this->selectedUserId)
+            ? User::with(['roles.permissions', 'teams'])->find($this->selectedUserId)
             : null;
 
         return view('livewire.admin.user-manager', [
             'users' => $users,
             'roles' => $roles,
+            'teams' => $teams,
             'selectedUser' => $selectedUser,
             'totalUsers' => User::count(),
             'verifiedUsers' => User::whereNotNull('email_verified_at')->count(),
             'filteredUsers' => $summaryQuery->count(),
             'attentionQueues' => $attentionQueues,
-            'recentAccessChanges' => User::with('roles')
+            'recentAccessChanges' => User::with(['roles', 'teams'])
                 ->latest('updated_at')
                 ->take(5)
                 ->get(),
@@ -91,6 +116,17 @@ class UserManager extends Component
 
                 $query->whereHas('roles', function (Builder $roleQuery) {
                     $roleQuery->where('name', $this->selectedRole);
+                });
+            })
+            ->when($this->selectedTeam, function (Builder $query) {
+                if ($this->selectedTeam === '__no_team__') {
+                    $query->doesntHave('teams');
+
+                    return;
+                }
+
+                $query->whereHas('teams', function (Builder $teamQuery) {
+                    $teamQuery->where('slug', $this->selectedTeam);
                 });
             })
             ->when($this->statusFilter, function (Builder $query) {
@@ -149,7 +185,7 @@ class UserManager extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'selectedRole', 'statusFilter']);
+        $this->reset(['search', 'selectedRole', 'selectedTeam', 'statusFilter']);
         $this->sortField = 'created_at';
         $this->sortDirection = 'desc';
         $this->perPage = 10;
@@ -169,6 +205,27 @@ class UserManager extends Component
         $user->syncRoles([$roleName]);
         $this->selectedUserId = $userId;
         session()->flash('message', "Role access updated for {$user->name}.");
+    }
+
+    public function toggleTeamAssignment(int $userId, int $teamId): void
+    {
+        $user = User::with('teams')->findOrFail($userId);
+        $team = Team::findOrFail($teamId);
+
+        if ($user->teams->contains('id', $teamId)) {
+            $user->teams()->detach($teamId);
+            session()->flash('message', "{$user->name} was removed from {$team->name}.");
+
+            return;
+        }
+
+        $user->teams()->attach($teamId);
+
+        if (filled($team->default_role_name) && !$user->hasRole($team->default_role_name)) {
+            $user->assignRole($team->default_role_name);
+        }
+
+        session()->flash('message', "{$user->name} was added to {$team->name}.");
     }
 
     public function toggleUserStatus(int $userId): void
@@ -208,12 +265,48 @@ class UserManager extends Component
         session()->flash('message', 'User deleted successfully.');
     }
 
+    public function createTeam(): void
+    {
+        $validated = $this->validate();
+
+        Team::ensureDefaultTeamsForCurrentTenant();
+
+        $tenantId = app(TenantManager::class)->currentId();
+        $slug = Str::slug($validated['newTeamName']);
+
+        $team = Team::withoutGlobalScopes()->where('tenant_id', $tenantId)->where('slug', $slug)->first();
+
+        if ($team) {
+            $this->addError('newTeamName', 'A team with that name already exists.');
+
+            return;
+        }
+
+        Team::create([
+            'tenant_id' => $tenantId,
+            'name' => $validated['newTeamName'],
+            'slug' => $slug,
+            'description' => $validated['newTeamDescription'],
+            'color' => $validated['newTeamColor'],
+            'default_role_name' => $validated['newTeamDefaultRole'] ?: null,
+            'is_active' => true,
+        ]);
+
+        $this->reset(['newTeamName', 'newTeamDescription', 'newTeamColor', 'newTeamDefaultRole', 'showTeamCreator']);
+        session()->flash('message', 'Team created successfully.');
+    }
+
     public function updatedSearch(): void
     {
         $this->resetPage();
     }
 
     public function updatedSelectedRole(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedTeam(): void
     {
         $this->resetPage();
     }
