@@ -106,6 +106,29 @@
 
                 closeSidebar() {
                     this.sidebarOpen = false;
+                },
+
+                launchPos(url) {
+                    const width = Math.min(window.screen.availWidth - 80, 1440);
+                    const height = Math.min(window.screen.availHeight - 80, 960);
+                    const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
+                    const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
+                    const features = [
+                        `width=${width}`,
+                        `height=${height}`,
+                        `left=${left}`,
+                        `top=${top}`,
+                        'resizable=yes',
+                        'scrollbars=yes',
+                    ].join(',');
+
+                    const posWindow = window.open(url, 'displaylanka-pos', features);
+
+                    if (posWindow) {
+                        posWindow.focus();
+                    } else {
+                        window.location.href = url;
+                    }
                 }
             }
         }

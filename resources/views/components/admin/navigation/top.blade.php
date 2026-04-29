@@ -38,6 +38,32 @@
                 {{ $siteName }} Admin
             </span>
 
+            @if (Route::has('admin.pos'))
+                @can('view pos')
+                    <button
+                        type="button"
+                        @click="launchPos('{{ route('admin.pos') }}')"
+                        class="admin-chip desktop-only"
+                        style="border:none;cursor:pointer;"
+                        aria-label="Open POS in a new window"
+                    >
+                        <i class="fas fa-cash-register"></i>
+                        <span>POS</span>
+                        <i class="fas fa-arrow-up-right-from-square" style="font-size:0.72rem;opacity:0.72;"></i>
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="launchPos('{{ route('admin.pos') }}')"
+                        class="admin-tool-button mobile-only"
+                        aria-label="Open POS in a new window"
+                        title="Open POS"
+                    >
+                        <i class="fas fa-cash-register"></i>
+                    </button>
+                @endcan
+            @endif
+
             @can('view system health')
                 <a href="{{ route('admin.system-health') }}" wire:navigate class="admin-chip desktop-only" style="text-decoration:none;">
                     <i class="fas fa-heart-pulse"></i>
