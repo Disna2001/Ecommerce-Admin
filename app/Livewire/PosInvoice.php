@@ -63,6 +63,8 @@ class PosInvoice extends Component
 
     public $showResults = false;
 
+    public $input_mode = 'keyboard_scanner';
+
     // Payment methods
     public $paymentMethods = [
         'cash' => 'Cash',
@@ -128,7 +130,7 @@ class PosInvoice extends Component
     public function updatedSearchTerm()
     {
         if (strlen($this->searchTerm) >= 2) {
-            $this->searchResults = Stock::with(['brand', 'make'])
+            $results = Stock::with(['brand', 'make'])
                 ->where('quantity', '>', 0)
                 ->where(function (Builder $query) {
                     $query->where('name', 'like', '%'.$this->searchTerm.'%')
@@ -140,7 +142,26 @@ class PosInvoice extends Component
                 })
                 ->limit(10)
                 ->get();
+
+            $this->searchResults = $results;
             $this->showResults = true;
+
+            if ($this->input_mode === 'keyboard_scanner') {
+                $normalizedTerm = strtolower(trim($this->searchTerm));
+                $exactMatches = $results->filter(function (Stock $stock) use ($normalizedTerm) {
+                    return collect([
+                        $stock->barcode,
+                        $stock->sku,
+                        $stock->item_code,
+                    ])->filter()->contains(fn ($value) => strtolower(trim((string) $value)) === $normalizedTerm);
+                })->values();
+
+                if ($exactMatches->count() === 1) {
+                    $this->selectProduct($exactMatches->first()->id);
+
+                    return;
+                }
+            }
         } else {
             $this->searchResults = [];
             $this->showResults = false;
@@ -695,7 +716,7 @@ class PosInvoice extends Component
         $billingProfiles = $billCustomizationService->configuredProfiles();
         $receiptProfile = $billCustomizationService->resolveProfile('pos_receipt', [
             'device_type' => 'desktop',
-            'input_mode' => 'keyboard_scanner',
+            'input_mode' => $this->input_mode,
             'printer_hint' => 'Counter Thermal',
         ]);
         $printerOptions = collect($billingProfiles)

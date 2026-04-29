@@ -7,11 +7,12 @@
     toastTone: 'success',
     defaultPrinterHint: @js($receiptProfile['printer_match'] ?? ''),
     printerHint: '',
-    inputMode: '',
+    inputMode: @entangle('input_mode').live,
     deviceType: 'desktop',
+    fullscreenActive: false,
     initPrintRouting() {
         this.printerHint = localStorage.getItem('posPreferredPrinter') || this.defaultPrinterHint;
-        this.inputMode = localStorage.getItem('posInputMode') || 'keyboard_scanner';
+        this.inputMode = localStorage.getItem('posInputMode') || this.inputMode || 'keyboard_scanner';
         const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
         if (window.innerWidth < 640) {
             this.deviceType = 'mobile';
@@ -26,8 +27,21 @@
     },
     persistInputMode() {
         localStorage.setItem('posInputMode', this.inputMode || 'keyboard_scanner');
+    },
+    initFullscreen() {
+        this.fullscreenActive = !!document.fullscreenElement;
+        document.addEventListener('fullscreenchange', () => {
+            this.fullscreenActive = !!document.fullscreenElement;
+        });
+    },
+    async toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen?.();
+        } else {
+            await document.exitFullscreen?.();
+        }
     }
-}" x-init="initPrintRouting(); $nextTick(() => { if (window.innerWidth >= 768) { $refs.productSearch?.focus(); } })"
+}" x-init="initPrintRouting(); initFullscreen(); $nextTick(() => { if (window.innerWidth >= 768) { $refs.productSearch?.focus(); } })"
     x-on:keydown.window="
         const tag = ($event.target.tagName || '').toUpperCase();
         const editing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
@@ -65,6 +79,14 @@
                     <span>Invoice</span>
                     <strong>{{ $invoice_number }}</strong>
                 </div>
+                <label class="pos-chip pos-chip--interactive">
+                    <span>Mode</span>
+                    <select x-model="inputMode" @change="persistInputMode()" class="pos-chip__select">
+                        <option value="keyboard_scanner">Scanner</option>
+                        <option value="touch">Touch</option>
+                        <option value="manual">Manual</option>
+                    </select>
+                </label>
                 <div class="pos-chip">
                     <span>/ or Ctrl+K</span>
                     <strong>Focus Search</strong>
@@ -77,6 +99,10 @@
                     <i class="fas fa-file-invoice-dollar"></i>
                     <span>Invoices</span>
                 </a>
+                <button type="button" @click="toggleFullscreen()" class="pos-button pos-button--ghost">
+                    <i class="fas" :class="fullscreenActive ? 'fa-compress' : 'fa-expand'"></i>
+                    <span x-text="fullscreenActive ? 'Exit Fullscreen' : 'Fullscreen'"></span>
+                </button>
                 <button type="button" wire:click="clearCart" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
                     <i class="fas fa-rotate-left"></i>
                     <span>Reset Sale</span>
@@ -140,7 +166,8 @@
                 </div>
 
                 <div class="pos-search-hints">
-                    <span class="pos-chip">Fast add from barcode or SKU</span>
+                    <span class="pos-chip" x-show="inputMode === 'keyboard_scanner'">Exact barcode/SKU auto-add in scanner mode</span>
+                    <span class="pos-chip" x-show="inputMode !== 'keyboard_scanner'">Press Enter to add the top matching result</span>
                     <span class="pos-chip">Use stock-in when counter stock arrives</span>
                 </div>
 
@@ -777,8 +804,26 @@
             color: #e2e8f0;
         }
 
+        .pos-chip--interactive {
+            padding-right: 0.45rem;
+        }
+
         .pos-chip--mono strong {
             font-family: "Courier New", monospace;
+        }
+
+        .pos-chip__select {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding-right: 0.25rem;
+            outline: none;
+        }
+
+        .pos-chip__select option {
+            color: #0f172a;
         }
 
         .pos-button,
