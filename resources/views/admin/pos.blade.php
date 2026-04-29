@@ -1,7 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.admin-pos')
 
-@section('header', 'Point of Sale')
-@section('breadcrumb', 'POS')
+@section('title', 'Point of Sale')
 
 @section('content')
 <livewire:pos-invoice />

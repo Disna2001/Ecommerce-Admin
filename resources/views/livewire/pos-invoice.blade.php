@@ -1,6 +1,7 @@
-<div class="space-y-6" x-data="{
+<div class="space-y-4" x-data="{
     showPaymentModal: @entangle('showPaymentModal'),
     showSuccessModal: @entangle('showSuccessModal'),
+    showStockModal: @entangle('showStockModal'),
     toastOpen: false,
     toastMessage: '',
     toastTone: 'success',
@@ -38,431 +39,459 @@
         <span x-text="toastMessage"></span>
     </div>
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <section class="pos-shell">
+        <div class="pos-hero">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Counter Workspace</p>
-                <h2 class="mt-2 text-2xl font-bold text-slate-900">{{ $siteName }} POS</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Run faster counter sales with cleaner cart handling, invoice email delivery, partial-payment support, and quick tender actions.</p>
+                <p class="pos-kicker">Counter Workspace</p>
+                <h1 class="pos-title">{{ $siteName }} POS</h1>
+                <p class="pos-copy">Compact counter flow for search, cart, settlement, and receipt handling without the usual admin-page clutter.</p>
             </div>
 
-            <div class="flex flex-wrap gap-3">
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Invoice Number</p>
-                    <p class="mt-2 font-mono text-sm font-bold text-slate-900">{{ $invoice_number }}</p>
+            <div class="pos-actions">
+                <div class="pos-chip pos-chip--mono">
+                    <span>Invoice</span>
+                    <strong>{{ $invoice_number }}</strong>
                 </div>
-                <a href="{{ route('admin.invoices') }}" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                <a href="{{ route('admin.invoices') }}" class="pos-button pos-button--ghost">
                     <i class="fas fa-file-invoice-dollar"></i>
                     <span>Invoices</span>
                 </a>
+                <button type="button" wire:click="clearCart" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
+                    <i class="fas fa-rotate-left"></i>
+                    <span>Reset Sale</span>
+                </button>
             </div>
         </div>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-4">
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Cart Lines</p>
-                <p class="mt-2 text-3xl font-black text-slate-900">{{ count($cart) }}</p>
+        <div class="pos-metrics">
+            <div class="pos-metric">
+                <span>Cart Lines</span>
+                <strong>{{ count($cart) }}</strong>
+                <small>Active items in the current sale</small>
             </div>
-            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Items</p>
-                <p class="mt-2 text-3xl font-black text-indigo-700">{{ $this->cartItemsCount }}</p>
+            <div class="pos-metric pos-metric--indigo">
+                <span>Units</span>
+                <strong>{{ $this->cartItemsCount }}</strong>
+                <small>Total pieces across the cart</small>
             </div>
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Total</p>
-                <p class="mt-2 text-3xl font-black text-emerald-700">Rs {{ number_format($cartTotal, 2) }}</p>
+            <div class="pos-metric pos-metric--emerald">
+                <span>Total</span>
+                <strong>Rs {{ number_format($cartTotal, 2) }}</strong>
+                <small>Current sale value</small>
             </div>
-            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">Savings</p>
-                <p class="mt-2 text-3xl font-black text-amber-700">Rs {{ number_format($this->cartSavings, 2) }}</p>
+            <div class="pos-metric pos-metric--amber">
+                <span>Savings</span>
+                <strong>Rs {{ number_format($this->cartSavings, 2) }}</strong>
+                <small>Discount impact on this bill</small>
+            </div>
+            <div class="pos-metric pos-metric--sky">
+                <span>Today Sales</span>
+                <strong>{{ $this->posSummary['today_sales'] }}</strong>
+                <small>Invoices created today</small>
+            </div>
+            <div class="pos-metric pos-metric--violet">
+                <span>Revenue</span>
+                <strong>Rs {{ number_format($this->posSummary['today_revenue'], 0) }}</strong>
+                <small>Counter revenue today</small>
             </div>
         </div>
 
-        <div class="mt-4 grid gap-4 md:grid-cols-4">
-            <div class="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-500">Today Sales</p>
-                <p class="mt-2 text-2xl font-black text-sky-700">{{ $this->posSummary['today_sales'] }}</p>
-            </div>
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Today Revenue</p>
-                <p class="mt-2 text-2xl font-black text-emerald-700">Rs {{ number_format($this->posSummary['today_revenue'], 0) }}</p>
-            </div>
-            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Fully Paid</p>
-                <p class="mt-2 text-2xl font-black text-indigo-700">{{ $this->posSummary['today_paid'] }}</p>
-            </div>
-            <div class="rounded-2xl border border-violet-200 bg-violet-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-violet-500">Partial Balance</p>
-                <p class="mt-2 text-2xl font-black text-violet-700">{{ $this->posSummary['today_partial'] }}</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid gap-6 xl:grid-cols-[1.3fr_1fr_360px]">
-        <div class="space-y-6">
-            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between gap-4">
+        <div class="pos-workspace">
+            <section class="pos-panel pos-panel--tall">
+                <div class="pos-panel__header">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Product Search</p>
-                        <h3 class="mt-2 text-lg font-bold text-slate-900">Scan or search stock items</h3>
+                        <p class="pos-panel__eyebrow">Product Search</p>
+                        <h2 class="pos-panel__title">Scan or search inventory</h2>
                     </div>
-                    <button type="button" wire:click="$set('searchTerm', '')" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100">
-                        Clear Search
-                    </button>
+                    <button type="button" wire:click="$set('searchTerm', '')" class="pos-mini-link">Clear</button>
                 </div>
 
-                <div class="relative mt-5">
+                <div class="relative">
                     <i class="fas fa-barcode pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" wire:model.live.debounce.250ms="searchTerm" placeholder="Search by name, SKU, barcode, item code, or model..."
-                        class="w-full rounded-2xl border-slate-200 py-3 pl-12 pr-4 text-sm shadow-none focus:ring-0">
+                    <input
+                        type="text"
+                        wire:model.live.debounce.250ms="searchTerm"
+                        placeholder="Search by name, SKU, barcode, item code, or model..."
+                        class="w-full rounded-2xl border-slate-200 bg-white py-3 pl-12 pr-4 text-sm shadow-none focus:ring-0"
+                    >
                 </div>
 
-                @if($showResults && count($searchResults) > 0)
-                    <div class="mt-5 grid gap-3 md:grid-cols-2">
-                        @foreach($searchResults as $product)
-                            <button wire:click="selectProduct({{ $product->id }})" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-slate-900">{{ $product->name }}</p>
-                                        <p class="mt-1 text-xs text-slate-500">{{ $product->sku }} @if($product->item_code) · {{ $product->item_code }} @endif</p>
-                                        <p class="mt-2 text-xs text-slate-500">{{ $product->brand->name ?? 'Unbranded' }} @if($product->model_name) · {{ $product->model_name }} @endif</p>
-                                    </div>
-                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm">{{ $product->quantity }} in stock</span>
-                                </div>
-                                <div class="mt-4 flex items-center justify-between">
-                                    <span class="text-lg font-black text-indigo-700">Rs {{ number_format($product->selling_price, 2) }}</span>
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-xs font-semibold text-white">
-                                        <i class="fas fa-plus"></i>
-                                        Add
-                                    </span>
-                                </div>
-                            </button>
-                        @endforeach
-                    </div>
-                @elseif(strlen($searchTerm) >= 2)
-                    <div class="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500">
-                        No matching products found for this search.
-                    </div>
-                @endif
-            </div>
+                <div class="pos-search-hints">
+                    <span class="pos-chip">Fast add from barcode or SKU</span>
+                    <span class="pos-chip">Use stock-in when counter stock arrives</span>
+                </div>
 
-            <div class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+                <div class="pos-result-list">
+                    @if($showResults && count($searchResults) > 0)
+                        @foreach($searchResults as $product)
+                            <div class="pos-result-card">
+                                <div class="min-w-0">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="truncate text-sm font-semibold text-slate-900">{{ $product->name }}</p>
+                                            <p class="mt-1 text-xs text-slate-500">
+                                                {{ $product->sku }}
+                                                @if($product->item_code)
+                                                    · {{ $product->item_code }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                        <span class="pos-badge">{{ $product->quantity }} in stock</span>
+                                    </div>
+                                    <p class="mt-2 text-xs text-slate-500">
+                                        {{ $product->brand->name ?? 'Unbranded' }}
+                                        @if($product->model_name)
+                                            · {{ $product->model_name }}
+                                        @endif
+                                    </p>
+                                </div>
+
+                                <div class="mt-3 flex items-center justify-between gap-3">
+                                    <strong class="text-base font-black text-indigo-700">Rs {{ number_format($product->selling_price, 2) }}</strong>
+                                    <div class="flex gap-2">
+                                        <button type="button" wire:click="openStockIntake({{ $product->id }})" class="pos-icon-button" title="Quick stock in">
+                                            <i class="fas fa-boxes-stacked"></i>
+                                        </button>
+                                        <button type="button" wire:click="selectProduct({{ $product->id }})" class="pos-button pos-button--primary">
+                                            <i class="fas fa-plus"></i>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @elseif(strlen($searchTerm) >= 2)
+                        <div class="pos-empty-state">
+                            <i class="fas fa-magnifying-glass"></i>
+                            <p>No matching products found for this search.</p>
+                        </div>
+                    @else
+                        <div class="pos-empty-state">
+                            <i class="fas fa-barcode"></i>
+                            <p>Start typing at least two characters to load sale-ready stock items.</p>
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+            <section class="pos-panel pos-panel--tall">
+                <div class="pos-panel__header">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Active Cart</p>
-                        <h3 class="mt-1 text-lg font-bold text-slate-900">Sale Items</h3>
+                        <p class="pos-panel__eyebrow">Active Cart</p>
+                        <h2 class="pos-panel__title">Sale items</h2>
                     </div>
                     @if(count($cart) > 0)
-                        <button wire:click="clearCart" class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
-                            <i class="fas fa-trash mr-2"></i>Clear Sale
-                        </button>
+                        <button wire:click="clearCart" class="pos-mini-link text-rose-600">Clear sale</button>
                     @endif
                 </div>
 
-                @if(count($cart) > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                <tr>
-                                    <th class="px-5 py-4">Product</th>
-                                    <th class="px-5 py-4">Qty</th>
-                                    <th class="px-5 py-4">Price</th>
-                                    <th class="px-5 py-4">Discount</th>
-                                    <th class="px-5 py-4">Line Total</th>
-                                    <th class="px-5 py-4"></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @foreach($cart as $index => $item)
-                                    <tr class="bg-white">
-                                        <td class="px-5 py-4 align-top">
-                                            <p class="text-sm font-semibold text-slate-900">{{ $item['name'] }}</p>
-                                            <p class="mt-1 text-xs text-slate-500">{{ $item['sku'] }}</p>
-                                            <p class="mt-2 text-xs {{ $item['stock_quantity'] <= 3 ? 'text-amber-600 font-semibold' : 'text-slate-400' }}">
-                                                Available stock: {{ $item['stock_quantity'] }}
-                                            </p>
-                                        </td>
-                                        <td class="px-5 py-4 align-top">
-                                            <input type="number" wire:change="updateQuantity({{ $index }}, $event.target.value)" value="{{ $item['quantity'] }}" min="1" max="{{ $item['stock_quantity'] }}"
-                                                class="w-20 rounded-2xl border-slate-200 text-center text-sm shadow-none">
-                                        </td>
-                                        <td class="px-5 py-4 align-top text-sm font-semibold text-slate-700">
-                                            Rs {{ number_format($item['unit_price'], 2) }}
-                                        </td>
-                                        <td class="px-5 py-4 align-top">
-                                            <div class="flex items-center gap-2">
-                                                <input type="number" wire:change="updateDiscount({{ $index }}, $event.target.value)" value="{{ $item['discount'] }}" min="0" max="100"
-                                                    class="w-20 rounded-2xl border-slate-200 text-right text-sm shadow-none">
-                                                <span class="text-xs font-semibold text-slate-400">%</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-5 py-4 align-top">
-                                            <p class="text-sm font-bold text-slate-900">Rs {{ number_format($item['total'], 2) }}</p>
-                                        </td>
-                                        <td class="px-5 py-4 align-top">
-                                            <button wire:click="removeItem({{ $index }})" class="rounded-full border border-rose-200 bg-rose-50 p-2 text-rose-600 transition hover:bg-rose-100">
-                                                <i class="fas fa-xmark"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="px-6 py-16 text-center">
-                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                            <i class="fas fa-cart-shopping text-2xl"></i>
-                        </div>
-                        <p class="mt-5 text-sm font-semibold text-slate-700">No items added yet</p>
-                        <p class="mt-1 text-sm text-slate-500">Search for a product above and add it to the current sale.</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="space-y-6">
-            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customer Desk</p>
-                <h3 class="mt-2 text-lg font-bold text-slate-900">Customer & Invoice Details</h3>
-
-                <div class="mt-5 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700">Customer Name</label>
-                        <input type="text" wire:model="customer_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                        @error('customer_name') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700">Customer Email @if($sendInvoiceEmail)<span class="text-rose-500">*</span>@endif</label>
-                        <input type="email" wire:model="customer_email" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none" placeholder="customer@example.com">
-                        @error('customer_email') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                    </div>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Phone</label>
-                            <input type="text" wire:model="customer_phone" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Payment Method</label>
-                            <select wire:model="payment_method" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                @foreach($paymentMethods as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700">Address</label>
-                        <textarea wire:model="customer_address" rows="3" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700">Sale Notes</label>
-                        <textarea wire:model="notes" rows="3" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none" placeholder="Counter notes, collection details, special requests..."></textarea>
-                    </div>
-                    <label class="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
-                        <input type="checkbox" wire:model="sendInvoiceEmail" class="mt-1 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
-                        <span>
-                            <span class="block font-semibold">Send invoice email automatically</span>
-                            <span class="mt-1 block text-xs text-indigo-600/80">If enabled, the customer receives the sale invoice immediately after payment.</span>
-                        </span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Payment Summary</p>
-                <h3 class="mt-2 text-lg font-bold text-slate-900">Totals</h3>
-
-                <div class="mt-5 space-y-3">
-                    <div class="flex items-center justify-between text-sm text-slate-500">
-                        <span>Subtotal</span>
-                        <span class="font-semibold text-slate-900">Rs {{ number_format($cartSubtotal, 2) }}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-sm text-slate-500">
-                        <span>Tax</span>
-                        <span class="font-semibold text-slate-900">Rs {{ number_format($cartTax, 2) }}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-sm text-slate-500">
-                        <span>Discount Savings</span>
-                        <span class="font-semibold text-amber-600">Rs {{ number_format($this->cartSavings, 2) }}</span>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-slate-200 pt-4">
-                        <span class="text-base font-semibold text-slate-900">Total Payable</span>
-                        <span class="text-2xl font-black text-emerald-700">Rs {{ number_format($cartTotal, 2) }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-5 grid gap-3">
-                    <button wire:click="openPaymentModal"
-                        class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                        @disabled(count($cart) === 0)>
-                        <i class="fas fa-credit-card"></i>
-                        <span>Process Payment</span>
-                    </button>
-                    <button wire:click="clearCart" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
-                        <i class="fas fa-rotate-right"></i>
-                        <span>Reset Sale</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Print Routing</p>
-                <h3 class="mt-2 text-lg font-bold text-slate-900">Device and printer recognition</h3>
-
-                <div class="mt-5 grid gap-4">
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detected Device</p>
-                            <p class="mt-2 text-lg font-bold text-slate-900" x-text="deviceType"></p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Default Receipt Profile</p>
-                            <p class="mt-2 text-sm font-bold text-slate-900">{{ $receiptProfile['name'] ?? 'POS Receipt' }}</p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Paper Size</p>
-                            <p class="mt-2 text-sm font-bold text-slate-900">{{ strtoupper(str_replace('_', ' ', $receiptProfile['paper_size'] ?? 'thermal_80')) }}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Preferred printer alias</label>
-                            <select x-model="printerHint" x-on:change="persistPrinterHint()" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                <option value="">Use default routing</option>
-                                @foreach($printerOptions as $printerOption)
-                                    <option value="{{ $printerOption }}">{{ $printerOption }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700">Primary input mode</label>
-                            <select x-model="inputMode" x-on:change="persistInputMode()" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                <option value="keyboard_scanner">Keyboard / Barcode Scanner</option>
-                                <option value="touch">Touch Screen</option>
-                                <option value="manual">Manual Keyboard Entry</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-900">
-                        Receipt routing uses the browser-detected device type plus these saved operator hints. Installed printer names are not directly available in normal browsers, so the selected printer alias is used as the printer recognition signal.
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Recent Activity</p>
-                        <h3 class="mt-2 text-lg font-bold text-slate-900">Latest Invoices</h3>
-                    </div>
-                </div>
-                <div class="mt-5 space-y-3">
-                    @forelse($recent_invoices as $invoice)
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <div>
-                                    <p class="text-sm font-semibold text-slate-900">{{ $invoice->invoice_number }}</p>
-                                    <p class="mt-1 text-xs text-slate-500">{{ $invoice->customer_name ?: 'Walk-in customer' }}</p>
+                <div class="pos-cart-list">
+                    @forelse($cart as $index => $item)
+                        <article class="pos-cart-item">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-semibold text-slate-900">{{ $item['name'] }}</p>
+                                    <p class="mt-1 text-xs text-slate-500">{{ $item['sku'] }}</p>
+                                    <p class="mt-2 text-xs {{ $item['stock_quantity'] <= 3 ? 'font-semibold text-amber-600' : 'text-slate-400' }}">
+                                        Available stock: {{ $item['stock_quantity'] }}
+                                    </p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-bold text-emerald-700">Rs {{ number_format($invoice->total, 2) }}</p>
-                                    <p class="mt-1 text-xs text-slate-400">{{ $invoice->created_at->diffForHumans() }}</p>
+                                <button wire:click="removeItem({{ $index }})" class="pos-icon-button pos-icon-button--danger" title="Remove item">
+                                    <i class="fas fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="mt-4 grid grid-cols-[92px_1fr_96px] gap-3">
+                                <label class="pos-field-group">
+                                    <span>Qty</span>
+                                    <input type="number" wire:change="updateQuantity({{ $index }}, $event.target.value)" value="{{ $item['quantity'] }}" min="1" max="{{ $item['stock_quantity'] }}" class="pos-field text-center">
+                                </label>
+                                <label class="pos-field-group">
+                                    <span>Discount %</span>
+                                    <input type="number" wire:change="updateDiscount({{ $index }}, $event.target.value)" value="{{ $item['discount'] }}" min="0" max="100" class="pos-field text-right">
+                                </label>
+                                <div class="pos-line-total">
+                                    <span>Total</span>
+                                    <strong>Rs {{ number_format($item['total'], 2) }}</strong>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     @empty
-                        <p class="text-sm text-slate-500">No recent invoices yet.</p>
+                        <div class="pos-empty-state">
+                            <i class="fas fa-cart-shopping"></i>
+                            <p>No items added yet. Search on the left and build the sale here.</p>
+                        </div>
                     @endforelse
                 </div>
-            </div>
+            </section>
+
+            <section class="pos-rail">
+                <div class="pos-panel">
+                    <div class="pos-panel__header">
+                        <div>
+                            <p class="pos-panel__eyebrow">Customer Desk</p>
+                            <h2 class="pos-panel__title">Customer and payment</h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="pos-field-group">
+                            <span>Customer name</span>
+                            <input type="text" wire:model="customer_name" class="pos-field">
+                            @error('customer_name') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="pos-field-group">
+                            <span>Customer email @if($sendInvoiceEmail)<span class="text-rose-500">*</span>@endif</span>
+                            <input type="email" wire:model="customer_email" class="pos-field" placeholder="customer@example.com">
+                            @error('customer_email') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                        </label>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <label class="pos-field-group">
+                                <span>Phone</span>
+                                <input type="text" wire:model="customer_phone" class="pos-field">
+                            </label>
+                            <label class="pos-field-group">
+                                <span>Payment method</span>
+                                <select wire:model="payment_method" class="pos-field">
+                                    @foreach($paymentMethods as $value => $label)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                        </div>
+
+                        <label class="pos-field-group">
+                            <span>Address</span>
+                            <textarea wire:model="customer_address" rows="2" class="pos-field resize-none"></textarea>
+                        </label>
+
+                        <label class="pos-field-group">
+                            <span>Sale notes</span>
+                            <textarea wire:model="notes" rows="2" class="pos-field resize-none" placeholder="Counter notes, collection details, special requests..."></textarea>
+                        </label>
+
+                        <label class="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+                            <input type="checkbox" wire:model="sendInvoiceEmail" class="mt-1 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
+                            <span>
+                                <span class="block font-semibold">Send invoice email automatically</span>
+                                <span class="mt-1 block text-xs text-indigo-600/80">When enabled, the customer receives the invoice immediately after settlement.</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pos-panel">
+                    <div class="pos-panel__header">
+                        <div>
+                            <p class="pos-panel__eyebrow">Settlement</p>
+                            <h2 class="pos-panel__title">Totals and tender</h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="pos-summary-row"><span>Subtotal</span><strong>Rs {{ number_format($cartSubtotal, 2) }}</strong></div>
+                        <div class="pos-summary-row"><span>Tax</span><strong>Rs {{ number_format($cartTax, 2) }}</strong></div>
+                        <div class="pos-summary-row"><span>Discount impact</span><strong>Rs {{ number_format($this->cartSavings, 2) }}</strong></div>
+                        <div class="pos-summary-row pos-summary-row--total"><span>Total</span><strong>Rs {{ number_format($cartTotal, 2) }}</strong></div>
+
+                        <label class="pos-field-group">
+                            <span>Amount paid</span>
+                            <input type="number" wire:model.live="amount_paid" min="0" step="0.01" class="pos-field text-right">
+                            @error('amount_paid') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                        </label>
+
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Quick Tender</p>
+                            <div class="mt-2 grid grid-cols-2 gap-2">
+                                <button wire:click="applyQuickTender('exact')" type="button" class="pos-quick-button">Exact</button>
+                                <button wire:click="applyQuickTender('plus_500')" type="button" class="pos-quick-button">+ 500</button>
+                                <button wire:click="applyQuickTender('plus_1000')" type="button" class="pos-quick-button">+ 1000</button>
+                                <button wire:click="applyQuickTender('plus_5000')" type="button" class="pos-quick-button">+ 5000</button>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Change Due</p>
+                            <p class="mt-2 text-3xl font-black text-emerald-700">Rs {{ number_format($change_due, 2) }}</p>
+                            <p class="mt-2 text-sm text-emerald-700">
+                                @if($amount_paid >= $cartTotal)
+                                    Full payment captured. Receipt and invoice are ready.
+                                @elseif($amount_paid >= ($cartTotal * 0.5))
+                                    Partial payment accepted. Outstanding balance will remain on the invoice.
+                                @else
+                                    Enter at least 50% of the total to complete this sale.
+                                @endif
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            wire:click="openPaymentModal"
+                            class="pos-button pos-button--primary w-full justify-center"
+                            @disabled(count($cart) === 0)
+                        >
+                            <i class="fas fa-check-circle"></i>
+                            <span>Review and Complete Sale</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pos-panel">
+                    <div class="pos-panel__header">
+                        <div>
+                            <p class="pos-panel__eyebrow">Recent Invoices</p>
+                            <h2 class="pos-panel__title">Latest counter activity</h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        @foreach($recent_invoices as $invoice)
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-slate-900">{{ $invoice->invoice_number }}</p>
+                                        <p class="mt-1 truncate text-xs text-slate-500">{{ $invoice->customer_name }}</p>
+                                    </div>
+                                    <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $invoice->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                                        {{ ucfirst($invoice->status) }}
+                                    </span>
+                                </div>
+                                <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+                                    <span>{{ optional($invoice->created_at)->diffForHumans() }}</span>
+                                    <strong class="text-slate-900">Rs {{ number_format($invoice->total, 2) }}</strong>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
         </div>
-    </div>
+    </section>
 
     <div x-show="showPaymentModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
         <div class="flex min-h-screen items-center justify-center px-4 py-8">
             <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
-            <div class="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+            <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
                 <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Payment Desk</p>
-                            <h3 class="mt-2 text-xl font-bold text-slate-900">Process Sale Payment</h3>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Final Check</p>
+                            <h3 class="mt-1 text-xl font-bold text-slate-900">Review settlement before closing</h3>
                         </div>
-                        <button @click="showPaymentModal = false" class="rounded-full border border-slate-200 p-3 text-slate-500 transition hover:bg-white hover:text-slate-700">
+                        <button @click="showPaymentModal = false" class="pos-icon-button" type="button">
                             <i class="fas fa-xmark"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="px-6 py-6">
-                    <div class="grid gap-6 md:grid-cols-[1fr_280px]">
-                        <div class="space-y-5">
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-slate-500">Sale Total</span>
-                                    <span class="font-bold text-slate-900">Rs {{ number_format($cartTotal, 2) }}</span>
-                                </div>
-                                <div class="mt-2 flex items-center justify-between text-sm">
-                                    <span class="text-slate-500">Minimum to proceed</span>
-                                    <span class="font-semibold text-slate-900">Rs {{ number_format($cartTotal * 0.5, 2) }}</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Payment Method</label>
-                                <select wire:model="payment_method" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                    @foreach($paymentMethods as $value => $label)
-                                        <option value="{{ $value }}">{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Amount Paid</label>
-                                <input type="number" wire:model.live="amount_paid" step="0.01" min="0" class="mt-2 w-full rounded-2xl border-slate-200 text-right text-lg font-bold shadow-none">
-                                @error('amount_paid') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div>
-                                <p class="text-sm font-medium text-slate-700">Quick Tender</p>
-                                <div class="mt-2 flex flex-wrap gap-2">
-                                    <button wire:click="applyQuickTender('exact')" type="button" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">Exact</button>
-                                    <button wire:click="applyQuickTender('plus_500')" type="button" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">+ 500</button>
-                                    <button wire:click="applyQuickTender('plus_1000')" type="button" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">+ 1000</button>
-                                    <button wire:click="applyQuickTender('plus_5000')" type="button" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">+ 5000</button>
-                                </div>
+                <div class="grid gap-6 p-6 lg:grid-cols-[1fr_320px]">
+                    <div>
+                        <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Customer</span><strong class="text-slate-900">{{ $customer_name ?: 'Walk-in customer' }}</strong></div>
+                                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Email</span><strong class="text-slate-900">{{ $customer_email ?: '-' }}</strong></div>
+                                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Method</span><strong class="text-slate-900">{{ $paymentMethods[$payment_method] ?? $payment_method }}</strong></div>
+                                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Cart lines</span><strong class="text-slate-900">{{ count($cart) }}</strong></div>
                             </div>
                         </div>
 
-                        <div class="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Settlement</p>
-                            <div class="mt-4 space-y-4">
-                                <div>
-                                    <p class="text-sm text-emerald-700">Change Due</p>
-                                    <p class="mt-1 text-3xl font-black text-emerald-700">Rs {{ number_format($change_due, 2) }}</p>
-                                </div>
-                                <div class="rounded-2xl bg-white/80 p-4 text-sm text-emerald-800">
-                                    @if($amount_paid >= $cartTotal)
-                                        Full payment captured. Receipt and invoice are ready to close.
-                                    @elseif($amount_paid >= ($cartTotal * 0.5))
-                                        Partial payment accepted. Invoice will remain with outstanding balance.
-                                    @else
-                                        Enter at least 50% of the total to proceed with this sale.
-                                    @endif
-                                </div>
-                            </div>
+                        <div class="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200">
+                            <table class="min-w-full">
+                                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                    <tr>
+                                        <th class="px-4 py-3">Item</th>
+                                        <th class="px-4 py-3">Qty</th>
+                                        <th class="px-4 py-3">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 bg-white">
+                                    @foreach($cart as $item)
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm font-medium text-slate-900">{{ $item['name'] }}</td>
+                                            <td class="px-4 py-3 text-sm text-slate-600">{{ $item['quantity'] }}</td>
+                                            <td class="px-4 py-3 text-sm font-semibold text-slate-900">Rs {{ number_format($item['total'], 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Settlement</p>
+                        <div class="mt-4 space-y-3">
+                            <div class="flex items-center justify-between text-sm"><span class="text-emerald-700">Subtotal</span><strong class="text-emerald-700">Rs {{ number_format($cartSubtotal, 2) }}</strong></div>
+                            <div class="flex items-center justify-between text-sm"><span class="text-emerald-700">Total</span><strong class="text-emerald-700">Rs {{ number_format($cartTotal, 2) }}</strong></div>
+                            <div class="flex items-center justify-between text-sm"><span class="text-emerald-700">Paid</span><strong class="text-emerald-700">Rs {{ number_format($amount_paid, 2) }}</strong></div>
+                            <div class="flex items-center justify-between text-sm"><span class="text-emerald-700">Change</span><strong class="text-emerald-700">Rs {{ number_format($change_due, 2) }}</strong></div>
+                        </div>
+
+                        <div class="mt-5 rounded-2xl bg-white/80 p-4 text-sm text-emerald-800">
+                            @if($amount_paid >= $cartTotal)
+                                Full payment captured. This sale can be completed now.
+                            @elseif($amount_paid >= ($cartTotal * 0.5))
+                                Partial payment is allowed. The invoice will carry the remaining balance.
+                            @else
+                                Enter at least 50% of the sale total to proceed.
+                            @endif
+                        </div>
+
+                        <div class="mt-5 flex gap-3">
+                            <button @click="showPaymentModal = false" class="pos-button pos-button--ghost w-full justify-center" type="button">Cancel</button>
+                            <button wire:click="processPayment" class="pos-button pos-button--primary w-full justify-center" @disabled($amount_paid < ($cartTotal * 0.5) || count($cart) === 0)>
+                                Complete Sale
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-                    <button @click="showPaymentModal = false" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">Cancel</button>
-                    <button wire:click="processPayment"
-                        class="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                        @disabled($amount_paid < ($cartTotal * 0.5) || count($cart) === 0)>
-                        Complete Sale
+    <div x-show="showStockModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+        <div class="flex min-h-screen items-center justify-center px-4 py-8">
+            <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+            <div class="relative z-10 w-full max-w-lg overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+                <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Quick Stock In</p>
+                            <h3 class="mt-1 text-xl font-bold text-slate-900">{{ $quickStockName }}</h3>
+                            <p class="mt-1 text-sm text-slate-500">Current stock: {{ $quickStockCurrentQuantity }}</p>
+                        </div>
+                        <button type="button" wire:click="closeStockIntake" class="pos-icon-button">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4 p-6">
+                    <label class="pos-field-group">
+                        <span>Add quantity</span>
+                        <input type="number" wire:model="quickStockAddQuantity" min="1" class="pos-field">
+                        @error('quickStockAddQuantity') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                    </label>
+
+                    <label class="pos-field-group">
+                        <span>Notes</span>
+                        <textarea wire:model="quickStockNotes" rows="3" class="pos-field resize-none"></textarea>
+                        @error('quickStockNotes') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                    </label>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" wire:click="$set('quickStockAddQuantity', 1)" class="pos-quick-button">+1</button>
+                        <button type="button" wire:click="$set('quickStockAddQuantity', 5)" class="pos-quick-button">+5</button>
+                        <button type="button" wire:click="$set('quickStockAddQuantity', 10)" class="pos-quick-button">+10</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+                    <button type="button" wire:click="closeStockIntake" class="pos-button pos-button--ghost w-full justify-center">Cancel</button>
+                    <button type="button" wire:click="receiveStock" class="pos-button pos-button--primary w-full justify-center">
+                        <i class="fas fa-boxes-stacked"></i>
+                        <span>Confirm Stock In</span>
                     </button>
                 </div>
             </div>
@@ -604,6 +633,452 @@
 
 @push('styles')
     <style>
+        .pos-shell {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .pos-hero,
+        .pos-panel,
+        .pos-metric {
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            background: rgba(255, 255, 255, 0.84);
+            border-radius: 1.4rem;
+            box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.22);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .dark .pos-hero,
+        .dark .pos-panel,
+        .dark .pos-metric {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.72);
+        }
+
+        .pos-hero {
+            padding: 1rem 1.15rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .pos-kicker {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .pos-title {
+            margin-top: 0.25rem;
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            font-weight: 800;
+            line-height: 1.05;
+            color: #0f172a;
+        }
+
+        .dark .pos-title {
+            color: #f8fafc;
+        }
+
+        .pos-copy {
+            margin-top: 0.4rem;
+            max-width: 44rem;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #64748b;
+        }
+
+        .dark .pos-copy {
+            color: #cbd5e1;
+        }
+
+        .pos-actions,
+        .pos-search-hints {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .pos-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.52rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.08);
+            color: #475569;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .dark .pos-chip {
+            background: rgba(99, 102, 241, 0.16);
+            color: #e2e8f0;
+        }
+
+        .pos-chip--mono strong {
+            font-family: "Courier New", monospace;
+        }
+
+        .pos-button,
+        .pos-icon-button,
+        .pos-quick-button,
+        .pos-mini-link {
+            transition: all 0.2s ease;
+        }
+
+        .pos-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            border-radius: 999px;
+            padding: 0.78rem 1rem;
+            font-size: 0.86rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .pos-button--primary {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        .pos-button--primary:hover {
+            background: #1e293b;
+        }
+
+        .pos-button--ghost {
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.85);
+            color: #334155;
+        }
+
+        .dark .pos-button--ghost {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+
+        .pos-icon-button {
+            width: 2.3rem;
+            height: 2.3rem;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.9);
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dark .pos-icon-button {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+
+        .pos-icon-button:hover,
+        .pos-quick-button:hover,
+        .pos-mini-link:hover {
+            transform: translateY(-1px);
+        }
+
+        .pos-icon-button--danger {
+            color: #e11d48;
+            border-color: #fecdd3;
+            background: #fff1f2;
+        }
+
+        .pos-mini-link {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #6366f1;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .pos-metrics {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .pos-metric {
+            padding: 0.9rem 1rem;
+        }
+
+        .pos-metric span {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .pos-metric strong {
+            display: block;
+            margin-top: 0.45rem;
+            font-size: 1.4rem;
+            line-height: 1.1;
+            color: #0f172a;
+        }
+
+        .dark .pos-metric strong {
+            color: #f8fafc;
+        }
+
+        .pos-metric small {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .dark .pos-metric small {
+            color: #cbd5e1;
+        }
+
+        .pos-metric--indigo { border-color: #c7d2fe; background: rgba(238, 242, 255, 0.92); }
+        .pos-metric--emerald { border-color: #a7f3d0; background: rgba(236, 253, 245, 0.94); }
+        .pos-metric--amber { border-color: #fde68a; background: rgba(255, 251, 235, 0.94); }
+        .pos-metric--sky { border-color: #bae6fd; background: rgba(240, 249, 255, 0.94); }
+        .pos-metric--violet { border-color: #ddd6fe; background: rgba(245, 243, 255, 0.94); }
+
+        .dark .pos-metric--indigo,
+        .dark .pos-metric--emerald,
+        .dark .pos-metric--amber,
+        .dark .pos-metric--sky,
+        .dark .pos-metric--violet {
+            background: rgba(15, 23, 42, 0.78);
+        }
+
+        .pos-workspace {
+            display: grid;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .pos-panel {
+            padding: 1rem;
+        }
+
+        .pos-panel--tall {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .pos-panel__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .pos-panel__eyebrow {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .pos-panel__title {
+            margin-top: 0.2rem;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .dark .pos-panel__title {
+            color: #f8fafc;
+        }
+
+        .pos-result-list,
+        .pos-cart-list {
+            display: grid;
+            gap: 0.75rem;
+            min-height: 0;
+            overflow: auto;
+        }
+
+        .pos-result-card,
+        .pos-cart-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 1.1rem;
+            background: rgba(248, 250, 252, 0.84);
+            padding: 0.85rem;
+        }
+
+        .dark .pos-result-card,
+        .dark .pos-cart-item {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.68);
+        }
+
+        .pos-badge {
+            flex-shrink: 0;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.35rem 0.65rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #475569;
+        }
+
+        .dark .pos-badge {
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+        }
+
+        .pos-empty-state {
+            display: grid;
+            place-items: center;
+            gap: 0.65rem;
+            min-height: 11rem;
+            border: 1px dashed #cbd5e1;
+            border-radius: 1.2rem;
+            background: rgba(248, 250, 252, 0.75);
+            padding: 1.2rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .dark .pos-empty-state {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.62);
+            color: #cbd5e1;
+        }
+
+        .pos-empty-state i {
+            font-size: 1.5rem;
+            color: #94a3b8;
+        }
+
+        .pos-field-group {
+            display: grid;
+            gap: 0.42rem;
+        }
+
+        .pos-field-group span {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .dark .pos-field-group span {
+            color: #cbd5e1;
+        }
+
+        .pos-field {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.72rem 0.85rem;
+            font-size: 0.92rem;
+            color: #0f172a;
+            box-shadow: none;
+        }
+
+        .dark .pos-field {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.75);
+            color: #f8fafc;
+        }
+
+        .pos-line-total {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.75);
+            padding: 0.72rem 0.85rem;
+        }
+
+        .dark .pos-line-total {
+            background: rgba(15, 23, 42, 0.72);
+        }
+
+        .pos-line-total span {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+
+        .pos-line-total strong {
+            margin-top: 0.2rem;
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+
+        .dark .pos-line-total strong {
+            color: #f8fafc;
+        }
+
+        .pos-rail {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .pos-summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            font-size: 0.88rem;
+            color: #475569;
+        }
+
+        .pos-summary-row strong {
+            color: #0f172a;
+        }
+
+        .dark .pos-summary-row {
+            color: #cbd5e1;
+        }
+
+        .dark .pos-summary-row strong {
+            color: #f8fafc;
+        }
+
+        .pos-summary-row--total {
+            padding-top: 0.55rem;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        .dark .pos-summary-row--total {
+            border-color: #334155;
+        }
+
+        .pos-quick-button {
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            padding: 0.6rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .dark .pos-quick-button {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+        }
+
         #pos-receipt-print-zone {
             display: none;
         }
@@ -673,6 +1148,63 @@
         .receipt-muted {
             font-size: 11px;
             color: #64748b;
+        }
+
+        @media (min-width: 1100px) {
+            .pos-shell {
+                height: calc(100vh - 7.4rem);
+                grid-template-rows: auto auto minmax(0, 1fr);
+            }
+
+            .pos-metrics {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+            }
+
+            .pos-workspace {
+                min-height: 0;
+                grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.05fr) 360px;
+            }
+
+            .pos-panel--tall {
+                height: 100%;
+            }
+
+            .pos-result-list,
+            .pos-cart-list,
+            .pos-rail {
+                min-height: 0;
+                max-height: 100%;
+            }
+
+            .pos-rail {
+                align-content: start;
+                overflow: auto;
+            }
+        }
+
+        @media (max-width: 1099px) {
+            .pos-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .pos-actions {
+                width: 100%;
+            }
+
+            .pos-button {
+                justify-content: center;
+                flex: 1 1 calc(50% - 0.5rem);
+            }
+
+            .pos-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .pos-cart-item .grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media print {

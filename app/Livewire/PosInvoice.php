@@ -71,7 +71,19 @@ class PosInvoice extends Component
 
     public $showSuccessModal = false;
 
+    public $showStockModal = false;
+
     public $createdInvoice = null;
+
+    public $quickStockId = null;
+
+    public $quickStockName = '';
+
+    public $quickStockCurrentQuantity = 0;
+
+    public $quickStockAddQuantity = 1;
+
+    public $quickStockNotes = 'Received at POS counter.';
 
     // Add this property
     public $sendInvoiceEmail = true;
@@ -288,6 +300,66 @@ class PosInvoice extends Component
         $this->generateInvoiceNumber();
     }
 
+    public function openStockIntake(int $stockId): void
+    {
+        $stock = Stock::findOrFail($stockId);
+
+        $this->quickStockId = $stock->id;
+        $this->quickStockName = $stock->name;
+        $this->quickStockCurrentQuantity = (int) $stock->quantity;
+        $this->quickStockAddQuantity = 1;
+        $this->quickStockNotes = 'Received at POS counter.';
+        $this->showStockModal = true;
+        $this->resetValidation([
+            'quickStockAddQuantity',
+            'quickStockNotes',
+        ]);
+    }
+
+    public function closeStockIntake(): void
+    {
+        $this->showStockModal = false;
+        $this->quickStockId = null;
+        $this->quickStockName = '';
+        $this->quickStockCurrentQuantity = 0;
+        $this->quickStockAddQuantity = 1;
+        $this->quickStockNotes = 'Received at POS counter.';
+    }
+
+    public function receiveStock(StockMovementService $stockMovementService): void
+    {
+        $this->validate([
+            'quickStockId' => 'required|integer|exists:stocks,id',
+            'quickStockAddQuantity' => 'required|integer|min:1|max:100000',
+            'quickStockNotes' => 'nullable|string|max:255',
+        ]);
+
+        $stockMovementService->increase(
+            (int) $this->quickStockId,
+            (int) $this->quickStockAddQuantity,
+            'pos_counter_restock',
+            [
+                'user_id' => auth()->id(),
+                'notes' => $this->quickStockNotes ?: 'Received at POS counter.',
+            ]
+        );
+
+        $updatedStock = Stock::find($this->quickStockId);
+
+        foreach ($this->cart as $index => $item) {
+            if ((int) $item['stock_id'] === (int) $this->quickStockId) {
+                $this->cart[$index]['stock_quantity'] = (int) ($updatedStock?->quantity ?? $item['stock_quantity']);
+            }
+        }
+
+        if (filled($this->searchTerm)) {
+            $this->updatedSearchTerm();
+        }
+
+        $this->dispatch('show-success', message: 'Stock updated for '.$this->quickStockName.'.');
+        $this->closeStockIntake();
+    }
+
     public function openPaymentModal()
     {
         if (empty($this->cart)) {
@@ -501,6 +573,6 @@ class PosInvoice extends Component
             'billingProfiles' => $billingProfiles,
             'printerOptions' => $printerOptions,
             'company' => $billCustomizationService->companyPayload(),
-        ])->layout('layouts.admin');
+        ])->layout('layouts.admin-pos');
     }
 }
