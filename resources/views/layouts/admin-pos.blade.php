@@ -75,6 +75,8 @@
         function adminPosLayout() {
             return {
                 theme: localStorage.getItem('adminTheme') || 'light',
+                profileDropdownOpen: false,
+                notificationDropdownOpen: false,
 
                 init() {
                     this.applyTheme(this.theme);
