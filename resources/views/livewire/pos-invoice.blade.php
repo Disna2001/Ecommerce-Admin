@@ -2,6 +2,7 @@
     showPaymentModal: @entangle('showPaymentModal'),
     showSuccessModal: @entangle('showSuccessModal'),
     showStockModal: @entangle('showStockModal'),
+    showCustomerCreateModal: @entangle('showCustomerCreateModal'),
     toastOpen: false,
     toastMessage: '',
     toastTone: 'success',
@@ -302,7 +303,10 @@
                         <div class="pos-field-group relative">
                             <div class="flex items-center justify-between gap-3">
                                 <span>Find customer</span>
-                                <button type="button" wire:click="setWalkInCustomer" class="pos-mini-link">Walk-in</button>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" wire:click="openCustomerCreate" class="pos-mini-link">New customer</button>
+                                    <button type="button" wire:click="setWalkInCustomer" class="pos-mini-link">Walk-in</button>
+                                </div>
                             </div>
                             <input type="text" wire:model.live.debounce.250ms="customerLookup" class="pos-field" placeholder="Search by customer name, phone, or email">
 
@@ -625,6 +629,66 @@
                     <button type="button" wire:click="receiveStock" class="pos-button pos-button--primary w-full justify-center">
                         <i class="fas fa-boxes-stacked"></i>
                         <span>Confirm Stock In</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="showCustomerCreateModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+        <div class="flex min-h-screen items-center justify-center px-4 py-8">
+            <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+            <div class="relative z-10 w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+                <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Quick Customer</p>
+                            <h3 class="mt-1 text-xl font-bold text-slate-900">Create customer at the counter</h3>
+                            <p class="mt-1 text-sm text-slate-500">Save the buyer once and load the profile into the current sale immediately.</p>
+                        </div>
+                        <button type="button" wire:click="closeCustomerCreate" class="pos-icon-button">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4 p-6">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="pos-field-group sm:col-span-2">
+                            <span>Customer name</span>
+                            <input type="text" wire:model="quickCustomerName" class="pos-field">
+                            @error('quickCustomerName') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="pos-field-group">
+                            <span>Email</span>
+                            <input type="email" wire:model="quickCustomerEmail" class="pos-field" placeholder="customer@example.com">
+                            @error('quickCustomerEmail') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="pos-field-group">
+                            <span>Phone</span>
+                            <input type="text" wire:model="quickCustomerPhone" class="pos-field">
+                            @error('quickCustomerPhone') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                        </label>
+                    </div>
+
+                    <label class="pos-field-group">
+                        <span>Address</span>
+                        <textarea wire:model="quickCustomerAddress" rows="3" class="pos-field resize-none"></textarea>
+                        @error('quickCustomerAddress') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                    </label>
+
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+                        This creates a regular customer profile for future checkout lookup. A secure password is generated automatically for the account record.
+                    </div>
+                </div>
+
+                <div class="flex gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+                    <button type="button" wire:click="closeCustomerCreate" class="pos-button pos-button--ghost w-full justify-center">Cancel</button>
+                    <button type="button" wire:click="createQuickCustomer" class="pos-button pos-button--primary w-full justify-center">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Create Customer</span>
                     </button>
                 </div>
             </div>

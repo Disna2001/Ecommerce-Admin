@@ -13,9 +13,11 @@ use App\Services\Inventory\StockMovementService;
 use App\Services\Notifications\CustomerNotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Spatie\Permission\Models\Role;
 
 class PosInvoice extends Component
 {
@@ -82,6 +84,8 @@ class PosInvoice extends Component
 
     public $showStockModal = false;
 
+    public $showCustomerCreateModal = false;
+
     public $createdInvoice = null;
 
     public $heldInvoiceId = null;
@@ -95,6 +99,14 @@ class PosInvoice extends Component
     public $quickStockAddQuantity = 1;
 
     public $quickStockNotes = 'Received at POS counter.';
+
+    public $quickCustomerName = '';
+
+    public $quickCustomerEmail = '';
+
+    public $quickCustomerPhone = '';
+
+    public $quickCustomerAddress = '';
 
     // Add this property
     public $sendInvoiceEmail = true;
@@ -436,6 +448,70 @@ class PosInvoice extends Component
         if (blank($this->customerLookup)) {
             $this->customerLookup = $this->customer_name;
         }
+    }
+
+    public function openCustomerCreate(): void
+    {
+        $this->quickCustomerName = $this->customer_name && $this->customer_name !== 'Walk-in customer'
+            ? $this->customer_name
+            : '';
+        $this->quickCustomerEmail = $this->customer_email;
+        $this->quickCustomerPhone = $this->customer_phone;
+        $this->quickCustomerAddress = $this->customer_address;
+        $this->showCustomerCreateModal = true;
+        $this->resetValidation([
+            'quickCustomerName',
+            'quickCustomerEmail',
+            'quickCustomerPhone',
+            'quickCustomerAddress',
+        ]);
+    }
+
+    public function closeCustomerCreate(): void
+    {
+        $this->showCustomerCreateModal = false;
+        $this->quickCustomerName = '';
+        $this->quickCustomerEmail = '';
+        $this->quickCustomerPhone = '';
+        $this->quickCustomerAddress = '';
+    }
+
+    public function createQuickCustomer(): void
+    {
+        $this->validate([
+            'quickCustomerName' => 'required|string|max:255',
+            'quickCustomerEmail' => 'required|email|max:255|unique:users,email',
+            'quickCustomerPhone' => 'nullable|string|max:20',
+            'quickCustomerAddress' => 'nullable|string|max:500',
+        ]);
+
+        $user = User::create([
+            'name' => $this->quickCustomerName,
+            'email' => $this->quickCustomerEmail,
+            'user_type' => 'regular',
+            'password' => Hash::make(Str::random(24)),
+            'phone' => $this->quickCustomerPhone ?: null,
+            'address' => $this->quickCustomerAddress ?: null,
+            'preferences' => [
+                'created_from' => 'pos_counter',
+                'requires_password_reset' => true,
+            ],
+            'email_verified_at' => now(),
+        ]);
+
+        $role = Role::firstOrCreate(['name' => 'User', 'guard_name' => 'web']);
+        $user->assignRole($role);
+
+        $this->customer_name = $user->name;
+        $this->customer_email = $user->email;
+        $this->customer_phone = $user->phone ?: '';
+        $this->customer_address = $user->address ?: '';
+        $this->customerLookup = $user->name;
+        $this->customerResults = [];
+        $this->showCustomerResults = false;
+
+        $this->dispatch('show-success', message: 'Customer created and loaded into the counter.');
+        $this->closeCustomerCreate();
     }
 
     public function selectCustomerProfile(string $type, int $id): void
