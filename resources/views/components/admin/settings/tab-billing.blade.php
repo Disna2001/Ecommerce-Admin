@@ -3,6 +3,7 @@
     'billingDefaultProfiles' => [],
     'billingPreviewCompany' => [],
     'billingPreviewDocuments' => [],
+    'printerCatalog' => [],
 ])
 
 <x-admin.ui.panel padding="p-6">
@@ -58,6 +59,109 @@
             <p class="mt-3 leading-6 text-sky-800 dark:text-sky-100/85">
                 Device recognition is automatic in the browser using screen and pointer capabilities. Printer recognition works through operator-selected printer aliases saved on the POS browser, because normal web browsers do not expose installed printer names directly.
             </p>
+        </div>
+    </div>
+
+    <div class="mt-6 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Printer Management</p>
+                <h4 class="mt-2 text-lg font-bold text-slate-900 dark:text-white">Managed printer catalog</h4>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Define the printer aliases your team uses, then attach bill profiles to those aliases for stable routing on each counter or office device.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" wire:click="addPrinter" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                    <i class="fas fa-print mr-2"></i>Add Printer
+                </button>
+                <button type="button" wire:click="resetPrinterCatalog" class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+                    <i class="fas fa-rotate-left mr-2"></i>Reset Printers
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-100">
+            Modern web browsers cannot read the full installed printer list automatically. The POS counter stores the selected printer alias in that browser, and optional USB detection helps match connected XPrinter devices on supported browsers like Chrome and Edge.
+        </div>
+
+        <div class="mt-5 space-y-4">
+            @forelse($printerCatalog as $printerIndex => $printer)
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                        <div class="grid min-w-0 flex-1 gap-4 xl:grid-cols-[1.1fr_1.1fr_0.8fr_0.8fr]">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Printer alias</label>
+                                <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.alias" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Windows / queue name</label>
+                                <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.queue_name" placeholder="Xprinter XP-365B" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Connection</label>
+                                <select wire:model="printer_catalog.{{ $printerIndex }}.connection_type" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                                    <option value="usb">USB</option>
+                                    <option value="network">Network</option>
+                                    <option value="shared">Shared</option>
+                                    <option value="virtual">Virtual / PDF</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Paper size</label>
+                                <select wire:model="printer_catalog.{{ $printerIndex }}.paper_size" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                                    <option value="a4">A4</option>
+                                    <option value="letter">Letter</option>
+                                    <option value="thermal_80">Thermal 80mm</option>
+                                    <option value="thermal_58">Thermal 58mm</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            <label class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                                <input type="checkbox" wire:model="printer_catalog.{{ $printerIndex }}.enabled" class="rounded border-slate-300 text-violet-600 focus:ring-violet-500">
+                                Enabled
+                            </label>
+                            <label class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                                <input type="checkbox" wire:model="printer_catalog.{{ $printerIndex }}.auto_print" class="rounded border-slate-300 text-violet-600 focus:ring-violet-500">
+                                Auto print
+                            </label>
+                            <button type="button" wire:click="removePrinter({{ $printerIndex }})" class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid gap-4 xl:grid-cols-[0.8fr_1.2fr_1fr]">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Device scope</label>
+                            <select wire:model="printer_catalog.{{ $printerIndex }}.device_scope" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                                <option value="counter">Counter</option>
+                                <option value="backoffice">Back Office</option>
+                                <option value="shared">Shared</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Bill types handled</label>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                @foreach(['invoice_pdf' => 'Invoice PDF', 'pos_receipt' => 'POS Receipt', 'any' => 'Any Bill'] as $billType => $label)
+                                    <label class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                                        <input type="checkbox" wire:model="printer_catalog.{{ $printerIndex }}.bill_types" value="{{ $billType }}" class="rounded border-slate-300 text-violet-600 focus:ring-violet-500">
+                                        <span>{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Notes</label>
+                            <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.notes" placeholder="Counter 01 thermal printer" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+                    No managed printers yet. Add at least one printer so bills can route by alias instead of manual matching text.
+                </div>
+            @endforelse
         </div>
     </div>
 
@@ -151,7 +255,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Printer alias match</label>
-                        <input type="text" wire:model="billing_profiles.{{ $index }}.printer_match" placeholder="Counter Thermal" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                        <input list="printer-aliases" type="text" wire:model="billing_profiles.{{ $index }}.printer_match" placeholder="Counter Thermal" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">
                     </div>
                     <div class="grid gap-4 xl:grid-cols-2">
                         <div>
@@ -487,4 +591,12 @@
             </div>
         @endforelse
     </div>
+
+    <datalist id="printer-aliases">
+        @foreach($printerCatalog as $printer)
+            @if(! empty($printer['enabled']))
+                <option value="{{ $printer['alias'] }}">{{ $printer['queue_name'] ?: $printer['notes'] }}</option>
+            @endif
+        @endforeach
+    </datalist>
 </x-admin.ui.panel>

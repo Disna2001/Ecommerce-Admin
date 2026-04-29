@@ -69,6 +69,8 @@ class SystemSettingsManager extends Component
 
     public array $billing_default_profiles = [];
 
+    public array $printer_catalog = [];
+
     public string $billing_preview_invoice_status = 'paid';
 
     public string $billing_preview_invoice_customer_name = 'Dishna Chamuditha';
@@ -159,6 +161,7 @@ class SystemSettingsManager extends Component
 
         $this->billing_profiles = $billCustomizationService->configuredProfiles();
         $this->billing_default_profiles = $billCustomizationService->configuredAssignments();
+        $this->printer_catalog = $billCustomizationService->configuredPrinterCatalog();
         $this->test_email_recipient = $this->support_notification_email ?: $this->mail_from_address;
     }
 
@@ -188,9 +191,18 @@ class SystemSettingsManager extends Component
             $billCustomizationService->defaultAssignments(),
             $this->billing_default_profiles
         );
+        $this->printer_catalog = array_values(array_map(
+            fn (array $printer) => $billCustomizationService->normalizePrinter($printer),
+            array_filter($this->printer_catalog, 'is_array')
+        ));
+
+        if ($this->printer_catalog === []) {
+            $this->printer_catalog = $billCustomizationService->defaultPrinterCatalog();
+        }
 
         SiteSetting::set('billing_profiles', $this->billing_profiles, 'json', 'billing', 'Bill customization profiles');
         SiteSetting::set('billing_default_profiles', $this->billing_default_profiles, 'json', 'billing', 'Bill default profile assignments');
+        SiteSetting::set('printer_catalog', $this->printer_catalog, 'json', 'billing', 'Managed printer catalog');
 
         $auditLogService->log(
             'settings.updated',
@@ -205,6 +217,7 @@ class SystemSettingsManager extends Component
                 'ai_enabled' => $this->ai_enabled,
                 'ai_model' => $this->ai_model,
                 'billing_profile_count' => count($this->billing_profiles),
+                'printer_catalog_count' => count($this->printer_catalog),
             ],
             auth()->id()
         );
@@ -317,6 +330,16 @@ class SystemSettingsManager extends Component
             'billing_profiles.*.footer_note' => 'nullable|string|max:255',
             'billing_default_profiles.invoice_pdf' => 'nullable|string|max:100',
             'billing_default_profiles.pos_receipt' => 'nullable|string|max:100',
+            'printer_catalog' => 'nullable|array',
+            'printer_catalog.*.id' => 'required|string|max:100',
+            'printer_catalog.*.alias' => 'required|string|max:120',
+            'printer_catalog.*.queue_name' => 'nullable|string|max:160',
+            'printer_catalog.*.connection_type' => 'required|in:usb,network,shared,virtual',
+            'printer_catalog.*.bill_types' => 'required|array|min:1',
+            'printer_catalog.*.bill_types.*' => 'required|in:invoice_pdf,pos_receipt,any',
+            'printer_catalog.*.paper_size' => 'required|in:a4,letter,thermal_80,thermal_58',
+            'printer_catalog.*.device_scope' => 'required|in:counter,backoffice,shared',
+            'printer_catalog.*.notes' => 'nullable|string|max:255',
         ];
     }
 
@@ -465,6 +488,7 @@ class SystemSettingsManager extends Component
                 ])->filter(fn ($value) => filled($value))->count(),
             ],
             'checklist' => $checklist,
+            'printerCatalog' => $this->printer_catalog,
         ]);
     }
 
@@ -501,5 +525,41 @@ class SystemSettingsManager extends Component
     {
         $this->billing_profiles = $billCustomizationService->defaultProfiles();
         $this->billing_default_profiles = $billCustomizationService->defaultAssignments();
+    }
+
+    public function addPrinter(BillCustomizationService $billCustomizationService): void
+    {
+        $this->printer_catalog[] = $billCustomizationService->normalizePrinter([
+            'id' => 'printer-'.str()->lower(str()->random(8)),
+            'alias' => 'New Printer',
+            'bill_types' => ['pos_receipt'],
+            'paper_size' => 'thermal_80',
+            'device_scope' => 'counter',
+            'connection_type' => 'usb',
+        ]);
+    }
+
+    public function removePrinter(int $index): void
+    {
+        if (! isset($this->printer_catalog[$index])) {
+            return;
+        }
+
+        $removedAlias = $this->printer_catalog[$index]['alias'] ?? null;
+        unset($this->printer_catalog[$index]);
+        $this->printer_catalog = array_values($this->printer_catalog);
+
+        if ($removedAlias) {
+            foreach ($this->billing_profiles as $profileIndex => $profile) {
+                if (($profile['printer_match'] ?? '') === $removedAlias) {
+                    $this->billing_profiles[$profileIndex]['printer_match'] = '';
+                }
+            }
+        }
+    }
+
+    public function resetPrinterCatalog(BillCustomizationService $billCustomizationService): void
+    {
+        $this->printer_catalog = $billCustomizationService->defaultPrinterCatalog();
     }
 }

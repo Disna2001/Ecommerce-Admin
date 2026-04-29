@@ -25,6 +25,7 @@
                     :billing-default-profiles="$billing_default_profiles"
                     :billing-preview-company="$billingPreviewCompany"
                     :billing-preview-documents="$billingPreviewDocuments"
+                    :printer-catalog="$printerCatalog"
                 />
             @endif
 

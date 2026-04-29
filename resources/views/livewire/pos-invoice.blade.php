@@ -6,13 +6,16 @@
     toastOpen: false,
     toastMessage: '',
     toastTone: 'success',
+    printerCatalog: @js($printerCatalog),
     defaultPrinterHint: @js($receiptProfile['printer_match'] ?? ''),
     printerHint: '',
+    usbPrinterName: '',
     inputMode: @entangle('input_mode').live,
     deviceType: 'desktop',
     fullscreenActive: false,
     initPrintRouting() {
-        this.printerHint = localStorage.getItem('posPreferredPrinter') || this.defaultPrinterHint;
+        this.usbPrinterName = localStorage.getItem('posUsbPrinterName') || '';
+        this.printerHint = localStorage.getItem('posPreferredPrinter') || this.matchCatalogPrinter(this.usbPrinterName) || this.defaultPrinterHint;
         this.inputMode = localStorage.getItem('posInputMode') || this.inputMode || 'keyboard_scanner';
         const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
         if (window.innerWidth < 640) {
@@ -25,6 +28,58 @@
     },
     persistPrinterHint() {
         localStorage.setItem('posPreferredPrinter', this.printerHint || '');
+    },
+    matchCatalogPrinter(rawHint) {
+        const hint = (rawHint || '').trim().toLowerCase();
+        if (!hint) {
+            return '';
+        }
+
+        const match = (this.printerCatalog || []).find((printer) => {
+            const alias = (printer.alias || '').trim().toLowerCase();
+            const queue = (printer.queue_name || '').trim().toLowerCase();
+            return (alias && hint.includes(alias)) || (queue && hint.includes(queue)) || (queue && queue.includes(hint));
+        });
+
+        return match?.alias || '';
+    },
+    async detectUsbPrinter() {
+        if (!navigator.usb?.requestDevice) {
+            this.toastOpen = true;
+            this.toastMessage = 'USB printer detection needs Chrome or Edge on this counter PC.';
+            this.toastTone = 'warning';
+            setTimeout(() => this.toastOpen = false, 3200);
+            return;
+        }
+
+        try {
+            const device = await navigator.usb.requestDevice({
+                filters: [{ vendorId: 0x1FC9 }],
+            });
+
+            this.usbPrinterName = device.productName || 'Xprinter USB device';
+            localStorage.setItem('posUsbPrinterName', this.usbPrinterName);
+
+            const matchedAlias = this.matchCatalogPrinter(this.usbPrinterName);
+            if (matchedAlias) {
+                this.printerHint = matchedAlias;
+                this.persistPrinterHint();
+            }
+
+            this.toastOpen = true;
+            this.toastMessage = matchedAlias
+                ? `Printer detected and matched to ${matchedAlias}.`
+                : `USB printer detected: ${this.usbPrinterName}. Select its alias if needed.`;
+            this.toastTone = 'success';
+            setTimeout(() => this.toastOpen = false, 3600);
+        } catch (error) {
+            this.toastOpen = true;
+            this.toastMessage = error?.name === 'NotFoundError'
+                ? 'No printer was selected.'
+                : 'Printer detection was not completed.';
+            this.toastTone = 'warning';
+            setTimeout(() => this.toastOpen = false, 3200);
+        }
     },
     persistInputMode() {
         localStorage.setItem('posInputMode', this.inputMode || 'keyboard_scanner');
@@ -107,6 +162,19 @@
                         <option value="manual">Manual</option>
                     </select>
                 </label>
+                <label class="pos-chip pos-chip--interactive">
+                    <span>Printer</span>
+                    <select x-model="printerHint" @change="persistPrinterHint()" class="pos-chip__select">
+                        <option value="">Select printer</option>
+                        @foreach($printerCatalog as $printer)
+                            <option value="{{ $printer['alias'] }}">{{ $printer['alias'] }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <button type="button" @click="detectUsbPrinter()" class="pos-button pos-button--ghost">
+                    <i class="fas fa-plug"></i>
+                    <span>Detect Printer</span>
+                </button>
                 <div class="pos-chip">
                     <span>/ or Ctrl+K</span>
                     <strong>Focus Search</strong>
@@ -132,6 +200,19 @@
                     <span>Reset Sale</span>
                 </button>
             </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="pos-chip">
+                <span>Bill routing</span>
+                <strong x-text="printerHint || 'No printer selected'"></strong>
+            </div>
+            <template x-if="usbPrinterName">
+                <div class="pos-chip">
+                    <span>USB device</span>
+                    <strong x-text="usbPrinterName"></strong>
+                </div>
+            </template>
         </div>
 
         <div class="pos-metrics">

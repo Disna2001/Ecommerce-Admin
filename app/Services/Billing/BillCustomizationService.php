@@ -8,6 +8,36 @@ use Illuminate\Support\Facades\Storage;
 
 class BillCustomizationService
 {
+    public function defaultPrinterCatalog(): array
+    {
+        return [
+            [
+                'id' => 'printer-office-a4',
+                'alias' => 'Office A4',
+                'queue_name' => '',
+                'connection_type' => 'network',
+                'bill_types' => ['invoice_pdf'],
+                'paper_size' => 'a4',
+                'device_scope' => 'backoffice',
+                'auto_print' => false,
+                'notes' => 'Primary printer for invoice PDFs and office documents.',
+                'enabled' => true,
+            ],
+            [
+                'id' => 'printer-counter-thermal',
+                'alias' => 'Counter Thermal',
+                'queue_name' => '',
+                'connection_type' => 'usb',
+                'bill_types' => ['pos_receipt'],
+                'paper_size' => 'thermal_80',
+                'device_scope' => 'counter',
+                'auto_print' => true,
+                'notes' => 'Thermal receipt printer used at the POS counter.',
+                'enabled' => true,
+            ],
+        ];
+    }
+
     public function defaultProfiles(): array
     {
         return [
@@ -95,6 +125,20 @@ class BillCustomizationService
         }
 
         return array_merge($this->defaultAssignments(), $stored);
+    }
+
+    public function configuredPrinterCatalog(): array
+    {
+        $stored = SiteSetting::get('printer_catalog', []);
+
+        if (! is_array($stored) || $stored === []) {
+            return $this->defaultPrinterCatalog();
+        }
+
+        return array_values(array_map(
+            fn (array $printer) => $this->normalizePrinter($printer),
+            array_filter($stored, 'is_array')
+        ));
     }
 
     public function resolveProfile(string $billType, array $context = []): array
@@ -252,6 +296,48 @@ class BillCustomizationService
             'show_terms',
         ] as $key) {
             $normalized[$key] = (bool) $normalized[$key];
+        }
+
+        return $normalized;
+    }
+
+    public function normalizePrinter(array $printer): array
+    {
+        $defaults = [
+            'id' => 'printer-'.substr(md5(json_encode($printer)), 0, 8),
+            'alias' => 'Printer',
+            'queue_name' => '',
+            'connection_type' => 'usb',
+            'bill_types' => ['pos_receipt'],
+            'paper_size' => 'thermal_80',
+            'device_scope' => 'counter',
+            'auto_print' => false,
+            'notes' => '',
+            'enabled' => true,
+        ];
+
+        $normalized = array_merge($defaults, $printer);
+        $normalized['enabled'] = (bool) $normalized['enabled'];
+        $normalized['auto_print'] = (bool) $normalized['auto_print'];
+        $normalized['bill_types'] = collect($normalized['bill_types'] ?? [])
+            ->filter(fn ($type) => in_array($type, ['invoice_pdf', 'pos_receipt', 'any'], true))
+            ->values()
+            ->all();
+
+        if ($normalized['bill_types'] === []) {
+            $normalized['bill_types'] = ['pos_receipt'];
+        }
+
+        if (! in_array($normalized['connection_type'], ['usb', 'network', 'shared', 'virtual'], true)) {
+            $normalized['connection_type'] = 'usb';
+        }
+
+        if (! in_array($normalized['paper_size'], ['a4', 'letter', 'thermal_80', 'thermal_58'], true)) {
+            $normalized['paper_size'] = 'thermal_80';
+        }
+
+        if (! in_array($normalized['device_scope'], ['counter', 'backoffice', 'shared'], true)) {
+            $normalized['device_scope'] = 'counter';
         }
 
         return $normalized;

@@ -1128,17 +1128,15 @@ class PosInvoice extends Component
     {
         $billCustomizationService = app(BillCustomizationService::class);
         $billingProfiles = $billCustomizationService->configuredProfiles();
+        $printerCatalog = collect($billCustomizationService->configuredPrinterCatalog())
+            ->filter(fn (array $printer) => $printer['enabled'])
+            ->values()
+            ->all();
         $receiptProfile = $billCustomizationService->resolveProfile('pos_receipt', [
             'device_type' => 'desktop',
             'input_mode' => $this->input_mode,
             'printer_hint' => 'Counter Thermal',
         ]);
-        $printerOptions = collect($billingProfiles)
-            ->pluck('printer_match')
-            ->filter(fn ($printer) => filled($printer))
-            ->unique()
-            ->values()
-            ->all();
 
         return view('livewire.pos-invoice', [
             'held_sales' => Invoice::with('items')
@@ -1150,7 +1148,7 @@ class PosInvoice extends Component
             'siteName' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
             'receiptProfile' => $receiptProfile,
             'billingProfiles' => $billingProfiles,
-            'printerOptions' => $printerOptions,
+            'printerCatalog' => $printerCatalog,
             'company' => $billCustomizationService->companyPayload(),
         ])->layout('layouts.admin-pos');
     }
