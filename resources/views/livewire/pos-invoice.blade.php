@@ -27,8 +27,21 @@
     persistInputMode() {
         localStorage.setItem('posInputMode', this.inputMode || 'keyboard_scanner');
     }
-}" x-init="initPrintRouting()"
-    x-on:item-added.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'success'; setTimeout(() => toastOpen = false, 2600)"
+}" x-init="initPrintRouting(); $nextTick(() => { if (window.innerWidth >= 768) { $refs.productSearch?.focus(); } })"
+    x-on:keydown.window="
+        const tag = ($event.target.tagName || '').toUpperCase();
+        const editing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
+        if (($event.key === '/' || ($event.ctrlKey && $event.key.toLowerCase() === 'k')) && !editing) {
+            $event.preventDefault();
+            $refs.productSearch?.focus();
+            $refs.productSearch?.select?.();
+        }
+        if ($event.key === 'F8') {
+            $event.preventDefault();
+            $wire.openPaymentModal();
+        }
+    "
+    x-on:item-added.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'success'; $nextTick(() => { $refs.productSearch?.focus(); $refs.productSearch?.select?.(); }); setTimeout(() => toastOpen = false, 2600)"
     x-on:show-success.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'success'; setTimeout(() => toastOpen = false, 3200)"
     x-on:show-error.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'error'; setTimeout(() => toastOpen = false, 3200)"
     x-on:show-warning.window="toastOpen = true; toastMessage = $event.detail.message; toastTone = 'warning'; setTimeout(() => toastOpen = false, 3200)">
@@ -51,6 +64,14 @@
                 <div class="pos-chip pos-chip--mono">
                     <span>Invoice</span>
                     <strong>{{ $invoice_number }}</strong>
+                </div>
+                <div class="pos-chip">
+                    <span>/ or Ctrl+K</span>
+                    <strong>Focus Search</strong>
+                </div>
+                <div class="pos-chip">
+                    <span>F8</span>
+                    <strong>Review Sale</strong>
                 </div>
                 <a href="{{ route('admin.invoices') }}" class="pos-button pos-button--ghost">
                     <i class="fas fa-file-invoice-dollar"></i>
@@ -110,7 +131,9 @@
                     <i class="fas fa-barcode pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input
                         type="text"
+                        x-ref="productSearch"
                         wire:model.live.debounce.250ms="searchTerm"
+                        wire:keydown.enter.prevent="selectTopSearchResult"
                         placeholder="Search by name, SKU, barcode, item code, or model..."
                         class="w-full rounded-2xl border-slate-200 bg-white py-3 pl-12 pr-4 text-sm shadow-none focus:ring-0"
                     >
@@ -204,7 +227,11 @@
                             <div class="mt-4 grid grid-cols-[92px_1fr_96px] gap-3">
                                 <label class="pos-field-group">
                                     <span>Qty</span>
-                                    <input type="number" wire:change="updateQuantity({{ $index }}, $event.target.value)" value="{{ $item['quantity'] }}" min="1" max="{{ $item['stock_quantity'] }}" class="pos-field text-center">
+                                    <div class="pos-stepper">
+                                        <button type="button" wire:click="decrementQuantity({{ $index }})" class="pos-stepper__button" @disabled($item['quantity'] <= 1)>-</button>
+                                        <input type="number" wire:change="updateQuantity({{ $index }}, $event.target.value)" value="{{ $item['quantity'] }}" min="1" max="{{ $item['stock_quantity'] }}" class="pos-field pos-stepper__input text-center">
+                                        <button type="button" wire:click="incrementQuantity({{ $index }})" class="pos-stepper__button" @disabled($item['quantity'] >= $item['stock_quantity'])>+</button>
+                                    </div>
                                 </label>
                                 <label class="pos-field-group">
                                     <span>Discount %</span>
@@ -235,6 +262,30 @@
                     </div>
 
                     <div class="space-y-3">
+                        <div class="pos-field-group relative">
+                            <div class="flex items-center justify-between gap-3">
+                                <span>Find customer</span>
+                                <button type="button" wire:click="setWalkInCustomer" class="pos-mini-link">Walk-in</button>
+                            </div>
+                            <input type="text" wire:model.live.debounce.250ms="customerLookup" class="pos-field" placeholder="Search by customer name, phone, or email">
+
+                            @if($showCustomerResults && count($customerResults) > 0)
+                                <div class="pos-customer-results">
+                                    @foreach($customerResults as $result)
+                                        <button type="button" wire:click="selectCustomerProfile('{{ $result['type'] }}', {{ $result['id'] }})" class="pos-customer-result">
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold text-slate-900">{{ $result['name'] }}</p>
+                                                <p class="mt-1 truncate text-xs text-slate-500">
+                                                    {{ $result['email'] ?: ($result['phone'] ?: 'No contact saved') }}
+                                                </p>
+                                            </div>
+                                            <span class="pos-badge">{{ $result['source'] }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
                         <label class="pos-field-group">
                             <span>Customer name</span>
                             <input type="text" wire:model="customer_name" class="pos-field">
@@ -335,6 +386,10 @@
                             <i class="fas fa-check-circle"></i>
                             <span>Review and Complete Sale</span>
                         </button>
+
+                        <p class="text-center text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
+                            Hotkey: F8 opens the settlement review
+                        </p>
                     </div>
                 </div>
 
@@ -804,6 +859,38 @@
             cursor: pointer;
         }
 
+        .pos-stepper {
+            display: grid;
+            grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+            gap: 0.35rem;
+            align-items: center;
+        }
+
+        .pos-stepper__button {
+            height: 2.8rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #334155;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .dark .pos-stepper__button {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.78);
+            color: #e2e8f0;
+        }
+
+        .pos-stepper__button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .pos-stepper__input {
+            min-width: 0;
+        }
+
         .pos-metrics {
             display: grid;
             gap: 0.75rem;
@@ -996,6 +1083,54 @@
             color: #f8fafc;
         }
 
+        .pos-customer-results {
+            position: absolute;
+            top: calc(100% + 0.45rem);
+            left: 0;
+            right: 0;
+            z-index: 20;
+            display: grid;
+            gap: 0.45rem;
+            max-height: 16rem;
+            overflow: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.1rem;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 0.45rem;
+            box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.4);
+        }
+
+        .dark .pos-customer-results {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.96);
+        }
+
+        .pos-customer-result {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.95rem;
+            background: rgba(248, 250, 252, 0.88);
+            padding: 0.72rem 0.8rem;
+            text-align: left;
+        }
+
+        .dark .pos-customer-result {
+            border-color: #334155;
+            background: rgba(15, 23, 42, 0.84);
+        }
+
+        .pos-customer-result:hover {
+            border-color: #a5b4fc;
+            background: rgba(238, 242, 255, 0.96);
+        }
+
+        .dark .pos-customer-result:hover {
+            background: rgba(30, 41, 59, 0.94);
+        }
+
         .pos-line-total {
             display: flex;
             flex-direction: column;
@@ -1179,6 +1314,12 @@
             .pos-rail {
                 align-content: start;
                 overflow: auto;
+            }
+
+            .pos-rail > .pos-panel:nth-child(2) {
+                position: sticky;
+                top: 0;
+                z-index: 3;
             }
         }
 

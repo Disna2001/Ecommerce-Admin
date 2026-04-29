@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\SiteSetting;
 use App\Models\Stock;
+use App\Models\User;
 use App\Services\AuditLogService;
 use App\Services\Billing\BillCustomizationService;
 use App\Services\Inventory\StockMovementService;
@@ -37,6 +38,12 @@ class PosInvoice extends Component
     public $customer_phone = '';
 
     public $customer_address = '';
+
+    public $customerLookup = '';
+
+    public $customerResults = [];
+
+    public $showCustomerResults = false;
 
     // Invoice info
     public $invoice_number;
@@ -140,6 +147,81 @@ class PosInvoice extends Component
         }
     }
 
+    public function updatedCustomerLookup()
+    {
+        if (strlen(trim($this->customerLookup)) < 2) {
+            $this->customerResults = [];
+            $this->showCustomerResults = false;
+
+            return;
+        }
+
+        $term = trim($this->customerLookup);
+        $results = collect();
+
+        Invoice::query()
+            ->select(['id', 'customer_name', 'customer_email', 'customer_phone', 'customer_address'])
+            ->where(function (Builder $query) use ($term) {
+                $query->where('customer_name', 'like', '%'.$term.'%')
+                    ->orWhere('customer_email', 'like', '%'.$term.'%')
+                    ->orWhere('customer_phone', 'like', '%'.$term.'%');
+            })
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->each(function (Invoice $invoice) use ($results) {
+                $results->push([
+                    'type' => 'invoice',
+                    'id' => $invoice->id,
+                    'name' => $invoice->customer_name ?: 'Walk-in customer',
+                    'email' => $invoice->customer_email,
+                    'phone' => $invoice->customer_phone,
+                    'address' => $invoice->customer_address,
+                    'source' => 'Recent invoice',
+                ]);
+            });
+
+        User::query()
+            ->select(['id', 'name', 'email', 'phone', 'address'])
+            ->where('user_type', 'regular')
+            ->where(function (Builder $query) use ($term) {
+                $query->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('email', 'like', '%'.$term.'%')
+                    ->orWhere('phone', 'like', '%'.$term.'%');
+            })
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->each(function (User $user) use ($results) {
+                $results->push([
+                    'type' => 'user',
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'address' => $user->address,
+                    'source' => 'Registered customer',
+                ]);
+            });
+
+        $this->customerResults = $results
+            ->unique(fn (array $result) => strtolower(trim($result['email'] ?: $result['phone'] ?: $result['name'])))
+            ->take(6)
+            ->values()
+            ->all();
+
+        $this->showCustomerResults = ! empty($this->customerResults);
+    }
+
+    public function selectTopSearchResult(): void
+    {
+        $topResult = $this->searchResults[0] ?? null;
+
+        if ($topResult) {
+            $this->selectProduct(is_array($topResult) ? $topResult['id'] : $topResult->id);
+        }
+    }
+
     public function selectProduct($productId)
     {
         $product = Stock::find($productId);
@@ -196,6 +278,26 @@ class PosInvoice extends Component
             $this->recalculateLineItem($index);
             $this->calculateCart();
         }
+    }
+
+    public function incrementQuantity($index): void
+    {
+        if (! isset($this->cart[$index])) {
+            return;
+        }
+
+        $nextQuantity = (int) $this->cart[$index]['quantity'] + 1;
+        $this->updateQuantity($index, $nextQuantity);
+    }
+
+    public function decrementQuantity($index): void
+    {
+        if (! isset($this->cart[$index])) {
+            return;
+        }
+
+        $nextQuantity = max(1, (int) $this->cart[$index]['quantity'] - 1);
+        $this->updateQuantity($index, $nextQuantity);
     }
 
     public function removeItem($index)
@@ -295,9 +397,46 @@ class PosInvoice extends Component
         $this->customer_email = '';
         $this->customer_phone = '';
         $this->customer_address = '';
+        $this->customerLookup = '';
+        $this->customerResults = [];
+        $this->showCustomerResults = false;
         $this->notes = '';
         $this->payment_method = 'cash';
         $this->generateInvoiceNumber();
+    }
+
+    public function setWalkInCustomer(): void
+    {
+        $this->customer_name = 'Walk-in customer';
+
+        if (blank($this->customerLookup)) {
+            $this->customerLookup = $this->customer_name;
+        }
+    }
+
+    public function selectCustomerProfile(string $type, int $id): void
+    {
+        if ($type === 'invoice') {
+            $record = Invoice::find($id, ['id', 'customer_name', 'customer_email', 'customer_phone', 'customer_address']);
+        } else {
+            $record = User::find($id, ['id', 'name', 'email', 'phone', 'address']);
+        }
+
+        if (! $record) {
+            $this->dispatch('show-error', message: 'Customer profile could not be found.');
+
+            return;
+        }
+
+        $this->customer_name = $type === 'invoice' ? ($record->customer_name ?: 'Walk-in customer') : $record->name;
+        $this->customer_email = $type === 'invoice' ? ($record->customer_email ?: '') : ($record->email ?: '');
+        $this->customer_phone = $type === 'invoice' ? ($record->customer_phone ?: '') : ($record->phone ?: '');
+        $this->customer_address = $type === 'invoice' ? ($record->customer_address ?: '') : ($record->address ?: '');
+        $this->customerLookup = $this->customer_name;
+        $this->customerResults = [];
+        $this->showCustomerResults = false;
+
+        $this->dispatch('show-success', message: 'Customer details filled into the counter form.');
     }
 
     public function openStockIntake(int $stockId): void
