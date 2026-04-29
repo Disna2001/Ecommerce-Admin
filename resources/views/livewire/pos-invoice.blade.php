@@ -354,6 +354,43 @@
                             </label>
                         </div>
 
+                        @if($payment_method === 'split')
+                            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">Split payment</p>
+                                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                    <label class="pos-field-group">
+                                        <span>Primary tender</span>
+                                        <select wire:model="split_primary_method" class="pos-field">
+                                            @foreach(array_filter($paymentMethods, fn ($label, $value) => $value !== 'split', ARRAY_FILTER_USE_BOTH) as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('split_primary_method') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                                    </label>
+                                    <label class="pos-field-group">
+                                        <span>Primary amount</span>
+                                        <input type="number" wire:model.live="split_primary_amount" min="0" step="0.01" class="pos-field text-right">
+                                        @error('split_primary_amount') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                                    </label>
+                                    <label class="pos-field-group">
+                                        <span>Secondary tender</span>
+                                        <select wire:model="split_secondary_method" class="pos-field">
+                                            @foreach(array_filter($paymentMethods, fn ($label, $value) => $value !== 'split', ARRAY_FILTER_USE_BOTH) as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('split_secondary_method') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                                    </label>
+                                    <label class="pos-field-group">
+                                        <span>Secondary amount</span>
+                                        <input type="number" wire:model.live="split_secondary_amount" min="0" step="0.01" class="pos-field text-right">
+                                        @error('split_secondary_amount') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
+                                    </label>
+                                </div>
+                                <p class="mt-3 text-xs text-indigo-700">The two tender amounts combine into the paid total automatically.</p>
+                            </div>
+                        @endif
+
                         <label class="pos-field-group">
                             <span>Address</span>
                             <textarea wire:model="customer_address" rows="2" class="pos-field resize-none"></textarea>
@@ -403,6 +440,19 @@
                                 <button wire:click="applyQuickTender('plus_5000')" type="button" class="pos-quick-button">+ 5000</button>
                             </div>
                         </div>
+
+                        @if($payment_method === 'split')
+                            <div class="rounded-2xl bg-white/75 p-4 text-sm text-emerald-800">
+                                <div class="flex items-center justify-between gap-3">
+                                    <span>{{ $paymentMethods[$split_primary_method] ?? $split_primary_method }}</span>
+                                    <strong>Rs {{ number_format($split_primary_amount, 2) }}</strong>
+                                </div>
+                                <div class="mt-2 flex items-center justify-between gap-3">
+                                    <span>{{ $paymentMethods[$split_secondary_method] ?? $split_secondary_method }}</span>
+                                    <strong>Rs {{ number_format($split_secondary_amount, 2) }}</strong>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">Change Due</p>
@@ -529,7 +579,7 @@
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Customer</span><strong class="text-slate-900">{{ $customer_name ?: 'Walk-in customer' }}</strong></div>
                                 <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Email</span><strong class="text-slate-900">{{ $customer_email ?: '-' }}</strong></div>
-                                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Method</span><strong class="text-slate-900">{{ $paymentMethods[$payment_method] ?? $payment_method }}</strong></div>
+                                <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Method</span><strong class="text-slate-900">{{ $this->paymentMethodSummary }}</strong></div>
                                 <div class="flex items-center justify-between text-sm"><span class="text-slate-500">Cart lines</span><strong class="text-slate-900">{{ count($cart) }}</strong></div>
                             </div>
                         </div>
@@ -564,6 +614,19 @@
                             <div class="flex items-center justify-between text-sm"><span class="text-emerald-700">Paid</span><strong class="text-emerald-700">Rs {{ number_format($amount_paid, 2) }}</strong></div>
                             <div class="flex items-center justify-between text-sm"><span class="text-emerald-700">Change</span><strong class="text-emerald-700">Rs {{ number_format($change_due, 2) }}</strong></div>
                         </div>
+
+                        @if($payment_method === 'split')
+                            <div class="mt-4 rounded-2xl bg-white/80 p-4 text-sm text-emerald-800">
+                                <div class="flex items-center justify-between gap-3">
+                                    <span>{{ $paymentMethods[$split_primary_method] ?? $split_primary_method }}</span>
+                                    <strong>Rs {{ number_format($split_primary_amount, 2) }}</strong>
+                                </div>
+                                <div class="mt-2 flex items-center justify-between gap-3">
+                                    <span>{{ $paymentMethods[$split_secondary_method] ?? $split_secondary_method }}</span>
+                                    <strong>Rs {{ number_format($split_secondary_amount, 2) }}</strong>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="mt-5 rounded-2xl bg-white/80 p-4 text-sm text-emerald-800">
                             @if($amount_paid >= $cartTotal)
@@ -718,7 +781,7 @@
                             </div>
                             <div class="mt-3 flex items-center justify-between text-sm">
                                 <span class="text-slate-500">Payment</span>
-                                <span class="font-semibold text-slate-900">{{ $paymentMethods[$createdInvoice->payment_method] ?? $createdInvoice->payment_method }}</span>
+                                <span class="font-semibold text-slate-900">{{ $this->paymentMethodSummaryForInvoice($createdInvoice) }}</span>
                             </div>
                             @if($createdInvoice->customer_email)
                                 <div class="mt-4 rounded-2xl bg-white px-4 py-3 text-sm">
@@ -778,7 +841,7 @@
                     <div class="receipt-row" data-receipt-customer-email><span>Email</span><strong>{{ $receiptInvoice->customer_email ?: '-' }}</strong></div>
                     <div class="receipt-row" data-receipt-customer-phone><span>Phone</span><strong>{{ $receiptInvoice->customer_phone ?: '-' }}</strong></div>
                     <div class="receipt-row" data-receipt-customer-address><span>Address</span><strong>{{ $receiptInvoice->customer_address ?: '-' }}</strong></div>
-                    <div class="receipt-row" data-receipt-payment-method><span>Payment</span><strong>{{ $paymentMethods[$receiptInvoice->payment_method] ?? $receiptInvoice->payment_method }}</strong></div>
+                    <div class="receipt-row" data-receipt-payment-method><span>Payment</span><strong>{{ $this->paymentMethodSummaryForInvoice($receiptInvoice) }}</strong></div>
                 </div>
 
                 <div class="receipt-section">

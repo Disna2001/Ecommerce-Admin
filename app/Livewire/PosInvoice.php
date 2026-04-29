@@ -58,6 +58,14 @@ class PosInvoice extends Component
 
     public $change_due = 0;
 
+    public $split_primary_method = 'cash';
+
+    public $split_primary_amount = 0;
+
+    public $split_secondary_method = 'card';
+
+    public $split_secondary_amount = 0;
+
     // Search
     public $searchTerm = '';
 
@@ -75,6 +83,7 @@ class PosInvoice extends Component
         'mobile_money' => 'Mobile Money',
         'cheque' => 'Cheque',
         'credit' => 'Store Credit',
+        'split' => 'Split Payment',
     ];
 
     // UI State
@@ -377,12 +386,56 @@ class PosInvoice extends Component
 
     public function updatedAmountPaid()
     {
+        if ($this->payment_method === 'split') {
+            return;
+        }
+
+        $this->calculateChange();
+    }
+
+    public function updatedSplitPrimaryAmount()
+    {
+        $this->syncSplitAmounts();
+    }
+
+    public function updatedSplitSecondaryAmount()
+    {
+        $this->syncSplitAmounts();
+    }
+
+    public function updatedPaymentMethod()
+    {
+        if ($this->payment_method === 'split') {
+            $this->initializeSplitPayment();
+
+            return;
+        }
+
+        if ($this->amount_paid <= 0) {
+            $this->amount_paid = $this->cartTotal;
+        }
+
         $this->calculateChange();
     }
 
     public function calculateChange()
     {
         $this->change_due = max(0, $this->amount_paid - $this->cartTotal);
+    }
+
+    public function initializeSplitPayment(): void
+    {
+        $this->split_primary_method = $this->split_primary_method === 'split' ? 'cash' : $this->split_primary_method;
+        $this->split_secondary_method = $this->split_secondary_method === 'split' ? 'card' : $this->split_secondary_method;
+        $this->split_primary_amount = $this->cartTotal;
+        $this->split_secondary_amount = 0;
+        $this->syncSplitAmounts();
+    }
+
+    public function syncSplitAmounts(): void
+    {
+        $this->amount_paid = max(0, (float) $this->split_primary_amount) + max(0, (float) $this->split_secondary_amount);
+        $this->calculateChange();
     }
 
     public function getCartItemsCountProperty()
@@ -417,6 +470,11 @@ class PosInvoice extends Component
             default => $total,
         };
 
+        if ($this->payment_method === 'split') {
+            $this->split_primary_amount = $this->amount_paid;
+            $this->split_secondary_amount = 0;
+        }
+
         $this->calculateChange();
     }
 
@@ -437,6 +495,10 @@ class PosInvoice extends Component
         $this->showCustomerResults = false;
         $this->notes = '';
         $this->payment_method = 'cash';
+        $this->split_primary_method = 'cash';
+        $this->split_primary_amount = 0;
+        $this->split_secondary_method = 'card';
+        $this->split_secondary_amount = 0;
         $this->heldInvoiceId = null;
         $this->generateInvoiceNumber();
     }
@@ -615,8 +677,97 @@ class PosInvoice extends Component
         }
 
         $this->amount_paid = $this->cartTotal;
+        if ($this->payment_method === 'split') {
+            $this->initializeSplitPayment();
+        }
         $this->calculateChange();
         $this->showPaymentModal = true;
+    }
+
+    public function getPaymentMethodSummaryProperty(): string
+    {
+        if ($this->payment_method !== 'split') {
+            return $this->paymentMethods[$this->payment_method] ?? Str::headline((string) $this->payment_method);
+        }
+
+        $first = $this->paymentMethods[$this->split_primary_method] ?? Str::headline((string) $this->split_primary_method);
+        $second = $this->paymentMethods[$this->split_secondary_method] ?? Str::headline((string) $this->split_secondary_method);
+
+        return sprintf(
+            'Split: %s (Rs %s) + %s (Rs %s)',
+            $first,
+            number_format((float) $this->split_primary_amount, 2),
+            $second,
+            number_format((float) $this->split_secondary_amount, 2)
+        );
+    }
+
+    protected function splitPaymentMetaBlock(): ?string
+    {
+        if ($this->payment_method !== 'split') {
+            return null;
+        }
+
+        return json_encode([
+            'primary_method' => $this->split_primary_method,
+            'primary_amount' => round((float) $this->split_primary_amount, 2),
+            'secondary_method' => $this->split_secondary_method,
+            'secondary_amount' => round((float) $this->split_secondary_amount, 2),
+        ]);
+    }
+
+    protected function splitPaymentReferenceValue(): ?string
+    {
+        if ($this->payment_method !== 'split') {
+            return null;
+        }
+
+        return '[split-payment]'.$this->splitPaymentMetaBlock();
+    }
+
+    protected function extractSplitPaymentMeta(?string $paymentReference): array
+    {
+        if (! $paymentReference || ! str_contains($paymentReference, '[split-payment]')) {
+            return [
+                'primary_method' => 'cash',
+                'primary_amount' => (float) $this->cartTotal,
+                'secondary_method' => 'card',
+                'secondary_amount' => 0.0,
+            ];
+        }
+
+        [, $payload] = explode('[split-payment]', $paymentReference, 2);
+        $data = json_decode(trim($payload), true);
+
+        return [
+            'primary_method' => $data['primary_method'] ?? 'cash',
+            'primary_amount' => (float) ($data['primary_amount'] ?? $this->cartTotal),
+            'secondary_method' => $data['secondary_method'] ?? 'card',
+            'secondary_amount' => (float) ($data['secondary_amount'] ?? 0),
+        ];
+    }
+
+    public function paymentMethodSummaryForInvoice(?Invoice $invoice): string
+    {
+        if (! $invoice) {
+            return $this->paymentMethodSummary;
+        }
+
+        if ($invoice->payment_method !== 'split') {
+            return $this->paymentMethods[$invoice->payment_method] ?? Str::headline((string) $invoice->payment_method);
+        }
+
+        $meta = $this->extractSplitPaymentMeta($invoice->payment_reference);
+        $first = $this->paymentMethods[$meta['primary_method']] ?? Str::headline((string) $meta['primary_method']);
+        $second = $this->paymentMethods[$meta['secondary_method']] ?? Str::headline((string) $meta['secondary_method']);
+
+        return sprintf(
+            'Split: %s (Rs %s) + %s (Rs %s)',
+            $first,
+            number_format((float) $meta['primary_amount'], 2),
+            $second,
+            number_format((float) $meta['secondary_amount'], 2)
+        );
     }
 
     public function holdSale(AuditLogService $auditLogService): void
@@ -655,8 +806,9 @@ class PosInvoice extends Component
                 'amount_paid' => 0,
                 'balance_due' => $this->cartTotal,
                 'status' => 'draft',
-                'notes' => $this->notes,
+                'notes' => $this->notes ?: null,
                 'payment_method' => $this->payment_method,
+                'payment_reference' => $this->splitPaymentReferenceValue(),
                 'paid_at' => null,
             ]);
             $invoice->save();
@@ -720,7 +872,7 @@ class PosInvoice extends Component
         $this->customer_address = $invoice->customer_address ?: '';
         $this->customerLookup = $this->customer_name;
         $this->notes = $invoice->notes ?: '';
-        $this->payment_method = $invoice->payment_method ?: 'cash';
+        $this->payment_method = $invoice->payment_method === 'split' ? 'split' : ($invoice->payment_method ?: 'cash');
 
         $this->cart = $invoice->items->map(function (InvoiceItem $item) {
             $stock = Stock::find($item->stock_id);
@@ -740,6 +892,16 @@ class PosInvoice extends Component
         })->all();
 
         $this->calculateCart();
+
+        if ($this->payment_method === 'split') {
+            $meta = $this->extractSplitPaymentMeta($invoice->payment_reference);
+            $this->split_primary_method = $meta['primary_method'];
+            $this->split_primary_amount = $meta['primary_amount'];
+            $this->split_secondary_method = $meta['secondary_method'];
+            $this->split_secondary_amount = $meta['secondary_amount'];
+            $this->syncSplitAmounts();
+        }
+
         $this->dispatch('show-success', message: 'Held sale '.$invoice->invoice_number.' restored to the counter.');
     }
 
@@ -801,6 +963,14 @@ class PosInvoice extends Component
             'amount_paid' => 'required|numeric|min:'.($this->cartTotal * 0.5),
         ];
 
+        if ($this->payment_method === 'split') {
+            $rules['split_primary_method'] = 'required|string|different:split_secondary_method|not_in:split';
+            $rules['split_secondary_method'] = 'required|string|different:split_primary_method|not_in:split';
+            $rules['split_primary_amount'] = 'required|numeric|min:0.01';
+            $rules['split_secondary_amount'] = 'required|numeric|min:0.01';
+            $this->syncSplitAmounts();
+        }
+
         // Make email required if send invoice is checked
         if ($this->sendInvoiceEmail) {
             $rules['customer_email'] = 'required|email|max:255';
@@ -838,8 +1008,9 @@ class PosInvoice extends Component
                 'amount_paid' => $this->amount_paid,
                 'balance_due' => max(0, $this->cartTotal - $this->amount_paid),
                 'status' => $this->amount_paid >= $this->cartTotal ? 'paid' : 'sent',
-                'notes' => $this->notes,
+                'notes' => $this->notes ?: null,
                 'payment_method' => $this->payment_method,
+                'payment_reference' => $this->splitPaymentReferenceValue(),
                 'paid_at' => $this->amount_paid >= $this->cartTotal ? now() : null,
             ]);
             $invoice->save();
