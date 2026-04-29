@@ -32,13 +32,15 @@ class ProductDetail extends Component
 
     public function mount(Stock $product)
     {
+        abort_unless($product->is_storefront_live, 404);
+
         $this->product    = $product;
         $this->inWishlist = in_array($product->id, session('wishlist', []));
     }
 
     public function incrementQty()
     {
-        if ($this->quantity < $this->product->quantity) $this->quantity++;
+        if ($this->quantity < $this->product->storefront_available_quantity) $this->quantity++;
     }
 
     public function decrementQty()
@@ -58,16 +60,17 @@ class ProductDetail extends Component
 
     public function addToCart()
     {
-        if ($this->product->quantity <= 0) return;
+        if (! $this->product->is_storefront_live) return;
 
         $cart = session('cart', []);
         $id   = $this->product->id;
         $productPricingService = app(ProductPricingService::class);
+        $availableQuantity = $this->product->storefront_available_quantity;
 
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + $this->quantity, $this->product->quantity);
+            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + $this->quantity, $availableQuantity);
         } else {
-            $cart[$id] = $productPricingService->toCartItem($this->product, $this->quantity);
+            $cart[$id] = $productPricingService->toCartItem($this->product, min($this->quantity, $availableQuantity));
         }
         session(['cart' => $cart]);
 
@@ -162,9 +165,9 @@ class ProductDetail extends Component
 
         $related = Cache::remember('related_products_'.$this->product->id, 600, function () {
             return Stock::with('brand')
+                ->visibleOnStorefront()
                 ->where('category_id', $this->product->category_id)
                 ->where('id','!=',$this->product->id)
-                ->where('status','active')
                 ->limit(4)
                 ->get();
         });

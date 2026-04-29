@@ -77,7 +77,7 @@
                                     {{ $product->discount_badge }}
                                 </span>
                             @endif
-                            @if($product->quantity <= 0)
+                            @if($product->storefront_available_quantity <= 0)
                                 <div class="absolute inset-0 flex items-center justify-center bg-black/40">
                                     <span class="rounded-full bg-white px-3 py-1.5 text-xs font-bold">Out of Stock</span>
                                 </div>
@@ -107,10 +107,10 @@
                                     wire:loading.attr="disabled"
                                     wire:target="addToCart({{ $product->id }})"
                                     class="btn-gradient w-full rounded-xl py-2.5 text-xs font-semibold"
-                                    {{ $product->quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                                    {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
                                 <span wire:loading.remove wire:target="addToCart({{ $product->id }})">
                                     <i class="fas fa-shopping-cart text-xs"></i>
-                                    {{ $product->quantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+                                    {{ $product->storefront_available_quantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
                                 </span>
                                 <span wire:loading wire:target="addToCart({{ $product->id }})">
                                     <i class="fas fa-spinner fa-spin text-xs"></i> Adding...

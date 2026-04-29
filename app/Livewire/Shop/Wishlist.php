@@ -18,8 +18,8 @@ class Wishlist extends Component
         return empty($ids)
             ? collect()
             : Stock::with(['brand','category'])
+                ->visibleOnStorefront()
                 ->whereIn('id',$ids)
-                ->where('status','active')
                 ->get()
                 ->map(function (Stock $product) use ($productPricingService) {
                     $discount = $productPricingService->resolveDiscountForProduct($product);
@@ -51,12 +51,13 @@ class Wishlist extends Component
     {
         $productPricingService = app(ProductPricingService::class);
         $product = Stock::find($id);
-        if (!$product || $product->quantity <= 0) return;
+        if (!$product || !$product->is_storefront_live) return;
 
         $cart = session('cart', []);
+        $availableQuantity = $product->storefront_available_quantity;
 
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = min($cart[$id]['quantity']+1, $product->quantity);
+            $cart[$id]['quantity'] = min($cart[$id]['quantity']+1, $availableQuantity);
         } else {
             $cart[$id] = $productPricingService->toCartItem($product, 1);
         }

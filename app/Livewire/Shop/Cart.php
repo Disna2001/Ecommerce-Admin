@@ -51,11 +51,12 @@ class Cart extends Component
         if (!isset($cart[$id])) return;
 
         $newQty = $cart[$id]['quantity'] + $delta;
+        $availableQuantity = $product?->storefront_available_quantity ?? $newQty;
 
         if ($newQty <= 0) {
             unset($cart[$id]);
         } else {
-            $cart[$id]['quantity'] = $product ? min($newQty, $product->quantity) : $newQty;
+            $cart[$id]['quantity'] = $product ? min($newQty, $availableQuantity) : $newQty;
         }
 
         session(['cart' => $cart]);

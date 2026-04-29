@@ -55,13 +55,18 @@ class CartController extends Controller
     public function add(Request $request, $id, ProductPricingService $productPricingService)
     {
         $product = Stock::with('brand')->findOrFail($id);
+        if (! $product->is_storefront_live) {
+            abort(404);
+        }
+
         $qty     = max(1, (int) $request->input('quantity', 1));
         $cart    = $this->getCart();
+        $availableQuantity = $product->storefront_available_quantity;
  
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + $qty, $product->quantity);
+            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + $qty, $availableQuantity);
         } else {
-            $cart[$id] = $productPricingService->toCartItem($product, $qty);
+            $cart[$id] = $productPricingService->toCartItem($product, min($qty, $availableQuantity));
         }
  
         $this->saveCart($cart);
@@ -82,7 +87,7 @@ class CartController extends Controller
  
         if (isset($cart[$id])) {
             $product = Stock::find($id);
-            $cart[$id]['quantity'] = $product ? min($qty, $product->quantity) : $qty;
+            $cart[$id]['quantity'] = $product ? min($qty, $product->storefront_available_quantity) : $qty;
             $this->saveCart($cart);
         }
  

@@ -1,4 +1,4 @@
-<x-admin.ui.panel title="Product Selection Grid" description="Assign each product to Featured, New, or Deals, then adjust available quantity without leaving the merchandising workspace." padding="p-0">
+<x-admin.ui.panel title="Product Selection Grid" description="Publish products from main stock, control storefront quantity, and then assign them to homepage rails." padding="p-0">
     <div class="p-6">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @forelse($stocks as $stock)
@@ -9,24 +9,29 @@
                                 <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $stock->name }}</p>
                                 <p class="mt-1 text-xs text-slate-400">{{ $stock->sku }} | {{ $stock->category->name ?? 'N/A' }}</p>
                             </div>
-                            <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] {{ $stock->quantity <= 0 ? 'bg-rose-100 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300' : ($stock->isLowStock() ? 'bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300') }}">
-                                {{ $stock->quantity <= 0 ? 'Out' : ($stock->isLowStock() ? 'Low' : 'Ready') }}
+                            <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] {{ $stock->storefront_enabled ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-400/10 dark:text-indigo-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }}">
+                                {{ $stock->storefront_enabled ? 'Published' : 'Private' }}
                             </span>
                         </div>
                         <p class="mt-3 text-sm font-bold text-slate-800 dark:text-slate-200">Rs {{ number_format($stock->selling_price, 2) }}</p>
                         <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
                             <div class="flex items-center justify-between gap-3">
                                 <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Available quantity</p>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Warehouse stock</p>
                                     <p class="mt-1 text-xl font-black text-slate-900 dark:text-white">{{ $stock->quantity }}</p>
-                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Reorder at {{ $stock->reorder_level }}</p>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Storefront live: {{ $stock->storefront_available_quantity }} | Reorder at {{ $stock->reorder_level }}</p>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <button wire:click="adjustQuantity({{ $stock->id }}, 1)" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">+1</button>
-                                    <button wire:click="adjustQuantity({{ $stock->id }}, 5)" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">+5</button>
-                                    <button wire:click="adjustQuantity({{ $stock->id }}, -1)" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">-1</button>
-                                    <button wire:click="adjustQuantity({{ $stock->id }}, -5)" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">-5</button>
+                                    <button wire:click="adjustStorefrontQuantity({{ $stock->id }}, 1)" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">Site +1</button>
+                                    <button wire:click="adjustStorefrontQuantity({{ $stock->id }}, 5)" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">Site +5</button>
+                                    <button wire:click="adjustStorefrontQuantity({{ $stock->id }}, -1)" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Site -1</button>
+                                    <button wire:click="adjustStorefrontQuantity({{ $stock->id }}, -5)" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Site -5</button>
                                 </div>
+                            </div>
+                            <div class="mt-3">
+                                <button wire:click="toggleStorefront({{ $stock->id }})" class="w-full rounded-xl border px-3 py-2 text-xs font-semibold transition {{ $stock->storefront_enabled ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900' : 'border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-500' }}">
+                                    {{ $stock->storefront_enabled ? 'Unpublish from storefront' : 'Publish to storefront' }}
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -317,7 +317,7 @@
                                                 <p class="text-lg font-black text-slate-900 dark:text-slate-50">Rs {{ number_format($product->selling_price,2) }}</p>
                                             @endif
                                             <p class="mt-2 text-xs text-slate-400 dark:text-slate-400">
-                                                {{ $product->quantity > 0 ? $product->quantity.' in stock' : 'Currently unavailable' }}
+                                                {{ $product->storefront_available_quantity > 0 ? $product->storefront_available_quantity.' available' : 'Currently unavailable' }}
                                             </p>
                                         </div>
 
@@ -331,7 +331,7 @@
                                                     wire:target="addToCart({{ $product->id }})"
                                                     class="inline-flex h-10 min-w-[44px] items-center justify-center rounded-full px-4 text-xs font-bold text-white transition hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
                                                     style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})"
-                                                    {{ $product->quantity <= 0 ? 'disabled' : '' }}>
+                                                    {{ $product->storefront_available_quantity <= 0 ? 'disabled' : '' }}>
                                                 <span wire:loading.remove wire:target="addToCart({{ $product->id }})"><i class="fas fa-plus text-xs"></i></span>
                                                 <span wire:loading wire:target="addToCart({{ $product->id }})"><i class="fas fa-spinner fa-spin text-xs"></i></span>
                                             </button>

@@ -64,8 +64,20 @@ class StockMovementService
             throw new RuntimeException("Insufficient stock for {$stock->name} during {$context}.");
         }
 
+        if ($this->shouldAdjustStorefrontAllocation($context) && $stock->storefront_available_quantity < $quantity) {
+            throw new RuntimeException("Insufficient storefront allocation for {$stock->name} during {$context}.");
+        }
+
         $beforeQuantity = $stock->quantity;
+        $beforeStorefrontQuantity = (int) $stock->storefront_quantity;
         $stock->decrement('quantity', $quantity);
+
+        if ($this->shouldAdjustStorefrontAllocation($context)) {
+            $stock->forceFill([
+                'storefront_quantity' => max(0, $beforeStorefrontQuantity - $quantity),
+            ])->save();
+        }
+
         $this->recordMovement($stock->fresh(), 'out', $quantity, $beforeQuantity, $stock->fresh()->quantity, $context, $metadata);
     }
 
@@ -78,8 +90,27 @@ class StockMovementService
         }
 
         $beforeQuantity = $stock->quantity;
+        $beforeStorefrontQuantity = (int) $stock->storefront_quantity;
         $stock->increment('quantity', $quantity);
+
+        if ($this->shouldAdjustStorefrontAllocation($context) && $stock->storefront_enabled) {
+            $restoredStock = $stock->fresh();
+            $restoredStock->forceFill([
+                'storefront_quantity' => min((int) $restoredStock->quantity, $beforeStorefrontQuantity + $quantity),
+            ])->save();
+        }
+
         $this->recordMovement($stock->fresh(), 'in', $quantity, $beforeQuantity, $stock->fresh()->quantity, $context, $metadata);
+    }
+
+    protected function shouldAdjustStorefrontAllocation(string $context): bool
+    {
+        return in_array($context, [
+            'order_checkout',
+            'order_cancelled',
+            'order_refunded',
+            'gateway_payment_failed',
+        ], true);
     }
 
     protected function recordMovement(

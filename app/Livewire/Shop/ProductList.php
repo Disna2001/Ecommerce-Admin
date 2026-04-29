@@ -52,12 +52,13 @@ class ProductList extends Component
     {
         $productPricingService = app(ProductPricingService::class);
         $product = Stock::with('brand')->find($id);
-        if (!$product || $product->quantity <= 0) return;
+        if (!$product || !$product->is_storefront_live) return;
 
         $cart = session('cart', []);
+        $availableQuantity = $product->storefront_available_quantity;
 
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + 1, $product->quantity);
+            $cart[$id]['quantity'] = min($cart[$id]['quantity'] + 1, $availableQuantity);
         } else {
             $cart[$id] = $productPricingService->toCartItem($product, 1);
         }
@@ -99,7 +100,7 @@ class ProductList extends Component
         ])));
 
         $query = Stock::with(['category','brand'])
-            ->where('status','active')
+            ->visibleOnStorefront()
             ->when($this->search, fn($q) => $q->where(function (Builder $searchQuery) {
                 $searchQuery
                     ->where('name', 'like', '%'.$this->search.'%')

@@ -1,4 +1,5 @@
 <div class="grid gap-4 md:grid-cols-3">
+    <x-admin.ui.metric label="Published" :value="$displayStats['published']" hint="Products live on the storefront" tone="emerald" />
     <x-admin.ui.metric label="Featured" :value="count($featuredIds)" hint="Hero rail products" tone="blue" />
     <x-admin.ui.metric label="New Arrivals" :value="count($newArrivalsIds)" hint="Fresh catalog picks" tone="accent" />
     <x-admin.ui.metric label="Deals" :value="count($dealIds)" hint="Promotional items" tone="amber" />

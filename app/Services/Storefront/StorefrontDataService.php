@@ -148,8 +148,8 @@ class StorefrontDataService
         return $this->rememberOrCompute($prefix.md5(json_encode($ids)), 600, function () use ($ids) {
             return !empty($ids)
                 ? Stock::with(['brand', 'category'])
+                    ->visibleOnStorefront()
                     ->whereIn('id', $ids)
-                    ->where('status', 'active')
                     ->get()
                 : collect();
         });

@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\Stock;
 use App\Models\SiteSetting;
 use App\Models\Category;
-use App\Services\Inventory\StockMovementService;
 
 class DisplayItemManager extends Component
 {
@@ -26,6 +25,7 @@ class DisplayItemManager extends Component
     public $showRailQuantity = true;
     public $showRailStockStatus = true;
     public $productsPerRail = 8;
+    public $publishedIds = [];
 
     public function mount()
     {
@@ -42,6 +42,7 @@ class DisplayItemManager extends Component
         $this->showRailQuantity = SiteSetting::get('show_rail_quantity', true);
         $this->showRailStockStatus = SiteSetting::get('show_rail_stock_status', true);
         $this->productsPerRail = (int) SiteSetting::get('products_per_rail', 8);
+        $this->publishedIds = Stock::query()->where('storefront_enabled', true)->pluck('id')->all();
     }
 
     public function toggleFeatured($id)
@@ -90,30 +91,32 @@ class DisplayItemManager extends Component
         $this->dispatch('notify', ['type' => 'success', 'message' => 'Display items saved!']);
     }
 
-    public function adjustQuantity(int $stockId, int $amount, StockMovementService $stockMovementService): void
+    public function toggleStorefront(int $stockId): void
     {
         $stock = Stock::findOrFail($stockId);
+        $enabled = ! $stock->storefront_enabled;
+        $stock->forceFill([
+            'storefront_enabled' => $enabled,
+            'storefront_quantity' => $enabled
+                ? max(1, min((int) $stock->quantity, (int) $stock->storefront_quantity ?: (int) $stock->quantity))
+                : 0,
+        ])->save();
 
-        if ($amount === 0) {
-            return;
-        }
+        $this->publishedIds = Stock::query()->where('storefront_enabled', true)->pluck('id')->all();
+        $this->dispatch('notify', ['type' => 'success', 'message' => $enabled ? $stock->name.' published to the storefront.' : $stock->name.' removed from the storefront.']);
+    }
 
-        if ($amount > 0) {
-            $stockMovementService->increase($stockId, $amount, 'display_manager_adjustment', [
-                'user_id' => auth()->id(),
-                'notes' => 'Quantity increased from storefront display manager.',
-            ]);
-        } else {
-            if ($stock->quantity < abs($amount)) {
-                $this->dispatch('notify', ['type' => 'warning', 'message' => 'Cannot reduce below zero for '.$stock->name.'.']);
-                return;
-            }
+    public function adjustStorefrontQuantity(int $stockId, int $amount): void
+    {
+        $stock = Stock::findOrFail($stockId);
+        $nextQuantity = max(0, min((int) $stock->quantity, (int) $stock->storefront_quantity + $amount));
 
-            $stockMovementService->decrease($stockId, abs($amount), 'display_manager_adjustment', [
-                'user_id' => auth()->id(),
-                'notes' => 'Quantity reduced from storefront display manager.',
-            ]);
-        }
+        $stock->forceFill([
+            'storefront_enabled' => $nextQuantity > 0,
+            'storefront_quantity' => $nextQuantity,
+        ])->save();
+
+        $this->publishedIds = Stock::query()->where('storefront_enabled', true)->pluck('id')->all();
     }
 
     public function render()
@@ -133,6 +136,7 @@ class DisplayItemManager extends Component
             'stocks'     => $stocks,
             'categories' => Category::all(),
             'displayStats' => [
+                'published' => count($this->publishedIds),
                 'featured' => count($this->featuredIds),
                 'new' => count($this->newArrivalsIds),
                 'deals' => count($this->dealIds),

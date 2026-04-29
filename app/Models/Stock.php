@@ -30,6 +30,8 @@ class Stock extends Model
         'location',
         'barcode',
         'status',
+        'storefront_enabled',
+        'storefront_quantity',
         'model_name',
         'model_number',
         'color',
@@ -59,6 +61,8 @@ class Stock extends Model
         'weight'         => 'decimal:2',
         'quantity'       => 'integer',
         'reorder_level'  => 'integer',
+        'storefront_enabled' => 'boolean',
+        'storefront_quantity' => 'integer',
     ];
 
     // -------------------------------------------------------------------------
@@ -127,5 +131,28 @@ class Stock extends Model
     public function isLowStock(): bool
     {
         return $this->quantity <= $this->reorder_level;
+    }
+
+    public function getStorefrontAvailableQuantityAttribute(): int
+    {
+        if (! $this->storefront_enabled) {
+            return 0;
+        }
+
+        return max(0, min((int) $this->quantity, (int) $this->storefront_quantity));
+    }
+
+    public function getIsStorefrontLiveAttribute(): bool
+    {
+        return $this->status === 'active' && $this->storefront_available_quantity > 0;
+    }
+
+    public function scopeVisibleOnStorefront($query)
+    {
+        return $query
+            ->where('status', 'active')
+            ->where('storefront_enabled', true)
+            ->where('storefront_quantity', '>', 0)
+            ->where('quantity', '>', 0);
     }
 }

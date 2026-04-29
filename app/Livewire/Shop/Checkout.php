@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\SiteSetting;
+use App\Models\Stock;
 use App\Services\Notifications\CustomerNotificationService;
 use App\Services\Orders\OrderWorkflowService;
 use App\Services\Payments\PayHereService;
@@ -47,6 +48,15 @@ class Checkout extends Component
         if (empty($cart)) {
             $this->dispatch('notify', type: 'error', message: 'Your cart is empty.');
             return;
+        }
+
+        foreach ($cart as $stockId => $item) {
+            $stock = Stock::find($stockId);
+
+            if (! $stock || ! $stock->is_storefront_live || $stock->storefront_available_quantity < (int) ($item['quantity'] ?? 0)) {
+                $this->dispatch('notify', type: 'error', message: ($item['name'] ?? 'An item').' is no longer available in the requested storefront quantity.');
+                return;
+            }
         }
 
         if ($this->payment_method === 'payhere' && !$payHereService->isConfigured()) {

@@ -131,9 +131,9 @@
                     </div>
 
                     <div class="mb-5 flex items-center gap-2">
-                        @if($product->quantity > 0)
+                        @if($product->storefront_available_quantity > 0)
                             <span class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
-                            <span class="text-sm font-medium text-green-600">{{ $detailSettings['in_stock_label'] }}{{ $product->isLowStock() ? ' - '.str_replace('{quantity}', $product->quantity, $detailSettings['low_stock_template']) : '' }}</span>
+                            <span class="text-sm font-medium text-green-600">{{ $detailSettings['in_stock_label'] }}{{ $product->storefront_available_quantity <= $product->reorder_level ? ' - '.str_replace('{quantity}', $product->storefront_available_quantity, $detailSettings['low_stock_template']) : '' }}</span>
                         @else
                             <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
                             <span class="text-sm font-medium text-red-600">{{ $detailSettings['out_of_stock_label'] }}</span>
@@ -158,11 +158,11 @@
                             <span class="flex h-12 w-12 items-center justify-center text-sm font-semibold">{{ $quantity }}</span>
                             <button wire:click="incrementQty" class="flex h-12 w-10 items-center justify-center text-lg font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">+</button>
                         </div>
-                        <button wire:click="addToCart" wire:loading.attr="disabled" wire:target="addToCart" class="btn-gradient flex-1 rounded-2xl py-3 font-bold" {{ $product->quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                        <button wire:click="addToCart" wire:loading.attr="disabled" wire:target="addToCart" class="btn-gradient flex-1 rounded-2xl py-3 font-bold" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
                             <span wire:loading.remove wire:target="addToCart"><i class="fas fa-shopping-cart mr-2"></i>Add to Cart</span>
                             <span wire:loading wire:target="addToCart"><i class="fas fa-spinner fa-spin mr-2"></i>Adding...</span>
                         </button>
-                        <button wire:click="buyNow" wire:loading.attr="disabled" wire:target="buyNow" class="rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-100 dark:hover:bg-slate-800" {{ $product->quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                        <button wire:click="buyNow" wire:loading.attr="disabled" wire:target="buyNow" class="rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-100 dark:hover:bg-slate-800" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
                             <span wire:loading.remove wire:target="buyNow">Buy Now</span>
                             <span wire:loading wire:target="buyNow"><i class="fas fa-spinner fa-spin"></i></span>
                         </button>
