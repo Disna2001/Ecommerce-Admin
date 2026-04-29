@@ -131,23 +131,38 @@ class PosInvoice extends Component
         $this->generateInvoiceNumber();
     }
 
-    public function generateInvoiceNumber()
+    protected function nextAvailableInvoiceNumber(?int $ignoreInvoiceId = null): string
     {
-        $year = date('Y');
-        $month = date('m');
-        $lastInvoice = Invoice::whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->orderBy('id', 'desc')
-            ->first();
+        $prefix = 'POS-'.now()->format('Ym').'-';
+        $query = Invoice::query()->where('invoice_number', 'like', $prefix.'%');
 
-        if ($lastInvoice) {
-            $lastNumber = intval(substr($lastInvoice->invoice_number, -4));
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
+        if ($ignoreInvoiceId) {
+            $query->where('id', '!=', $ignoreInvoiceId);
         }
 
-        $this->invoice_number = 'POS-'.$year.$month.'-'.$newNumber;
+        $lastInvoice = $query->orderByDesc('invoice_number')->first();
+        $nextNumber = $lastInvoice
+            ? ((int) substr((string) $lastInvoice->invoice_number, -4)) + 1
+            : 1;
+
+        do {
+            $candidate = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+            $existsQuery = Invoice::query()->where('invoice_number', $candidate);
+
+            if ($ignoreInvoiceId) {
+                $existsQuery->where('id', '!=', $ignoreInvoiceId);
+            }
+
+            $exists = $existsQuery->exists();
+            $nextNumber++;
+        } while ($exists);
+
+        return $candidate;
+    }
+
+    public function generateInvoiceNumber()
+    {
+        $this->invoice_number = $this->nextAvailableInvoiceNumber($this->heldInvoiceId);
     }
 
     public function updatedSearchTerm()
@@ -787,7 +802,7 @@ class PosInvoice extends Component
 
             if (! $invoice) {
                 $invoice = new Invoice();
-                $invoice->invoice_number = $this->invoice_number;
+                $invoice->invoice_number = $this->nextAvailableInvoiceNumber();
                 $invoice->user_id = auth()->id();
                 $invoice->invoice_date = now();
                 $invoice->status = 'draft';
@@ -993,7 +1008,7 @@ class PosInvoice extends Component
             }
 
             $invoice->fill([
-                'invoice_number' => $invoice->exists ? $invoice->invoice_number : $this->invoice_number,
+                'invoice_number' => $invoice->exists ? $invoice->invoice_number : $this->nextAvailableInvoiceNumber(),
                 'user_id' => auth()->id(),
                 'customer_name' => $this->customer_name,
                 'customer_email' => $this->customer_email,
