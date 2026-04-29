@@ -136,21 +136,46 @@
     </div>
 
     <section class="pos-shell">
-        <div class="pos-hero">
-            <div>
-                <p class="pos-kicker">Counter Workspace</p>
-                <h1 class="pos-title">{{ $siteName }} POS</h1>
-                <p class="pos-copy">Compact counter flow for search, cart, settlement, and receipt handling without the usual admin-page clutter.</p>
+        <div class="pos-toolbar">
+            <div class="pos-toolbar__head">
+                <div class="min-w-0">
+                    <p class="pos-kicker">Counter Workspace</p>
+                    <h1 class="pos-title">{{ $siteName }} POS</h1>
+                    <p class="pos-copy">Scan, bill, print, and move to the next customer fast.</p>
+                </div>
+
+                <div class="pos-actions">
+                    <button type="button" @click="detectUsbPrinter()" class="pos-button pos-button--ghost">
+                        <i class="fas fa-plug"></i>
+                        <span>Detect</span>
+                    </button>
+                    <a href="{{ route('admin.invoices') }}" class="pos-button pos-button--ghost">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Invoices</span>
+                    </a>
+                    <button type="button" @click="toggleFullscreen()" class="pos-button pos-button--ghost">
+                        <i class="fas" :class="fullscreenActive ? 'fa-compress' : 'fa-expand'"></i>
+                        <span x-text="fullscreenActive ? 'Exit' : 'Fullscreen'"></span>
+                    </button>
+                    <button type="button" wire:click="holdSale" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
+                        <i class="fas fa-pause-circle"></i>
+                        <span>Hold</span>
+                    </button>
+                    <button type="button" wire:click="clearCart" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
+                        <i class="fas fa-rotate-left"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="pos-actions">
+            <div class="pos-toolbar__meta">
                 <div class="pos-chip pos-chip--mono">
                     <span>Invoice</span>
                     <strong>{{ $invoice_number }}</strong>
                 </div>
                 @if($heldInvoiceId)
                     <div class="pos-chip">
-                        <span>Held Sale</span>
+                        <span>Held</span>
                         <strong>Resumed</strong>
                     </div>
                 @endif
@@ -171,80 +196,47 @@
                         @endforeach
                     </select>
                 </label>
-                <button type="button" @click="detectUsbPrinter()" class="pos-button pos-button--ghost">
-                    <i class="fas fa-plug"></i>
-                    <span>Detect Printer</span>
-                </button>
                 <div class="pos-chip">
-                    <span>/ or Ctrl+K</span>
-                    <strong>Focus Search</strong>
+                    <span>Hotkeys</span>
+                    <strong>/ search · F8 review</strong>
                 </div>
                 <div class="pos-chip">
-                    <span>F8</span>
-                    <strong>Review Sale</strong>
+                    <span>Route</span>
+                    <strong x-text="printerHint || 'Not set'"></strong>
                 </div>
-                <a href="{{ route('admin.invoices') }}" class="pos-button pos-button--ghost">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span>Invoices</span>
-                </a>
-                <button type="button" @click="toggleFullscreen()" class="pos-button pos-button--ghost">
-                    <i class="fas" :class="fullscreenActive ? 'fa-compress' : 'fa-expand'"></i>
-                    <span x-text="fullscreenActive ? 'Exit Fullscreen' : 'Fullscreen'"></span>
-                </button>
-                <button type="button" wire:click="holdSale" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
-                    <i class="fas fa-pause-circle"></i>
-                    <span>Hold Sale</span>
-                </button>
-                <button type="button" wire:click="clearCart" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
-                    <i class="fas fa-rotate-left"></i>
-                    <span>Reset Sale</span>
-                </button>
+                <template x-if="usbPrinterName">
+                    <div class="pos-chip">
+                        <span>USB</span>
+                        <strong x-text="usbPrinterName"></strong>
+                    </div>
+                </template>
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="pos-chip">
-                <span>Bill routing</span>
-                <strong x-text="printerHint || 'No printer selected'"></strong>
-            </div>
-            <template x-if="usbPrinterName">
-                <div class="pos-chip">
-                    <span>USB device</span>
-                    <strong x-text="usbPrinterName"></strong>
-                </div>
-            </template>
-        </div>
-
-        <div class="pos-metrics">
-            <div class="pos-metric">
-                <span>Cart Lines</span>
+        <div class="pos-statbar">
+            <div class="pos-statbar__item">
+                <span>Lines</span>
                 <strong>{{ count($cart) }}</strong>
-                <small>Active items in the current sale</small>
             </div>
-            <div class="pos-metric pos-metric--indigo">
+            <div class="pos-statbar__item">
                 <span>Units</span>
                 <strong>{{ $this->cartItemsCount }}</strong>
-                <small>Total pieces across the cart</small>
             </div>
-            <div class="pos-metric pos-metric--emerald">
+            <div class="pos-statbar__item pos-statbar__item--emphasis">
                 <span>Total</span>
                 <strong>Rs {{ number_format($cartTotal, 2) }}</strong>
-                <small>Current sale value</small>
             </div>
-            <div class="pos-metric pos-metric--amber">
-                <span>Savings</span>
-                <strong>Rs {{ number_format($this->cartSavings, 2) }}</strong>
-                <small>Discount impact on this bill</small>
+            <div class="pos-statbar__item">
+                <span>Paid</span>
+                <strong>Rs {{ number_format($amount_paid, 2) }}</strong>
             </div>
-            <div class="pos-metric pos-metric--sky">
-                <span>Today Sales</span>
+            <div class="pos-statbar__item desktop-only">
+                <span>Today</span>
                 <strong>{{ $this->posSummary['today_sales'] }}</strong>
-                <small>Invoices created today</small>
             </div>
-            <div class="pos-metric pos-metric--violet">
+            <div class="pos-statbar__item desktop-only">
                 <span>Revenue</span>
                 <strong>Rs {{ number_format($this->posSummary['today_revenue'], 0) }}</strong>
-                <small>Counter revenue today</small>
             </div>
         </div>
 
@@ -989,34 +981,46 @@
     <style>
         .pos-shell {
             display: grid;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
-        .pos-hero,
+        .pos-toolbar,
         .pos-panel,
-        .pos-metric {
+        .pos-statbar {
             border: 1px solid rgba(226, 232, 240, 0.9);
             background: rgba(255, 255, 255, 0.84);
-            border-radius: 1.4rem;
-            box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.22);
+            border-radius: 1.15rem;
+            box-shadow: 0 8px 24px -24px rgba(15, 23, 42, 0.22);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
 
-        .dark .pos-hero,
+        .dark .pos-toolbar,
         .dark .pos-panel,
-        .dark .pos-metric {
+        .dark .pos-statbar {
             border-color: rgba(51, 65, 85, 0.95);
             background: rgba(15, 23, 42, 0.72);
         }
 
-        .pos-hero {
-            padding: 1rem 1.15rem;
+        .pos-toolbar {
+            padding: 0.85rem 1rem;
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .pos-toolbar__head {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
-            gap: 1rem;
+            gap: 0.85rem;
             flex-wrap: wrap;
+        }
+
+        .pos-toolbar__meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .pos-kicker {
@@ -1028,10 +1032,10 @@
         }
 
         .pos-title {
-            margin-top: 0.25rem;
-            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin-top: 0.15rem;
+            font-size: clamp(1.2rem, 1.6vw, 1.55rem);
             font-weight: 800;
-            line-height: 1.05;
+            line-height: 1.1;
             color: #0f172a;
         }
 
@@ -1040,10 +1044,10 @@
         }
 
         .pos-copy {
-            margin-top: 0.4rem;
-            max-width: 44rem;
-            font-size: 0.92rem;
-            line-height: 1.6;
+            margin-top: 0.25rem;
+            max-width: 38rem;
+            font-size: 0.82rem;
+            line-height: 1.45;
             color: #64748b;
         }
 
@@ -1054,7 +1058,7 @@
         .pos-actions,
         .pos-search-hints {
             display: flex;
-            gap: 0.65rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -1063,11 +1067,11 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            padding: 0.52rem 0.8rem;
+            padding: 0.42rem 0.68rem;
             border-radius: 999px;
             background: rgba(79, 70, 229, 0.08);
             color: #475569;
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             font-weight: 700;
         }
 
@@ -1088,7 +1092,7 @@
             border: none;
             background: transparent;
             color: inherit;
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             font-weight: 800;
             padding-right: 0.25rem;
             outline: none;
@@ -1110,8 +1114,8 @@
             align-items: center;
             gap: 0.55rem;
             border-radius: 999px;
-            padding: 0.78rem 1rem;
-            font-size: 0.86rem;
+            padding: 0.62rem 0.88rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-decoration: none;
         }
@@ -1225,70 +1229,60 @@
             min-width: 0;
         }
 
-        .pos-metrics {
+        .pos-statbar {
             display: grid;
-            gap: 0.75rem;
+            gap: 0;
             grid-template-columns: repeat(2, minmax(0, 1fr));
+            overflow: hidden;
         }
 
-        .pos-metric {
-            padding: 0.9rem 1rem;
+        .pos-statbar__item {
+            padding: 0.8rem 0.9rem;
+            border-right: 1px solid rgba(226, 232, 240, 0.9);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.9);
         }
 
-        .pos-metric span {
+        .dark .pos-statbar__item {
+            border-color: rgba(51, 65, 85, 0.95);
+        }
+
+        .pos-statbar__item span {
             display: block;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 800;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             color: #94a3b8;
         }
 
-        .pos-metric strong {
+        .pos-statbar__item strong {
             display: block;
-            margin-top: 0.45rem;
-            font-size: 1.4rem;
+            margin-top: 0.35rem;
+            font-size: 1.08rem;
             line-height: 1.1;
             color: #0f172a;
         }
 
-        .dark .pos-metric strong {
+        .dark .pos-statbar__item strong {
             color: #f8fafc;
         }
 
-        .pos-metric small {
-            display: block;
-            margin-top: 0.25rem;
-            font-size: 0.78rem;
-            color: #64748b;
+        .pos-statbar__item--emphasis {
+            background: rgba(238, 242, 255, 0.72);
         }
 
-        .dark .pos-metric small {
-            color: #cbd5e1;
-        }
-
-        .pos-metric--indigo { border-color: #c7d2fe; background: rgba(238, 242, 255, 0.92); }
-        .pos-metric--emerald { border-color: #a7f3d0; background: rgba(236, 253, 245, 0.94); }
-        .pos-metric--amber { border-color: #fde68a; background: rgba(255, 251, 235, 0.94); }
-        .pos-metric--sky { border-color: #bae6fd; background: rgba(240, 249, 255, 0.94); }
-        .pos-metric--violet { border-color: #ddd6fe; background: rgba(245, 243, 255, 0.94); }
-
-        .dark .pos-metric--indigo,
-        .dark .pos-metric--emerald,
-        .dark .pos-metric--amber,
-        .dark .pos-metric--sky,
-        .dark .pos-metric--violet {
+        .dark .pos-statbar__item--emphasis {
             background: rgba(15, 23, 42, 0.78);
         }
 
         .pos-workspace {
             display: grid;
-            gap: 1rem;
+            gap: 0.8rem;
             align-items: start;
         }
 
         .pos-panel {
-            padding: 1rem;
+            padding: 0.85rem;
         }
 
         .pos-panel--tall {
@@ -1302,7 +1296,7 @@
             align-items: flex-start;
             justify-content: space-between;
             gap: 1rem;
-            margin-bottom: 0.9rem;
+            margin-bottom: 0.7rem;
         }
 
         .pos-panel__eyebrow {
@@ -1315,7 +1309,7 @@
 
         .pos-panel__title {
             margin-top: 0.2rem;
-            font-size: 1rem;
+            font-size: 0.92rem;
             font-weight: 800;
             color: #0f172a;
         }
@@ -1327,7 +1321,7 @@
         .pos-result-list,
         .pos-cart-list {
             display: grid;
-            gap: 0.75rem;
+            gap: 0.6rem;
             min-height: 0;
             overflow: auto;
         }
@@ -1335,9 +1329,9 @@
         .pos-result-card,
         .pos-cart-item {
             border: 1px solid #e2e8f0;
-            border-radius: 1.1rem;
+            border-radius: 0.95rem;
             background: rgba(248, 250, 252, 0.84);
-            padding: 0.85rem;
+            padding: 0.72rem;
         }
 
         .dark .pos-result-card,
@@ -1365,11 +1359,11 @@
             display: grid;
             place-items: center;
             gap: 0.65rem;
-            min-height: 11rem;
+            min-height: 8.25rem;
             border: 1px dashed #cbd5e1;
-            border-radius: 1.2rem;
+            border-radius: 1rem;
             background: rgba(248, 250, 252, 0.75);
-            padding: 1.2rem;
+            padding: 0.95rem;
             text-align: center;
             color: #64748b;
         }
@@ -1502,7 +1496,7 @@
 
         .pos-rail {
             display: grid;
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
         .pos-summary-row {
@@ -1626,17 +1620,17 @@
 
         @media (min-width: 1100px) {
             .pos-shell {
-                height: calc(100vh - 7.4rem);
+                height: calc(100vh - 6.45rem);
                 grid-template-rows: auto auto minmax(0, 1fr);
             }
 
-            .pos-metrics {
+            .pos-statbar {
                 grid-template-columns: repeat(6, minmax(0, 1fr));
             }
 
             .pos-workspace {
                 min-height: 0;
-                grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.05fr) 360px;
+                grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 332px;
             }
 
             .pos-panel--tall {
@@ -1663,13 +1657,14 @@
         }
 
         @media (max-width: 1099px) {
-            .pos-metrics {
+            .pos-statbar {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
         @media (max-width: 640px) {
-            .pos-actions {
+            .pos-actions,
+            .pos-toolbar__meta {
                 width: 100%;
             }
 
@@ -1678,7 +1673,7 @@
                 flex: 1 1 calc(50% - 0.5rem);
             }
 
-            .pos-metrics {
+            .pos-statbar {
                 grid-template-columns: 1fr;
             }
 

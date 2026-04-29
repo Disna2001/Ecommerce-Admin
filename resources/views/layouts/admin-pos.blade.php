@@ -35,9 +35,9 @@
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <x-admin.logo />
-                    <div class="desktop-only" style="display:flex;flex-direction:column;gap:0.15rem;">
-                        <span style="font-size:0.72rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:rgba(226,232,240,0.68);">Counter Workspace</span>
-                        <span style="font-size:0.92rem;font-weight:700;color:var(--admin-navbar-text);">Separate POS Window</span>
+                    <div class="desktop-only" style="display:flex;flex-direction:column;gap:0.08rem;">
+                        <span style="font-size:0.7rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:rgba(226,232,240,0.68);">Counter Workspace</span>
+                        <span style="font-size:0.88rem;font-weight:700;color:var(--admin-navbar-text);">POS Window</span>
                     </div>
                 </div>
 
@@ -61,7 +61,7 @@
             </div>
         </nav>
 
-        <main class="admin-main" style="padding-top:5.8rem;">
+        <main class="admin-main" style="padding-top:5.15rem;">
             <div class="admin-content">
                 @yield('content')
             </div>
