@@ -84,6 +84,8 @@ class PosInvoice extends Component
 
     public $createdInvoice = null;
 
+    public $heldInvoiceId = null;
+
     public $quickStockId = null;
 
     public $quickStockName = '';
@@ -423,6 +425,7 @@ class PosInvoice extends Component
         $this->showCustomerResults = false;
         $this->notes = '';
         $this->payment_method = 'cash';
+        $this->heldInvoiceId = null;
         $this->generateInvoiceNumber();
     }
 
@@ -540,6 +543,159 @@ class PosInvoice extends Component
         $this->showPaymentModal = true;
     }
 
+    public function holdSale(AuditLogService $auditLogService): void
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('show-error', message: 'Add at least one item before holding a sale.');
+
+            return;
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $invoice = $this->heldInvoiceId
+                ? Invoice::with('items')->find($this->heldInvoiceId)
+                : null;
+
+            if (! $invoice) {
+                $invoice = new Invoice();
+                $invoice->invoice_number = $this->invoice_number;
+                $invoice->user_id = auth()->id();
+                $invoice->invoice_date = now();
+                $invoice->status = 'draft';
+            }
+
+            $invoice->fill([
+                'customer_name' => $this->customer_name ?: 'Walk-in customer',
+                'customer_email' => $this->customer_email ?: null,
+                'customer_phone' => $this->customer_phone ?: null,
+                'customer_address' => $this->customer_address ?: null,
+                'subtotal' => $this->cartSubtotal,
+                'tax_rate' => 0,
+                'tax_amount' => $this->cartTax,
+                'discount' => 0,
+                'total' => $this->cartTotal,
+                'amount_paid' => 0,
+                'balance_due' => $this->cartTotal,
+                'status' => 'draft',
+                'notes' => $this->notes,
+                'payment_method' => $this->payment_method,
+                'paid_at' => null,
+            ]);
+            $invoice->save();
+
+            $invoice->items()->delete();
+
+            foreach ($this->cart as $item) {
+                InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'stock_id' => $item['stock_id'],
+                    'item_name' => $item['name'],
+                    'item_code' => $item['sku'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'discount' => $item['discount'],
+                    'tax_rate' => $item['tax_rate'],
+                    'total' => $item['total'],
+                ]);
+            }
+
+            DB::commit();
+
+            $auditLogService->log(
+                'pos.sale_held',
+                $invoice,
+                'POS sale held for later checkout.',
+                [
+                    'invoice_number' => $invoice->invoice_number,
+                    'line_count' => count($this->cart),
+                    'total' => $invoice->total,
+                ],
+                auth()->id()
+            );
+
+            $heldNumber = $invoice->invoice_number;
+            $this->clearCart();
+            $this->dispatch('show-success', message: 'Sale '.$heldNumber.' moved to held sales.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Hold sale error: '.$e->getMessage());
+            $this->dispatch('show-error', message: 'Could not hold this sale right now.');
+        }
+    }
+
+    public function resumeHeldSale(int $invoiceId): void
+    {
+        $invoice = Invoice::with('items')->where('status', 'draft')->find($invoiceId);
+
+        if (! $invoice) {
+            $this->dispatch('show-error', message: 'Held sale not found.');
+
+            return;
+        }
+
+        $this->clearCart();
+        $this->heldInvoiceId = $invoice->id;
+        $this->invoice_number = $invoice->invoice_number;
+        $this->customer_name = $invoice->customer_name ?: '';
+        $this->customer_email = $invoice->customer_email ?: '';
+        $this->customer_phone = $invoice->customer_phone ?: '';
+        $this->customer_address = $invoice->customer_address ?: '';
+        $this->customerLookup = $this->customer_name;
+        $this->notes = $invoice->notes ?: '';
+        $this->payment_method = $invoice->payment_method ?: 'cash';
+
+        $this->cart = $invoice->items->map(function (InvoiceItem $item) {
+            $stock = Stock::find($item->stock_id);
+
+            return [
+                'id' => Str::random(10),
+                'stock_id' => $item->stock_id,
+                'name' => $item->item_name,
+                'sku' => $item->item_code,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => (float) $item->unit_price,
+                'discount' => (float) $item->discount,
+                'tax_rate' => (float) $item->tax_rate,
+                'total' => (float) $item->total,
+                'stock_quantity' => (int) ($stock?->quantity ?? $item->quantity),
+            ];
+        })->all();
+
+        $this->calculateCart();
+        $this->dispatch('show-success', message: 'Held sale '.$invoice->invoice_number.' restored to the counter.');
+    }
+
+    public function discardHeldSale(int $invoiceId, AuditLogService $auditLogService): void
+    {
+        $invoice = Invoice::with('items')->where('status', 'draft')->find($invoiceId);
+
+        if (! $invoice) {
+            $this->dispatch('show-error', message: 'Held sale not found.');
+
+            return;
+        }
+
+        $invoiceNumber = $invoice->invoice_number;
+        $invoice->items()->delete();
+        $invoice->delete();
+
+        $auditLogService->log(
+            'pos.sale_discarded',
+            $invoice,
+            'Held POS sale discarded.',
+            ['invoice_number' => $invoiceNumber],
+            auth()->id()
+        );
+
+        if ($this->heldInvoiceId === $invoiceId) {
+            $this->clearCart();
+        }
+
+        $this->dispatch('show-success', message: 'Held sale '.$invoiceNumber.' discarded.');
+    }
+
     /**
      * Send invoice email with PDF attachment
      */
@@ -582,14 +738,22 @@ class PosInvoice extends Component
 
         try {
             // Create invoice
-            $invoice = Invoice::create([
-                'invoice_number' => $this->invoice_number,
+            $invoice = $this->heldInvoiceId
+                ? Invoice::with('items')->find($this->heldInvoiceId)
+                : new Invoice();
+
+            if (! $invoice) {
+                $invoice = new Invoice();
+            }
+
+            $invoice->fill([
+                'invoice_number' => $invoice->exists ? $invoice->invoice_number : $this->invoice_number,
                 'user_id' => auth()->id(),
                 'customer_name' => $this->customer_name,
                 'customer_email' => $this->customer_email,
                 'customer_phone' => $this->customer_phone,
                 'customer_address' => $this->customer_address,
-                'invoice_date' => now(),
+                'invoice_date' => $invoice->invoice_date ?: now(),
                 'subtotal' => $this->cartSubtotal,
                 'tax_rate' => 0,
                 'tax_amount' => $this->cartTax,
@@ -602,6 +766,9 @@ class PosInvoice extends Component
                 'payment_method' => $this->payment_method,
                 'paid_at' => $this->amount_paid >= $this->cartTotal ? now() : null,
             ]);
+            $invoice->save();
+
+            $invoice->items()->delete();
 
             // Create invoice items
             foreach ($this->cart as $item) {
@@ -727,6 +894,11 @@ class PosInvoice extends Component
             ->all();
 
         return view('livewire.pos-invoice', [
+            'held_sales' => Invoice::with('items')
+                ->where('status', 'draft')
+                ->latest('updated_at')
+                ->take(6)
+                ->get(),
             'recent_invoices' => Invoice::latest()->take(5)->get(),
             'siteName' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
             'receiptProfile' => $receiptProfile,

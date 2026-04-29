@@ -79,6 +79,12 @@
                     <span>Invoice</span>
                     <strong>{{ $invoice_number }}</strong>
                 </div>
+                @if($heldInvoiceId)
+                    <div class="pos-chip">
+                        <span>Held Sale</span>
+                        <strong>Resumed</strong>
+                    </div>
+                @endif
                 <label class="pos-chip pos-chip--interactive">
                     <span>Mode</span>
                     <select x-model="inputMode" @change="persistInputMode()" class="pos-chip__select">
@@ -102,6 +108,10 @@
                 <button type="button" @click="toggleFullscreen()" class="pos-button pos-button--ghost">
                     <i class="fas" :class="fullscreenActive ? 'fa-compress' : 'fa-expand'"></i>
                     <span x-text="fullscreenActive ? 'Exit Fullscreen' : 'Fullscreen'"></span>
+                </button>
+                <button type="button" wire:click="holdSale" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
+                    <i class="fas fa-pause-circle"></i>
+                    <span>Hold Sale</span>
                 </button>
                 <button type="button" wire:click="clearCart" class="pos-button pos-button--ghost" @disabled(count($cart) === 0)>
                     <i class="fas fa-rotate-left"></i>
@@ -417,6 +427,47 @@
                         <p class="text-center text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
                             Hotkey: F8 opens the settlement review
                         </p>
+                    </div>
+                </div>
+
+                <div class="pos-panel">
+                    <div class="pos-panel__header">
+                        <div>
+                            <p class="pos-panel__eyebrow">Held Sales</p>
+                            <h2 class="pos-panel__title">Parked counter carts</h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        @forelse($held_sales as $heldSale)
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-slate-900">{{ $heldSale->invoice_number }}</p>
+                                        <p class="mt-1 truncate text-xs text-slate-500">{{ $heldSale->customer_name ?: 'Walk-in customer' }}</p>
+                                        <p class="mt-1 text-xs text-slate-400">{{ $heldSale->items->count() }} lines · Rs {{ number_format($heldSale->total, 2) }}</p>
+                                    </div>
+                                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                                        Held
+                                    </span>
+                                </div>
+                                <div class="mt-3 flex gap-2">
+                                    <button type="button" wire:click="resumeHeldSale({{ $heldSale->id }})" class="pos-button pos-button--primary pos-button--tiny">
+                                        <i class="fas fa-play"></i>
+                                        <span>Resume</span>
+                                    </button>
+                                    <button type="button" wire:click="discardHeldSale({{ $heldSale->id }})" class="pos-button pos-button--danger pos-button--tiny">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Discard</span>
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="pos-empty-state pos-empty-state--compact">
+                                <i class="fas fa-layer-group"></i>
+                                <p>No held sales yet. Park busy counter sales here and resume them later.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -844,6 +895,11 @@
             text-decoration: none;
         }
 
+        .pos-button--tiny {
+            padding: 0.55rem 0.85rem;
+            font-size: 0.76rem;
+        }
+
         .pos-button--primary {
             background: #0f172a;
             color: #fff;
@@ -859,10 +915,22 @@
             color: #334155;
         }
 
+        .pos-button--danger {
+            border: 1px solid #fecdd3;
+            background: #fff1f2;
+            color: #be123c;
+        }
+
         .dark .pos-button--ghost {
             border-color: #334155;
             background: rgba(15, 23, 42, 0.7);
             color: #e2e8f0;
+        }
+
+        .dark .pos-button--danger {
+            border-color: rgba(190, 24, 93, 0.4);
+            background: rgba(76, 5, 25, 0.65);
+            color: #fecdd3;
         }
 
         .pos-icon-button {
@@ -1094,6 +1162,11 @@
         .pos-empty-state i {
             font-size: 1.5rem;
             color: #94a3b8;
+        }
+
+        .pos-empty-state--compact {
+            min-height: 7rem;
+            padding: 0.95rem;
         }
 
         .pos-field-group {
