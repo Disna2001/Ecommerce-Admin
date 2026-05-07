@@ -109,10 +109,10 @@
 
                 <div class="mt-12 pt-12 border-t border-slate-100 dark:border-white/5 grid gap-8 sm:grid-cols-3">
                     @foreach([
-                        ['Subtotal Accumulation', 'Rs '.number_format((float) $order->subtotal, 2)],
-                        ['Logistics Contribution', 'Rs '.number_format((float) $order->shipping_fee, 2)],
+                        ['Subtotal Accumulation', 'Rs '.number_format((float) $order->subtotal, 2), false],
+                        ['Logistics Contribution', 'Rs '.number_format((float) $order->shipping_fee, 2), false],
                         ['Grand Total Ledger', 'Rs '.number_format((float) $order->total, 2), true]
-                    ] as [$label, $value, $bold = false])
+                    ] as [$label, $value, $bold])
                         <div class="p-6 rounded-3xl bg-slate-50/50 dark:bg-white/5">
                             <p class="{{ $muted }} mb-2">{{ $label }}</p>
                             <p class="text-base font-black {{ $bold ? 'text-[var(--primary)]' : 'text-slate-900 dark:text-white' }} tracking-tight">{{ $value }}</p>
