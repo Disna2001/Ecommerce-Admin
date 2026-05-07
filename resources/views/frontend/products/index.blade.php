@@ -192,7 +192,7 @@
                 <a href="{{ url('/products/'.$product->id) }}" class="group card-hover bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
                     <div class="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
                         @if(!empty($product->images) && count($product->images))
-                            <img src="{{ Storage::url($product->images[0]) }}" alt="{{ $product->name }}"
+                            <img src="{{ Storage::url(collect($product->images)->first()) }}" alt="{{ $product->name }}"
                                  class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
                         @else
                             <i class="fas fa-box text-5xl text-gray-200"></i>

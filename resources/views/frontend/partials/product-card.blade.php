@@ -22,7 +22,7 @@
         <div class="w-full h-56 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center
                     group-hover:from-indigo-50 group-hover:to-indigo-100 transition-all duration-300">
             @if(!empty($product->images) && count($product->images))
-                <img src="{{ Storage::url($product->images[0]) }}" alt="{{ $product->name }}"
+                <img src="{{ Storage::url(collect($product->images)->first()) }}" alt="{{ $product->name }}"
                      class="w-full h-56 object-cover group-hover:scale-105 transition duration-300">
             @else
                 <i class="fas fa-box text-5xl text-gray-300"></i>

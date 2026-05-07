@@ -397,7 +397,7 @@
                     <a href="{{ url('/products/'.$p->id) }}" class="card overflow-hidden group hover:shadow-md transition">
                         <div class="h-36 bg-gray-50 flex items-center justify-center overflow-hidden">
                             @if(!empty($p->images) && count($p->images))
-                                <img src="{{ Storage::url($p->images[0]) }}" class="w-full h-36 object-cover group-hover:scale-105 transition">
+                                <img src="{{ Storage::url(collect($p->images)->first()) }}" class="w-full h-36 object-cover group-hover:scale-105 transition">
                             @else
                                 <i class="fas fa-box text-3xl text-gray-200"></i>
                             @endif

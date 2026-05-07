@@ -101,7 +101,7 @@
             <div class="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
                 <a href="{{ url('/products/'.$product->id) }}">
                     @if(!empty($product->images) && count($product->images))
-                        <img src="{{ Storage::url($product->images[0]) }}" alt="{{ $product->name }}"
+                        <img src="{{ Storage::url(collect($product->images)->first()) }}" alt="{{ $product->name }}"
                              class="w-full h-48 object-cover hover:scale-105 transition duration-300">
                     @else
                         <i class="fas fa-box text-5xl text-gray-200"></i>

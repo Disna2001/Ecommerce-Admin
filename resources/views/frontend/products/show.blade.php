@@ -99,7 +99,7 @@
             <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm mb-4 flex items-center justify-center h-96">
                 @if(!empty($product->images) && count($product->images))
                     <img id="mainImage"
-                         src="{{ Storage::url($product->images[0]) }}"
+                         src="{{ Storage::url(collect($product->images)->first()) }}"
                          alt="{{ $product->name }}"
                          class="w-full h-96 object-cover">
                 @else
@@ -424,7 +424,7 @@
                class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all">
                 <div class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden">
                     @if(!empty($rp->images) && count($rp->images))
-                        <img src="{{ Storage::url($rp->images[0]) }}" class="w-full h-40 object-cover group-hover:scale-105 transition">
+                        <img src="{{ Storage::url(collect($rp->images)->first()) }}" class="w-full h-40 object-cover group-hover:scale-105 transition">
                     @else
                         <i class="fas fa-box text-4xl text-gray-200"></i>
                     @endif
