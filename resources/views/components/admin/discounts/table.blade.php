@@ -1,72 +1,109 @@
-<x-admin.ui.panel title="Active Promotions" description="Search, review scope, and toggle each discount without opening a large form first.">
-    <div class="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 dark:border-emerald-400/20 dark:bg-emerald-400/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-300">Active</p>
-            <p class="mt-2 text-3xl font-black text-emerald-700 dark:text-emerald-200">{{ $discountStats['active'] }}</p>
-        </div>
-        <div class="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-4 dark:border-indigo-400/20 dark:bg-indigo-400/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300">Coupons</p>
-            <p class="mt-2 text-3xl font-black text-indigo-700 dark:text-indigo-200">{{ $discountStats['coupons'] }}</p>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Auto apply</p>
-            <p class="mt-2 text-3xl font-black text-slate-900 dark:text-white">{{ $discountStats['auto_apply'] }}</p>
-        </div>
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 dark:border-amber-400/20 dark:bg-amber-400/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">Scheduled</p>
-            <p class="mt-2 text-3xl font-black text-amber-700 dark:text-amber-200">{{ $discountStats['scheduled'] }}</p>
-        </div>
-    </div>
+<div class="space-y-4">
+    @forelse($discounts as $discount)
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm group hover:border-slate-900 transition-all">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
+                <!-- Promo Type & Identity -->
+                <div class="flex items-center gap-4 min-w-[240px]">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xl shadow-slate-200">
+                        @if($discount->type === 'percentage')
+                            <span class="text-sm font-black">{{ (int)$discount->value }}%</span>
+                        @else
+                            <span class="text-sm font-black">Rs.</span>
+                        @endif
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 tracking-tight">{{ $discount->name }}</h4>
+                        @if($discount->code)
+                            <div class="mt-1 flex items-center gap-2">
+                                <span class="rounded-md bg-indigo-50 px-2 py-0.5 text-[9px] font-black text-indigo-600 uppercase tracking-widest border border-indigo-100">{{ $discount->code }}</span>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Coupon Code</span>
+                            </div>
+                        @else
+                            <div class="mt-1 flex items-center gap-2">
+                                <span class="rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-600 uppercase tracking-widest border border-emerald-100">Automated</span>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Auto-Applied</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
 
-    <div class="mb-5 grid gap-3 lg:grid-cols-3">
-        <button type="button" wire:click="applyPreset('welcome')" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">Welcome coupon</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Quick-start a reusable code for first-time customers.</p>
-        </button>
-        <button type="button" wire:click="applyPreset('bundle')" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">Bundle saving</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Use a fixed-value incentive for larger carts.</p>
-        </button>
-        <button type="button" wire:click="applyPreset('weekend')" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">Weekend countdown</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Generate a timer-based coupon and tune it in the editor.</p>
-        </button>
-    </div>
+                <!-- Strategic Context -->
+                <div class="flex-1 min-w-0 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Scope & Threshold</p>
+                        <div class="flex items-center gap-2">
+                            <i class="fas {{ $discount->scope === 'all' ? 'fa-globe' : ($discount->scope === 'category' ? 'fa-folder' : 'fa-box') }} text-[10px] text-slate-300"></i>
+                            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight">
+                                {{ ucfirst($discount->scope) }}
+                                @if($discount->min_order_amount > 0)
+                                    <span class="ml-1 text-slate-400">| Min Rs.{{ number_format($discount->min_order_amount) }}</span>
+                                @endif
+                            </span>
+                        </div>
+                    </div>
 
-    <div class="mb-5 flex flex-wrap items-center gap-3">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by name or code" class="min-w-[240px] flex-1 rounded-2xl border-slate-200 text-sm shadow-none focus:border-emerald-500 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active Pulse</p>
+                        <div class="flex items-center gap-2">
+                            @if($discount->starts_at || $discount->ends_at)
+                                <i class="fas fa-clock text-[10px] text-sky-400"></i>
+                                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight">
+                                    {{ $discount->starts_at ? $discount->starts_at->format('M d') : 'Now' }} 
+                                    → 
+                                    {{ $discount->ends_at ? $discount->ends_at->format('M d') : '∞' }}
+                                </span>
+                            @else
+                                <i class="fas fa-infinity text-[10px] text-slate-300"></i>
+                                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight">Persistent Offer</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Usage Signal</p>
+                        <div class="flex items-center gap-3">
+                             <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                <div class="h-full bg-indigo-500 rounded-full" style="width: {{ $discount->usage_limit ? min(100, ($discount->orders_count / $discount->usage_limit) * 100) : 0 }}%"></div>
+                             </div>
+                             <span class="text-[9px] font-black text-slate-900">{{ $discount->orders_count }} / {{ $discount->usage_limit ?: '∞' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Hub -->
+                <div class="flex items-center gap-3 lg:border-l lg:border-slate-100 lg:pl-6">
+                    <button 
+                        wire:click="toggleActive({{ $discount->id }})"
+                        class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors {{ $discount->is_active ? 'bg-emerald-500' : 'bg-slate-200' }}"
+                    >
+                        <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $discount->is_active ? 'translate-x-8' : 'translate-x-1' }}"></span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button wire:click="edit({{ $discount->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                            <i class="fas fa-pencil text-xs"></i>
+                        </button>
+                        <button 
+                            onclick="confirm('Decommission this promotion?') || event.stopImmediatePropagation()"
+                            wire:click="delete({{ $discount->id }})" 
+                            class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                        >
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @empty
+        <div class="py-20 text-center">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white text-slate-200 shadow-sm mb-6">
+                <i class="fas fa-ticket-alt text-3xl"></i>
+            </div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">No promotions found.<br>Deploy your first incentive to drive conversions.</p>
+        </div>
+    @endforelse
+
+    <div class="pt-6">
+        {{ $discounts->links() }}
     </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-            <thead class="bg-slate-50 dark:bg-slate-900/70">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Name</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Code</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Value</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Scope</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Timer</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Usage</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-900">
-                @forelse($discounts as $discount)
-                    <tr class="bg-white transition hover:bg-slate-50/80 dark:bg-slate-950/60 dark:hover:bg-slate-900/50">
-                        <td class="px-4 py-4"><p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $discount->name }}</p>@if($discount->description)<p class="mt-1 text-xs text-slate-400">{{ \Illuminate\Support\Str::limit($discount->description, 50) }}</p>@endif</td>
-                        <td class="px-4 py-4">@if($discount->code)<span class="rounded-full bg-slate-100 px-3 py-1 font-mono text-xs font-semibold text-slate-700 dark:bg-slate-900 dark:text-slate-200">{{ $discount->code }}</span>@else<span class="text-xs text-slate-400">Auto-apply</span>@endif</td>
-                        <td class="px-4 py-4"><p class="text-sm font-bold text-emerald-700 dark:text-emerald-300">@if($discount->type === 'percentage'){{ $discount->value }}%@else Rs {{ number_format($discount->value, 2) }}@endif</p>@if($discount->max_discount_amount)<p class="mt-1 text-xs text-slate-400">Cap Rs {{ number_format($discount->max_discount_amount, 2) }}</p>@endif</td>
-                        <td class="px-4 py-4 text-sm text-slate-600 dark:text-slate-300">{{ ucfirst($discount->scope) }}</td>
-                        <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">@if($discount->has_timer && $discount->ends_at)@if($discount->isExpired())<span class="font-semibold text-rose-600 dark:text-rose-300">Expired</span>@else<span class="font-semibold text-amber-600 dark:text-amber-300">Ends {{ $discount->ends_at->diffForHumans() }}</span>@if($discount->show_timer_on_site)<p class="mt-1">Shown on site</p>@endif@endif @else <span>No timer</span>@endif</td>
-                        <td class="px-4 py-4 text-sm text-slate-600 dark:text-slate-300">{{ $discount->used_count }}{{ $discount->usage_limit ? ' / ' . $discount->usage_limit : ' / unlimited' }}</td>
-                        <td class="px-4 py-4"><button wire:click="toggleActive({{ $discount->id }})" class="rounded-full px-3 py-1 text-xs font-semibold {{ $discount->is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-300' }}">{{ $discount->is_active ? 'Active' : 'Inactive' }}</button></td>
-                        <td class="px-4 py-4"><div class="flex items-center gap-2"><button wire:click="edit({{ $discount->id }})" class="rounded-2xl bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100 dark:bg-indigo-400/10 dark:text-indigo-300">Edit</button><button wire:click="delete({{ $discount->id }})" onclick="confirm('Delete this discount?') || event.stopImmediatePropagation()" class="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-400/10 dark:text-rose-300">Delete</button></div></td>
-                    </tr>
-                @empty
-                    <tr><td colspan="8" class="px-6 py-16"><x-admin.ui.empty-state title="No discounts yet" description="Create your first campaign rule to control discounts from one clean workspace." /></td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="mt-5">{{ $discounts->links() }}</div>
-</x-admin.ui.panel>
+</div>

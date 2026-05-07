@@ -1,122 +1,129 @@
 @extends('layouts.shop')
-@section('title', 'Track Order')
+@section('title', 'Order Sync Node')
 @section('content')
-<div class="mx-auto max-w-6xl py-8">
-    <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400">
-        <a wire:navigate href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-        <i class="fas fa-chevron-right text-xs"></i>
-        <span class="font-medium text-slate-700 dark:text-slate-100">Track Order</span>
-    </nav>
+@php
+    $panel = "premium-card !p-8 !rounded-[2.5rem]";
+    $muted = "text-[10px] font-black uppercase tracking-[0.2em] text-slate-400";
+    $input = "w-full h-14 rounded-3xl border-slate-100 bg-slate-50 px-6 text-sm font-bold text-slate-900 focus:border-[var(--primary)] focus:ring-0 transition-all dark:border-white/5 dark:bg-white/5 dark:text-white";
+@endphp
 
-    <div class="glass card-shadow rounded-[2rem] px-6 py-8">
-        <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Order Updates</p>
-        <h1 class="mt-3 text-4xl font-black text-adapt">Track your order status</h1>
-        <p class="mt-4 max-w-3xl text-sm leading-7 text-soft">Enter your order number and optionally the same email used during checkout to view the latest recorded status.</p>
+<div class="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+    <header class="mb-12">
+        <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <a wire:navigate href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-slate-900 dark:text-white">Order Sync Node</span>
+        </nav>
+        <p class="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Protocol Intelligence</p>
+        <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Order Sync Node</h1>
+        <p class="mt-4 max-w-3xl text-sm font-bold text-slate-400 leading-relaxed">Enter your protocol identifier and registry email to synchronize the latest operational status from the central distribution ledger.</p>
+    </header>
 
-        <form method="GET" action="{{ route('track-order') }}" class="mt-6 grid gap-4 md:grid-cols-[1.3fr_1fr_auto]">
-            <div>
-                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-soft">Order Number</label>
-                <input type="text" name="order_number" value="{{ request('order_number') }}" class="field" placeholder="ORD-20260401-ABCDE">
+    <div class="glass !p-12 mb-12 rounded-[3.5rem] relative overflow-hidden">
+        <form method="GET" action="{{ route('track-order') }}" class="grid gap-6 md:grid-cols-[1.3fr_1.1fr_auto] items-end">
+            <div class="space-y-2">
+                <label class="{{ $muted }} ml-4">Protocol Identifier (Order #)</label>
+                <input type="text" name="order_number" value="{{ request('order_number') }}" class="{{ $input }}" placeholder="ORD-2026-XXXX">
             </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-soft">Email</label>
-                <input type="email" name="email" value="{{ request('email') }}" class="field" placeholder="name@example.com">
+            <div class="space-y-2">
+                <label class="{{ $muted }} ml-4">Registry Email</label>
+                <input type="email" name="email" value="{{ request('email') }}" class="{{ $input }}" placeholder="identity@matrix.com">
             </div>
-            <div class="flex items-end">
-                <button type="submit" class="btn-gradient w-full rounded-2xl px-6 py-3 text-sm font-semibold">Track</button>
-            </div>
+            <button type="submit" class="h-14 px-12 rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">Initialize Sync</button>
         </form>
     </div>
 
     @if($searched)
-        <div class="mt-8">
+        <div class="mt-12 transition-all">
             @if($order)
-                <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-                    <div class="space-y-6">
-                        <div class="surface card-shadow rounded-[1.75rem] p-6">
-                            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
+                    <div class="space-y-12">
+                        <section class="{{ $panel }}">
+                            <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-12">
                                 <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-soft">Order Found</p>
-                                    <h2 class="mt-2 text-2xl font-bold text-adapt">{{ $order->order_number }}</h2>
-                                    <p class="mt-2 text-sm text-soft">{{ $order->customer_name }} · {{ $order->customer_email }}</p>
+                                    <p class="{{ $muted }} mb-2">Sync Successful</p>
+                                    <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Protocol #{{ $order->order_number }}</h2>
+                                    <p class="mt-2 text-xs font-bold text-slate-400">{{ $order->customer_name }} · {{ $order->customer_email }}</p>
                                 </div>
-                                <span class="inline-flex rounded-full px-4 py-2 text-xs font-semibold text-white" style="background: {{ $order->status_color }}">
+                                <span class="h-10 px-6 flex items-center justify-center rounded-full text-[9px] font-black uppercase tracking-widest text-white shadow-lg" style="background: {{ $order->status_color }}">
                                     {{ $order->status_label }}
                                 </span>
                             </div>
 
-                            <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                                <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Payment Status</p>
-                                    <p class="mt-2 text-sm font-semibold text-adapt">{{ ucfirst($order->payment_status) }}</p>
-                                </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Total</p>
-                                    <p class="mt-2 text-sm font-semibold text-adapt">Rs {{ number_format($order->total, 2) }}</p>
-                                </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Courier</p>
-                                    <p class="mt-2 text-sm font-semibold text-adapt">{{ $order->courier ?: 'Not assigned yet' }}</p>
-                                </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Tracking Number</p>
-                                    <p class="mt-2 text-sm font-semibold text-adapt">{{ $order->tracking_number ?: 'Pending' }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="surface card-shadow rounded-[1.75rem] p-6">
-                            <h3 class="text-lg font-bold text-adapt">Order Timeline</h3>
-                            <div class="mt-5 space-y-4">
-                                @forelse($order->statusHistory as $history)
-                                    <div class="flex gap-4">
-                                        <div class="mt-1 h-3 w-3 rounded-full" style="background:var(--primary)"></div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-adapt">{{ ucfirst(str_replace('_', ' ', $history->status)) }}</p>
-                                            <p class="mt-1 text-sm text-soft">{{ $history->note ?: 'Status updated by the team.' }}</p>
-                                            <p class="mt-1 text-xs text-slate-400">{{ $history->created_at?->format('M d, Y h:i A') }}</p>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-soft">The order exists, but no timeline items were recorded yet.</div>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="surface card-shadow rounded-[1.75rem] p-6">
-                            <h3 class="text-lg font-bold text-adapt">Items</h3>
-                            <div class="mt-5 space-y-3">
-                                @foreach($order->items as $item)
-                                    <div class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-4 dark:border-white/10 dark:bg-slate-900/70">
-                                        <p class="text-sm font-semibold text-adapt">{{ $item->name }}</p>
-                                        <p class="mt-1 text-xs text-soft">Qty {{ $item->quantity }} · Rs {{ number_format($item->price, 2) }}</p>
+                            <div class="grid gap-6 sm:grid-cols-2">
+                                @foreach([
+                                    ['Settlement Status', ucfirst($order->payment_status)],
+                                    ['Ledger Total', 'Rs '.number_format($order->total, 2)],
+                                    ['Logistics Carrier', $order->courier ?: 'Unassigned'],
+                                    ['Tracking Index', $order->tracking_number ?: 'Pending Synchronization']
+                                ] as [$label, $value])
+                                    <div class="p-6 rounded-3xl bg-slate-50/50 dark:bg-white/5 border border-slate-50 dark:border-white/5">
+                                        <p class="{{ $muted }} mb-2">{{ $label }}</p>
+                                        <p class="text-sm font-black text-slate-900 dark:text-white tracking-tight">{{ $value }}</p>
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
+                        </section>
 
-                        <div class="surface card-shadow rounded-[1.75rem] p-6">
-                            <h3 class="text-lg font-bold text-adapt">Need help?</h3>
-                            <p class="mt-3 text-sm leading-7 text-soft">If the status looks incorrect or payment verification is delayed, use the support chat button or open the help center.</p>
-                            <div class="mt-4 flex flex-wrap gap-3">
-                                <a wire:navigate href="{{ route('help-center') }}" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Open Help Center</a>
-                                <a wire:navigate href="{{ route('products.index') }}" class="btn-gradient rounded-full px-5 py-3 text-sm font-semibold">Continue Shopping</a>
+                        <section class="{{ $panel }}">
+                            <p class="{{ $muted }} mb-10">Operational Timeline</p>
+                            <div class="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-slate-100 dark:before:bg-white/5">
+                                @forelse($order->statusHistory as $history)
+                                    <div class="relative pl-10">
+                                        <div class="absolute left-0 top-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-white border-4 border-slate-100 dark:bg-slate-900 dark:border-white/5 z-10">
+                                            <div class="h-2 w-2 rounded-full bg-[var(--primary)]"></div>
+                                        </div>
+                                        <div class="p-6 rounded-3xl bg-slate-50/50 dark:bg-white/5 hover:bg-slate-50 transition-colors">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ ucfirst(str_replace('_', ' ', $history->status)) }}</p>
+                                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{ $history->created_at?->format('M d, Y | h:i A') }}</span>
+                                            </div>
+                                            <p class="text-[11px] font-bold text-slate-500 leading-relaxed">{{ $history->note ?: 'Operational status synchronized successfully.' }}</p>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="py-12 text-center glass rounded-[2.5rem]">
+                                        <i class="fas fa-history text-2xl text-slate-200 mb-4"></i>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">No Historical Records Synchronized</p>
+                                    </div>
+                                @endforelse
                             </div>
-                        </div>
+                        </section>
                     </div>
+
+                    <aside class="space-y-12">
+                        <section class="{{ $panel }}">
+                            <p class="{{ $muted }} mb-10">Asset Configuration</p>
+                            <div class="space-y-4">
+                                @foreach($order->items as $item)
+                                    <div class="p-5 rounded-3xl bg-slate-50/50 dark:bg-white/5 border border-slate-50 dark:border-white/5">
+                                        <p class="text-xs font-black text-slate-900 dark:text-white tracking-tight mb-1">{{ $item->name }}</p>
+                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Qty {{ $item->quantity }} · Rs {{ number_format($item->price, 2) }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </section>
+
+                        <section class="{{ $panel }}">
+                            <p class="{{ $muted }} mb-8">Node Support</p>
+                            <p class="text-[11px] font-bold text-slate-400 leading-relaxed mb-10">If the synchronized status appears incorrect or payment verification is delayed, initialize a support protocol via the central help node.</p>
+                            <div class="grid gap-4">
+                                <a wire:navigate href="{{ route('help-center') }}" class="h-12 flex items-center justify-center rounded-full border border-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all dark:border-white/5">Launch Help Node</a>
+                                <a wire:navigate href="{{ route('products.index') }}" class="h-12 flex items-center justify-center rounded-full bg-slate-900 text-[9px] font-black uppercase tracking-widest text-white shadow-lg hover:scale-105 transition-all">Continue Exploration</a>
+                            </div>
+                        </section>
+                    </aside>
                 </div>
             @else
-                <div class="surface card-shadow rounded-[1.75rem] px-6 py-16 text-center">
-                    <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-amber-50">
-                        <i class="fas fa-magnifying-glass text-3xl text-amber-500"></i>
+                <div class="glass py-24 text-center rounded-[3.5rem]">
+                    <div class="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-slate-50 text-amber-500 dark:bg-white/5">
+                        <i class="fas fa-search-minus text-3xl"></i>
                     </div>
-                    <h2 class="text-xl font-bold text-adapt">No order matched that search</h2>
-                    <p class="mt-3 text-sm leading-7 text-soft">Check the order number and email, or use the help center if you need the support team to verify it for you.</p>
-                    <div class="mt-6 flex flex-wrap justify-center gap-3">
-                        <a wire:navigate href="{{ route('help-center') }}" class="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Help Center</a>
-                        <a wire:navigate href="{{ route('products.index') }}" class="btn-gradient rounded-full px-6 py-3 text-sm font-semibold">Browse Products</a>
+                    <h2 class="mb-4 text-2xl font-black text-slate-900 dark:text-white tracking-tight">Sync Protocol Failed</h2>
+                    <p class="mx-auto mb-10 max-w-md text-sm font-bold text-slate-400 leading-relaxed">The provided identifier and email combination did not match any records in the central distribution ledger. Please verify your credentials and try again.</p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <a wire:navigate href="{{ route('help-center') }}" class="h-14 px-10 flex items-center justify-center rounded-full border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-50">Support Node</a>
+                        <a wire:navigate href="{{ route('products.index') }}" class="h-14 px-10 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">Explore Registry</a>
                     </div>
                 </div>
             @endif

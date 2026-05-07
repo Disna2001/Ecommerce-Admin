@@ -21,16 +21,15 @@ $cartCount = collect(session('cart', []))->sum('quantity');
     @livewireStyles
     <style>
         :root { --primary: {{ $primaryColor }}; --secondary: {{ $secondaryColor }}; --accent: {{ $accentColor }}; --site-text: {{ $textColor ?? '#111827' }}; --site-bg: {{ $bgColor ?? '#f8fafc' }}; --nav-bg: {{ $navBgColor ?? '#ffffff' }}; }
-        body { font-family: 'Figtree', sans-serif; }
+        body { font-family: 'Figtree', sans-serif; scroll-behavior: smooth; }
         .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.15), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.14), transparent 24%), var(--site-bg); color: var(--site-text); }
         .dark .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.28), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.18), transparent 22%), #0f1020; color: #f5f3ff; }
-        .glass { background: color-mix(in srgb, var(--nav-bg) 78%, white 22%); border: 1px solid rgba(139,92,246,.12); backdrop-filter: blur(16px); }
-        .dark .glass { background: rgba(15,23,42,.72); border-color: rgba(255,255,255,.08); }
-        .muted { color: #6b6480; } .dark .muted { color: #c8bdf0; }
-        .card { box-shadow: 0 18px 48px rgba(88,28,135,.10); }
-        .dark .card { box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-        .product-card { background: rgba(255,255,255,.92); border: 1px solid rgba(139,92,246,.10); }
-        .dark .product-card { background: rgba(15,23,42,.92); border-color: rgba(255,255,255,.06); }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .dark .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .premium-card { background: white; border-radius: 3rem; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 25px 80px -20px rgba(0,0,0,0.08); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .dark .premium-card { background: #0f172a; border-color: rgba(255,255,255,0.05); box-shadow: 0 25px 80px -20px rgba(0,0,0,0.4); }
+        .premium-card:hover { transform: translateY(-8px); box-shadow: 0 40px 100px -20px rgba(0,0,0,0.12); }
+        .hero-gradient { background: linear-gradient(135deg, {{ $heroBgFrom }} 0%, {{ $heroBgTo }} 100%); }
     </style>
 </head>
 <body class="shell">
@@ -38,78 +37,84 @@ $cartCount = collect(session('cart', []))->sum('quantity');
     <div id="site-progress" class="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-0 opacity-0 transition-[width,opacity] duration-300" style="background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));"></div>
     <livewire:storefront.header-bar />
 
-    <main class="px-4 pb-16">
-        <section class="mx-auto mt-4 max-w-7xl rounded-[2rem] px-6 py-12 card
-            {{ $heroSurface === 'minimal' ? 'bg-transparent shadow-none' : '' }}
-            {{ $heroSurface === 'solid' ? '' : '' }}"
-            style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(180deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
-            <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : ($heroLayout === 'stacked' ? 'space-y-8' : 'grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center') }}">
-                <div class="mx-auto max-w-4xl {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? 'text-center' : 'lg:mx-0 lg:max-w-none lg:text-left text-center' }}">
-                    <p class="text-xs font-semibold uppercase tracking-[0.3em]" style="color:var(--primary)">{{ $siteTagline }}</p>
-                    <h1 class="mt-6 text-4xl font-black leading-tight text-slate-900 sm:text-5xl lg:text-6xl {{ $heroSurface !== 'minimal' ? 'text-white' : '' }}">
-                        {{ $heroTitle }}
-                        <span class="block" style="color:var(--primary)">{{ $heroHighlight }}</span>
-                    </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-base leading-8 {{ $heroSurface !== 'minimal' ? 'text-white/85' : 'text-slate-600' }} {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? '' : 'lg:mx-0' }}">{{ $heroSubtitle }} <span class="font-medium {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-800' }}">{{ $heroMicrocopy }}</span></p>
-                    <div class="mt-8 flex flex-col items-center gap-4 sm:flex-row {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? 'justify-center' : 'lg:justify-start justify-center' }}">
-                        <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">{{ $heroBtnText }} <i class="fas fa-arrow-right text-xs"></i></a>
-                        @guest <a wire:navigate href="{{ route('register') }}" class="inline-flex items-center rounded-full border {{ $heroSurface !== 'minimal' ? 'border-white/25 bg-white/10 text-white' : 'border-slate-300 bg-white/80 text-slate-700' }} px-7 py-3 text-sm font-semibold">Create account</a> @endguest
-                    </div>
-                    <div class="mt-8 flex flex-wrap items-center justify-center gap-5 text-sm font-medium {{ $heroSurface !== 'minimal' ? 'text-white/85' : 'text-slate-700' }} {{ $heroLayout === 'centered' || $heroAlignment === 'center' ? '' : 'lg:justify-start' }}">
-                        @foreach([$featureOne, $featureTwo, $featureThree, $featureFour] as $feature)
-                            <span class="inline-flex items-center gap-2"><i class="fas fa-star text-[11px]" style="color:var(--primary)"></i>{{ $feature }}</span>
-                        @endforeach
-                    </div>
-                </div>
-
-                @if($heroImagePath && $heroLayout !== 'centered')
-                    <div class="mx-auto w-full max-w-xl">
-                        <div class="overflow-hidden rounded-[2rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10' : 'border-white/70 bg-white/70' }} p-3 shadow-[0_25px_60px_rgba(88,28,135,0.14)]">
-                            <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[380px]">
-                        </div>
-                    </div>
-                @endif
-            </div>
-            @if($heroBanners->isNotEmpty())
-                <div class="mt-8 grid gap-4 md:grid-cols-3" style="grid-template-columns: repeat({{ min(3, max(1, $heroBanners->count())) }}, minmax(0, 1fr));">
-                    @foreach($heroBanners as $banner)
-                        <div class="rounded-[1.5rem] border border-white/15 p-5 text-white shadow-[0_16px_48px_rgba(15,23,42,0.18)]" style="background:linear-gradient(135deg, {{ $banner->bg_color }}, {{ $banner->bg_color }}dd); color: {{ $banner->text_color }};">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em]" style="color: {{ $banner->text_color }}cc;">{{ $banner->subtitle ?: 'Storefront Banner' }}</p>
-                            <h3 class="mt-3 text-xl font-bold">{{ $banner->title }}</h3>
-                            @if($banner->caption)
-                                <p class="mt-2 text-sm" style="color: {{ $banner->text_color }}dd;">{{ $banner->caption }}</p>
-                            @endif
-                            @if($banner->button_text)
-                                <a href="{{ $banner->button_link ?: '#' }}" class="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900">{{ $banner->button_text }}</a>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
+    <main class="px-4 pb-16 space-y-12">
+        <!-- Hero Protocol -->
+        <section class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative" style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(135deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
+            @if($heroSurface !== 'minimal')
+                <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\" fill-rule=\"evenodd\"%3E%3Ccircle cx=\"3\" cy=\"3\" r=\"3\"/%3E%3Ccircle cx=\"13\" cy=\"13\" r=\"3\"/%3E%3C/g%3E%3C/svg%3E');"></div>
             @endif
+            
+            <div class="relative z-10 px-8 py-20 lg:px-16 lg:py-24">
+                <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : 'grid gap-16 lg:grid-cols-2 lg:items-center' }}">
+                    <div class="{{ $heroLayout === 'centered' ? '' : 'text-left' }}">
+                        <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 {{ $heroSurface !== 'minimal' ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 text-slate-500' }}">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            {{ $siteTagline }}
+                        </div>
+                        
+                        <h1 class="text-5xl font-black leading-[1.1] text-slate-900 sm:text-6xl lg:text-7xl {{ $heroSurface !== 'minimal' ? 'text-white' : '' }} tracking-tight">
+                            {{ $heroTitle }}
+                            <span class="block mt-2 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">{{ $heroHighlight }}</span>
+                        </h1>
+                        
+                        <p class="mt-8 text-lg leading-relaxed {{ $heroSurface !== 'minimal' ? 'text-white/80' : 'text-slate-600' }} max-w-xl {{ $heroLayout === 'centered' ? 'mx-auto' : '' }}">
+                            {{ $heroSubtitle }} <span class="font-bold {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-900' }}">{{ $heroMicrocopy }}</span>
+                        </p>
+                        
+                        <div class="mt-12 flex flex-wrap items-center gap-6 {{ $heroLayout === 'centered' ? 'justify-center' : '' }}">
+                            <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="inline-flex items-center gap-4 rounded-full px-10 py-5 text-xs font-black text-white uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-indigo-500/40 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                                <span>{{ $heroBtnText }}</span>
+                                <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                            </a>
+                            @guest
+                                <a wire:navigate href="{{ route('register') }}" class="inline-flex items-center rounded-full border px-10 py-5 text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm hover:shadow-lg' }}">
+                                    Onboard Now
+                                </a>
+                            @endguest
+                        </div>
+                    </div>
+
+                    @if($heroImagePath && $heroLayout !== 'centered')
+                        <div class="relative group">
+                            <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
+                            <div class="relative overflow-hidden rounded-[2.5rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-2xl' : 'border-slate-200 bg-white shadow-xl' }} p-4">
+                                <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </section>
 
-        <section id="categories" class="mx-auto mt-8 max-w-7xl">
-            <div class="mb-4 flex items-end justify-between gap-4">
+        <!-- Category Pulse -->
+        <section id="categories" class="mx-auto max-w-7xl px-4">
+            <div class="mb-8 flex items-end justify-between">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color:var(--primary)">{{ $categoryStripTitle }}</p>
-                    <p class="mt-2 text-sm text-slate-500">{{ $categoryStripSubtitle }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{{ $categoryStripTitle }}</p>
+                    <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Browse Registry</h2>
                 </div>
+                <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">See Ledger <i class="fas fa-arrow-right ml-2"></i></a>
             </div>
-            <div class="{{ $categoryStripStyle === 'cards' ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-4' : 'flex gap-3 overflow-x-auto pb-2' }}">
-                <a wire:navigate href="{{ url('/products') }}" class="{{ $categoryStripStyle === 'cards' ? 'min-h-[110px]' : 'shrink-0' }} rounded-2xl px-5 py-4 text-sm font-semibold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
-                    <span class="inline-flex items-center gap-2">
-                        @if($categoryShowIcons)<i class="fas fa-table-cells-large"></i>@endif
-                        All Products
-                    </span>
+            
+            <div class="{{ $categoryStripStyle === 'cards' ? 'grid gap-6 sm:grid-cols-2 xl:grid-cols-4' : 'flex gap-4 overflow-x-auto pb-4 custom-scrollbar' }}">
+                <a wire:navigate href="{{ url('/products') }}" class="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] p-8 text-white min-h-[160px] min-w-[240px] shadow-xl transition-all hover:scale-[1.02]" style="background:linear-gradient(135deg, var(--primary), var(--secondary))">
+                    <i class="fas fa-grid-2 text-3xl opacity-20 absolute -right-4 -top-4"></i>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-white/60">Global</p>
+                    <span class="text-lg font-black uppercase tracking-tight">Full Catalog</span>
                 </a>
+                
                 @foreach($categories as $category)
-                    <a wire:navigate href="{{ url('/products?category='.$category->id) }}" class="glass {{ $categoryStripStyle === 'cards' ? 'min-h-[110px] rounded-[1.5rem] p-5' : 'shrink-0 rounded-2xl px-5 py-3' }} text-sm font-medium">
-                        @if($categoryShowIcons)
-                            <span class="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/70 text-violet-600">
-                                <i class="fas {{ ($categoryIcons[$category->id] ?? 'fa-tag') }}"></i>
-                            </span>
-                        @endif
-                        <span class="block">{{ $category->name }}</span>
+                    <a wire:navigate href="{{ url('/products?category='.$category->id) }}" class="premium-card group relative flex flex-col justify-between p-8 min-h-[160px] min-w-[240px]">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white transition-colors group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900">
+                            <i class="fas {{ ($categoryIcons[$category->id] ?? 'fa-tag') }} text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Classification</p>
+                            <span class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ $category->name }}</span>
+                        </div>
                     </a>
                 @endforeach
             </div>
@@ -134,64 +139,34 @@ $cartCount = collect(session('cart', []))->sum('quantity');
         @endif
 
         @if(($personalizedRecommendations ?? collect())->isNotEmpty())
-            <section class="mx-auto mt-12 max-w-7xl">
-                <div class="mb-6 flex items-end justify-between gap-4">
+            <section class="mx-auto max-w-7xl px-4">
+                <div class="mb-10 flex items-end justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color:var(--primary)">Recommended For You</p>
-                        <h2 class="mt-2 text-3xl font-bold">A smarter shortlist based on your activity</h2>
-                        <p class="muted mt-2 text-sm">The storefront now adapts suggestions from your views, wishlist, reviews, and orders.</p>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">Curated Intelligence</p>
+                        <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Personalized Ledger</h2>
                     </div>
-                    <a wire:navigate href="{{ url('/products') }}" class="text-sm font-semibold" style="color:var(--primary)">Browse All <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
                 </div>
-                <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
                     @foreach($personalizedRecommendations as $product)
-                        <article class="product-card card overflow-hidden rounded-[1.75rem] p-3">
-                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden rounded-[1.25rem]">
-                                <div class="absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">For You</div>
-                                <div class="flex h-64 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-white to-violet-50 p-6 dark:from-slate-900 dark:to-slate-800">
+                        <article class="premium-card group overflow-hidden flex flex-col h-full">
+                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-3 pb-0">
+                                <div class="absolute left-6 top-6 z-10 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">For You</div>
+                                <div class="flex h-64 items-center justify-center rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-8 overflow-hidden">
                                     @if($product->primary_image_url)
-                                        <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                                        <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
                                     @endif
                                 </div>
                             </a>
-                            <div class="px-2 pb-2 pt-4">
-                                <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ $product->brand->name ?? ($product->category->name ?? 'Digital Product') }}</p>
-                                <h3 class="mt-2 line-clamp-2 text-base font-semibold">{{ $product->name }}</h3>
-                                <p class="mt-4 text-lg font-black" style="color:var(--primary)">Rs {{ number_format($product->final_price ?? $product->selling_price, 2) }}</p>
-                                <div class="mt-4 flex justify-between gap-3">
-                                    <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="inline-flex h-10 items-center justify-center rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-700">View</a>
-                                    <button type="button" class="shop-cart-btn rounded-full px-4 py-2 text-xs font-bold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">Buy Now</button>
+                            <div class="p-6 pt-5 flex flex-col flex-1">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">{{ $product->brand->name ?? 'Premium Item' }}</p>
+                                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight mb-4 group-hover:text-[var(--primary)] transition-colors">{{ $product->name }}</h3>
+                                <div class="mt-auto flex items-center justify-between gap-4">
+                                    <p class="text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price ?? $product->selling_price, 2) }}</p>
+                                    <button type="button" class="shop-cart-btn h-10 w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
                                 </div>
                             </div>
-                        </article>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        @if($promoBanners->isNotEmpty())
-            <section class="mx-auto mt-8 max-w-7xl">
-                <div class="grid gap-4 lg:grid-cols-3">
-                    @foreach($promoBanners as $banner)
-                        <article class="overflow-hidden rounded-[1.75rem] border border-white/40 shadow-[0_18px_54px_rgba(15,23,42,0.12)]" style="background:linear-gradient(135deg, {{ $banner->bg_color }}, {{ $banner->bg_color }}cc); color: {{ $banner->text_color }};">
-                            <div class="p-6">
-                                @if($banner->subtitle)
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color: {{ $banner->text_color }}cc;">{{ $banner->subtitle }}</p>
-                                @endif
-                                <h3 class="mt-3 text-2xl font-black">{{ $banner->title }}</h3>
-                                @if($banner->caption)
-                                    <p class="mt-3 text-sm leading-7" style="color: {{ $banner->text_color }}dd;">{{ $banner->caption }}</p>
-                                @endif
-                                @if($banner->button_text)
-                                    <a href="{{ $banner->button_link ?: '#' }}" class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900">
-                                        {{ $banner->button_text }}
-                                        <i class="fas fa-arrow-right text-xs"></i>
-                                    </a>
-                                @endif
-                            </div>
-                            @if($banner->image_path)
-                                <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title }}" class="h-44 w-full object-cover">
-                            @endif
                         </article>
                     @endforeach
                 </div>
@@ -199,16 +174,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
         @endif
 
         @php
-            $railGridClass = match($railLayout) {
-                'compact' => 'grid gap-4 sm:grid-cols-2 xl:grid-cols-5',
-                'editorial' => 'grid gap-6 md:grid-cols-2 xl:grid-cols-3',
-                default => 'grid gap-5 sm:grid-cols-2 xl:grid-cols-4',
-            };
-            $railCardClass = match($railLayout) {
-                'compact' => 'product-card card overflow-hidden rounded-[1.5rem] p-3',
-                'editorial' => 'product-card card overflow-hidden rounded-[2rem] p-4',
-                default => 'product-card card overflow-hidden rounded-[1.75rem] p-3',
-            };
+            $railGridClass = 'grid gap-8 sm:grid-cols-2 xl:grid-cols-4';
             $sectionSubtitles = [
                 'deals' => $dealsSubtitle,
                 'featured' => $featuredSubtitle,
@@ -222,50 +188,45 @@ $cartCount = collect(session('cart', []))->sum('quantity');
             $showNewArrivalsLink ? ['new-arrivals', $newTitle, $newArrivals->take(max(1, $productsPerRail)), 'New'] : null,
         ])) as [$sectionId,$sectionTitle,$items,$badge])
             @if($items->isNotEmpty())
-                <section id="{{ $sectionId }}" class="mx-auto mt-12 max-w-7xl">
-                    <div class="mb-6 flex items-end justify-between gap-4">
-                        <div><h2 class="text-3xl font-bold">{{ $sectionTitle }}</h2><p class="muted mt-1 text-sm">{{ $sectionSubtitles[$sectionId] ?? 'Handpicked for fast-moving shoppers.' }}</p></div>
-                        <a wire:navigate href="{{ url('/products') }}" class="text-sm font-semibold" style="color:var(--primary)">View All <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                <section id="{{ $sectionId }}" class="mx-auto max-w-7xl px-4">
+                    <div class="mb-10 flex items-end justify-between">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">{{ $badge }}</p>
+                            <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ $sectionTitle }}</h2>
+                        </div>
+                        <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">View All <i class="fas fa-arrow-right ml-2"></i></a>
                     </div>
                     <div class="{{ $railGridClass }}">
                         @foreach($items as $product)
-                            <article class="{{ $railCardClass }}">
-                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden rounded-[1.25rem]">
-                                    <div class="absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white" style="background:linear-gradient(90deg, #f97316, #ef4444)">{{ $badge }}</div>
-                                    @if($showRailStockStatus)
-                                        <div class="absolute right-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] {{ $product->quantity <= 0 ? 'bg-rose-500 text-white' : ($product->isLowStock() ? 'bg-amber-400 text-slate-900' : 'bg-emerald-400 text-slate-900') }}">
-                                            {{ $product->quantity <= 0 ? 'Out of stock' : ($product->isLowStock() ? 'Low stock' : 'In stock') }}
-                                        </div>
-                                    @endif
-                                    <div class="flex h-64 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-white to-violet-50 p-6 dark:from-slate-900 dark:to-slate-800">
+                            <article class="premium-card group overflow-hidden flex flex-col h-full">
+                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-3 pb-0">
+                                    <div class="absolute left-6 top-6 z-10 flex flex-col gap-2">
+                                        <div class="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, #f97316, #ef4444)">{{ $badge }}</div>
+                                        @if($showRailStockStatus)
+                                            <div class="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] shadow-sm {{ $product->quantity <= 0 ? 'bg-slate-900 text-white' : 'bg-white text-slate-900' }}">
+                                                {{ $product->quantity <= 0 ? 'Exhausted' : 'In Registry' }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="flex h-64 items-center justify-center rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-8 overflow-hidden">
                                         @if($product->primary_image_url)
-                                            <picture class="block h-full w-full">
-                                                @if(!empty($product->primary_image_sources['webp']))
-                                                    <source srcset="{{ $product->primary_image_sources['webp'] }}" type="image/webp">
-                                                @endif
-                                                @if(!empty($product->primary_image_sources['jpeg']))
-                                                    <source srcset="{{ $product->primary_image_sources['jpeg'] }}" type="image/jpeg">
-                                                @endif
-                                                <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async" class="h-full w-full object-cover">
-                                            </picture>
+                                            <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
                                         @else
-                                            <div class="text-center"><i class="fas fa-box-open text-5xl" style="color:var(--primary)"></i><p class="mt-3 text-sm font-semibold">{{ $product->brand->name ?? $siteName }}</p></div>
+                                            <i class="fas fa-box-open text-4xl text-slate-200"></i>
                                         @endif
                                     </div>
                                 </a>
-                                <div class="px-2 pb-2 pt-4">
-                                    <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ $product->brand->name ?? ($product->category->name ?? 'Digital Product') }}</p>
-                                    <h3 class="mt-2 line-clamp-2 text-base font-semibold">{{ $product->name }}</h3>
-                                    <p class="muted mt-2 line-clamp-2 text-sm">{{ $product->model_name ?: 'Fast digital delivery with account-backed access.' }}</p>
-                                    @if($showRailQuantity)
-                                        <p class="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Available now: {{ $product->quantity }}</p>
-                                    @endif
-                                    <div class="mt-4 flex items-end justify-between gap-3">
+                                <div class="p-6 pt-5 flex flex-col flex-1">
+                                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">{{ $product->brand->name ?? 'Registry Item' }}</p>
+                                    <h3 class="text-base font-black text-slate-900 leading-tight mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
+                                    <div class="mt-auto flex items-center justify-between gap-4">
                                         <div>
-                                            <p class="text-lg font-black" style="color:var(--primary)">Rs {{ number_format($product->final_price, 2) }}</p>
-                                            @if($product->discount_badge)<p class="text-xs text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
+                                            <p class="text-xl font-black text-slate-900">Rs {{ number_format($product->final_price, 2) }}</p>
+                                            @if($product->discount_badge)<p class="text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
                                         </div>
-                                        <button type="button" class="shop-cart-btn rounded-full px-4 py-2 text-xs font-bold text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">Buy Now</button>
+                                        <button type="button" class="shop-cart-btn h-10 w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
+                                            <i class="fas fa-shopping-cart text-xs"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </article>
@@ -275,89 +236,115 @@ $cartCount = collect(session('cart', []))->sum('quantity');
             @endif
         @endforeach
 
-        <section id="reviews" class="mx-auto mt-16 max-w-7xl">
-            <div class="text-center">
-                <h2 class="text-3xl font-bold">{{ $reviewsSectionTitle }}</h2>
-                <p class="muted mt-2 text-sm">{{ $reviewsSectionSubtitle }}</p>
+        <!-- Critical Review Registry -->
+        <section id="reviews" class="mx-auto max-w-7xl px-4 py-12">
+            <div class="text-center mb-12">
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--primary)] mb-3">Public Audit</p>
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight">{{ $reviewsSectionTitle }}</h2>
+                <p class="mt-4 text-slate-500 max-w-2xl mx-auto">{{ $reviewsSectionSubtitle }}</p>
             </div>
-            <div class="mt-8 grid gap-5 md:grid-cols-3">
+            <div class="grid gap-8 md:grid-cols-3">
                 @forelse($reviews as $review)
-                    <article class="glass card rounded-[1.5rem] p-6">
-                        <div class="text-amber-400">@for($i=0;$i<5;$i++)<i class="fas fa-star text-sm {{ $i < $review->rating ? '' : 'opacity-30' }}"></i>@endfor</div>
-                        <p class="mt-4 text-sm leading-7">{{ $review->body ?: $review->title }}</p>
-                        <div class="mt-5 text-sm font-semibold">{{ $review->user->name ?? 'Verified Customer' }}</div>
+                    <article class="premium-card p-10 flex flex-col justify-between">
+                        <div>
+                            <div class="flex gap-1 mb-6">
+                                @for($i=0;$i<5;$i++)<i class="fas fa-star text-[10px] {{ $i < $review->rating ? 'text-amber-400' : 'text-slate-200' }}"></i>@endfor
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $review->body ?: $review->title }}"</p>
+                        </div>
+                        <div class="mt-8 pt-8 border-t border-slate-50 dark:border-white/5 flex items-center gap-4">
+                            <div class="h-10 w-10 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">{{ strtoupper(substr($review->user->name ?? 'V', 0, 1)) }}</div>
+                            <div>
+                                <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $review->user->name ?? 'Verified Auditor' }}</p>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Verified Purchase</p>
+                            </div>
+                        </div>
                     </article>
                 @empty
-                    @foreach([['Fast delivery and smooth activation.','Kumari P.'],['Best prices I found and everything worked exactly as promised.','Dilan S.'],['Clean buying experience and very quick support.','Ruwani M.']] as [$text,$name])
-                        <article class="glass card rounded-[1.5rem] p-6">
-                            <div class="text-amber-400">@for($i=0;$i<5;$i++)<i class="fas fa-star text-sm"></i>@endfor</div>
-                            <p class="mt-4 text-sm leading-7">{{ $text }}</p>
-                            <div class="mt-5 text-sm font-semibold">{{ $name }}</div>
+                    @foreach([['Exceptional logistics and item integrity.','Kumari P.'],['Strategic pricing and flawless registration process.','Dilan S.'],['Premium interface and rapid administrative support.','Ruwani M.']] as [$text,$name])
+                        <article class="premium-card p-10">
+                            <div class="flex gap-1 mb-6 text-amber-400">@for($i=0;$i<5;$i++)<i class="fas fa-star text-[10px]"></i>@endfor</div>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $text }}"</p>
+                            <div class="mt-8 pt-8 border-t border-slate-50 dark:border-white/5 flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">{{ strtoupper(substr($name, 0, 1)) }}</div>
+                                <div><p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $name }}</p></div>
+                            </div>
                         </article>
                     @endforeach
                 @endforelse
             </div>
         </section>
 
-        <section class="mx-auto mt-16 max-w-7xl rounded-[2rem] px-8 py-14 text-center text-white card" style="background:linear-gradient(120deg, var(--primary), var(--secondary), var(--accent))">
-            <h2 class="text-3xl font-black sm:text-4xl">{{ $finalCtaTitle }}</h2>
-            <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/85 sm:text-base">{{ $finalCtaSubtitle }}</p>
-            <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-slate-900">{{ $finalCtaButtonText }} <i class="fas fa-arrow-right text-xs"></i></a>
+        <!-- Final Protocol CTA -->
+        <section class="mx-auto max-w-7xl px-4">
+            <div class="relative rounded-[3.5rem] px-8 py-20 text-center text-white overflow-hidden shadow-2xl" style="background:linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-white/60 mb-6">Execution Phase</p>
+                    <h2 class="text-4xl font-black sm:text-5xl lg:text-6xl tracking-tight mb-6">{{ $finalCtaTitle }}</h2>
+                    <p class="mx-auto max-w-2xl text-lg text-white/80 mb-12">{{ $finalCtaSubtitle }}</p>
+                    <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex items-center gap-4 rounded-full bg-white px-12 py-5 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition-all group">
+                        {{ $finalCtaButtonText }}
+                        <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </a>
+                </div>
+            </div>
         </section>
     </main>
 
-    <footer id="footer" class="mt-16 px-4 pb-10">
-        <div class="mx-auto max-w-7xl rounded-[2rem] bg-slate-950 px-8 py-10 text-white card">
-            <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
+    <!-- Global Footer -->
+    <footer id="footer" class="mt-24 px-4 pb-12">
+        <div class="mx-auto max-w-7xl rounded-[3.5rem] bg-slate-950 px-12 py-20 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-indigo-500/10 blur-[120px] rounded-full"></div>
+            <div class="relative z-10 grid gap-16 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
                 <div>
-                    @if($logoPath)
-                        <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-12 w-auto object-contain brightness-0 invert">
-                    @else
-                        <div class="text-3xl font-black lowercase">{{ strtolower($siteName) }}</div>
-                    @endif
-                    <p class="mt-4 max-w-sm text-sm leading-7 text-white/70">{{ $footerTagline }}</p>
-                    <div class="mt-5 flex items-center gap-3">
-                        @foreach([['fab fa-facebook-f',$fbUrl],['fab fa-twitter',$twUrl],['fab fa-instagram',$igUrl],['fab fa-pinterest',$piUrl]] as [$icon,$url])
-                            <a href="{{ $url }}" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80"><i class="{{ $icon }}"></i></a>
+                    <div class="flex items-center gap-3 mb-8">
+                        @if($logoPath)
+                            <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto brightness-0 invert">
+                        @else
+                            <div class="text-2xl font-black lowercase tracking-tighter" style="color:var(--primary)">{{ strtolower($siteName) }}</div>
+                        @endif
+                    </div>
+                    <p class="max-w-xs text-sm leading-8 text-slate-400 mb-8">{{ $footerTagline }}</p>
+                    <div class="flex items-center gap-4">
+                        @foreach([['fab fa-facebook-f',$fbUrl],['fab fa-twitter',$twUrl],['fab fa-instagram',$igUrl]] as [$icon,$url])
+                            <a href="{{ $url }}" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 hover:bg-white hover:text-slate-900 transition-all"><i class="{{ $icon }} text-xs"></i></a>
                         @endforeach
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Quick Links</h3>
-                    <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block" href="{{ url('/products') }}">{{ $navProductsLabel }}</a>
-                        @if($showDealsLink)
-                            <a class="block" href="#deals">{{ $navDealsLabel }}</a>
-                        @endif
-                        <a class="block" href="#reviews">Reviews</a>
-                        <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
-                        <a wire:navigate class="block" href="{{ route('refund-policy') }}">Refund Policy</a>
-                        <a wire:navigate class="block" href="{{ route('privacy-policy') }}">Privacy Policy</a>
-                        <a wire:navigate class="block" href="{{ route('terms-and-conditions') }}">Terms & Conditions</a>
-                        <a wire:navigate class="block" href="{{ route('login') }}">Login</a>
-                    </div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">System</h3>
+                    <nav class="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+                        <a wire:navigate href="{{ url('/products') }}" class="hover:text-white transition-colors">{{ $navProductsLabel }}</a>
+                        <a wire:navigate href="{{ route('track-order') }}" class="hover:text-white transition-colors">Track Shipment</a>
+                        <a wire:navigate href="{{ route('login') }}" class="hover:text-white transition-colors">Authentication</a>
+                    </nav>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Support</h3>
-                    <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block hover:text-white" href="{{ route('track-order') }}">{{ $navTrackLabel }}</a>
-                        <a wire:navigate class="block hover:text-white" href="{{ route('help-center') }}">{{ $navHelpLabel }}</a>
-                        <a wire:navigate class="block hover:text-white" href="{{ route('help-center') }}">Payment Help</a>
-                        <div>{{ $supportHours }}</div>
-                        @if($supportEmail)<div>{{ $supportEmail }}</div>@endif
-                    </div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">Governance</h3>
+                    <nav class="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+                        <a wire:navigate href="{{ route('privacy-policy') }}" class="hover:text-white transition-colors">Privacy Protocol</a>
+                        <a wire:navigate href="{{ route('terms-and-conditions') }}" class="hover:text-white transition-colors">Terms of Service</a>
+                        <a wire:navigate href="{{ route('refund-policy') }}" class="hover:text-white transition-colors">Refund Charter</a>
+                    </nav>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Contact</h3>
-                    <div class="mt-4 space-y-3 text-sm text-white/75">
-                        @if($supportPhone)<div>{{ $supportPhone }}</div>@endif
-                        @if($supportWhatsapp)<div>WhatsApp: {{ $supportWhatsapp }}</div>@endif
-                        @if($supportEmail)<div>{{ $supportEmail }}</div>@endif
-                        <div>{{ $utilityCenter }}</div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">Contact</h3>
+                    <div class="flex flex-col gap-6 text-sm text-slate-400">
+                        <p class="leading-relaxed">{{ $utilityCenter }}</p>
+                        @if($supportEmail)<a href="mailto:{{ $supportEmail }}" class="text-white font-bold">{{ $supportEmail }}</a>@endif
+                        @if($supportPhone)<p class="text-white font-bold">{{ $supportPhone }}</p>@endif
                     </div>
                 </div>
             </div>
-            <div class="mt-10 border-t border-white/10 pt-5 text-xs text-white/50">{{ $footerCopy }}</div>
+            <div class="mt-20 pt-8 border-t border-white/5 flex flex-wrap justify-between items-center gap-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">{{ $footerCopy }}</p>
+                <div class="flex gap-6">
+                    <i class="fab fa-cc-visa text-xl text-slate-700"></i>
+                    <i class="fab fa-cc-mastercard text-xl text-slate-700"></i>
+                    <i class="fab fa-cc-paypal text-xl text-slate-700"></i>
+                </div>
+            </div>
         </div>
     </footer>
 

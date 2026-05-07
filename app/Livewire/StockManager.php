@@ -126,7 +126,14 @@ class StockManager extends Component
     public string $quickBrandName = '';
     public string $quickSupplierName = '';
     public string $quickItemTypeName = '';
+    public string $quickWarrantyName = '';
+    public string $quickWarrantyDuration = '12';
     public ?string $aiDemandInsight = null;
+    public bool $isRegistryEditModalOpen = false;
+    public string $editingRegistryType = '';
+    public int $editingRegistryId = 0;
+    public string $editingRegistryName = '';
+    public ?int $editingRegistryDuration = null;
 
     protected $openAIService;
 
@@ -717,6 +724,12 @@ class StockManager extends Component
             'qualityLevels' => $this->qualityLevels,
             'movementSummary' => $this->movementSummary,
             'inventoryQuickCounts' => $this->inventoryQuickCounts,
+            'stockSteps' => [
+                'catalog' => ['label' => 'Catalog'],
+                'inventory' => ['label' => 'Inventory'],
+                'media' => ['label' => 'Media'],
+                'review' => ['label' => 'Review'],
+            ],
             'selectedLabelStocks' => $this->selectedLabelStocks,
             'recentMovements' => StockMovementLog::with(['stock', 'user'])
                 ->latest()
@@ -1004,7 +1017,10 @@ class StockManager extends Component
 
     public function setStockWorkspaceTab(string $tab): void
     {
-        $allowed = ['inventory', 'intake', 'structure'];
+        $allowed = [
+            'inventory', 'intake', 'import', 
+            'categories', 'brands', 'makes', 'suppliers', 'item_types'
+        ];
         $this->stockWorkspaceTab = in_array($tab, $allowed, true) ? $tab : 'inventory';
     }
 
@@ -1199,6 +1215,11 @@ class StockManager extends Component
         $this->item_type_id = $this->quickCreateLookup(ItemType::class, $this->quickItemTypeName, 'quickItemTypeName');
     }
 
+    public function quickCreateWarranty(): void
+    {
+        $this->warranty_id = $this->quickCreateLookup(Warranty::class, $this->quickWarrantyName, 'quickWarrantyName');
+    }
+
     protected function quickCreateLookup(string $modelClass, string $name, string $property): ?int
     {
         $name = trim($name);
@@ -1247,8 +1268,69 @@ class StockManager extends Component
                 'contact_person' => $name,
                 'status' => 'active',
             ],
+            Warranty::class => [
+                'type' => 'Standard',
+                'duration' => (int) ($this->quickWarrantyDuration ?: 12),
+                'status' => 'active',
+                'terms' => 'Standard warranty terms apply.',
+                'coverage' => 'Manufacturer defects',
+            ],
             default => [],
         };
+    }
+
+    public function editRegistryEntity(string $type, int $id): void
+    {
+        $this->editingRegistryType = $type;
+        $this->editingRegistryId = $id;
+        
+        $modelClass = $this->getRegistryModelClass($type);
+        $record = $modelClass::findOrFail($id);
+        
+        $this->editingRegistryName = $record->name;
+        if ($type === 'warranties') {
+            $this->editingRegistryDuration = $record->duration;
+        }
+        
+        $this->isRegistryEditModalOpen = true;
+    }
+
+    public function saveRegistryEntity(): void
+    {
+        $modelClass = $this->getRegistryModelClass($this->editingRegistryType);
+        $record = $modelClass::findOrFail($this->editingRegistryId);
+        
+        $record->update(['name' => $this->editingRegistryName]);
+        if ($this->editingRegistryType === 'warranties') {
+            $record->update(['duration' => (int)$this->editingRegistryDuration]);
+        }
+        
+        $this->isRegistryEditModalOpen = false;
+        $this->dispatch('notify', ['type' => 'success', 'message' => 'Registry record updated successfully.']);
+    }
+
+    public function deleteRegistryEntity(string $type, int $id): void
+    {
+        try {
+            $modelClass = $this->getRegistryModelClass($type);
+            $record = $modelClass::findOrFail($id);
+            $record->delete();
+            $this->dispatch('notify', ['type' => 'success', 'message' => 'Record removed from the registry.']);
+        } catch (\Exception $e) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Could not remove record. It may be linked to active products.']);
+        }
+    }
+
+    protected function getRegistryModelClass(string $type): string
+    {
+        return [
+            'categories' => Category::class,
+            'brands' => Brand::class,
+            'makes' => Make::class,
+            'suppliers' => Supplier::class,
+            'item_types' => ItemType::class,
+            'warranties' => Warranty::class,
+        ][$type];
     }
 
     protected function generateQuickSupplierEmail(string $name): string

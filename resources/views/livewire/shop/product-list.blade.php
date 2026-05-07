@@ -16,350 +16,166 @@
     </div>
 
     <div class="storefront-page-shell">
-        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <div class="storefront-panel storefront-reveal rounded-[2rem] p-6 shadow-[0_25px_80px_rgba(88,28,135,0.08)] sm:p-8">
-                <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400 dark:text-slate-400">
-                    <a href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-                    <i class="fas fa-chevron-right text-[10px]"></i>
-                    <span class="font-medium text-slate-700 dark:text-slate-100">Products</span>
-                </nav>
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <!-- Catalog Governance Header -->
+        <div class="glass storefront-reveal rounded-[2.5rem] p-10 shadow-2xl mb-12">
+            <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-2xl">
+                    <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+                        <a href="/" class="hover:text-[var(--primary)] transition-colors">Registry</a>
+                        <i class="fas fa-chevron-right text-[8px]"></i>
+                        <span class="text-slate-900 dark:text-white">Active Catalog</span>
+                    </nav>
+                    <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight sm:text-5xl">
+                        {{ $catalogSettings['title'] }}
+                        <span class="block text-sm font-bold uppercase tracking-[0.3em] text-[var(--primary)] mt-4">{{ $products->total() }} Records in Ledger</span>
+                    </h1>
+                </div>
 
-                <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                    <div class="max-w-2xl">
-                        <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color: {{ $primaryColor }}">{{ $catalogSettings['badge'] }}</p>
-                        <h1 class="mt-3 text-3xl font-black text-slate-900 dark:text-slate-50 sm:text-4xl">{{ $catalogSettings['title'] }}</h1>
-                        <p class="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-300 sm:text-base">
-                            {{ $catalogSettings['subtitle'] }}
-                        </p>
-                    </div>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button @click="mobileFilters = !mobileFilters"
+                            class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:bg-slate-50 lg:hidden">
+                        <i class="fas fa-sliders-h text-xs"></i>
+                        Filters
+                    </button>
 
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="rounded-2xl bg-white/80 px-4 py-3 text-sm text-slate-600 shadow-sm dark:bg-slate-900/70 dark:text-slate-300">
-                            Showing <span class="font-bold text-slate-900 dark:text-slate-50">{{ $products->total() }}</span> products
-                        </div>
-
-                        <button @click="mobileFilters = !mobileFilters"
-                                class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100 lg:hidden">
-                            <i class="fas fa-sliders-h text-xs"></i>
-                            Filters
-                        </button>
-
+                    <div class="relative group">
                         <select wire:model.live="sort"
-                                class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                            <option value="newest">Newest</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="name">Name A-Z</option>
+                                class="appearance-none rounded-full border border-slate-200 bg-white pl-8 pr-12 py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-8 focus:ring-[var(--primary)]/5">
+                            <option value="newest">Latest Entries</option>
+                            <option value="price_asc">Valuation: Low-High</option>
+                            <option value="price_desc">Valuation: High-Low</option>
+                            <option value="name">Alphanumeric</option>
                         </select>
+                        <i class="fas fa-sort absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 group-focus-within:text-[var(--primary)]"></i>
+                        <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    <div class="storefront-chip rounded-[1.5rem] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Live Results</p>
-                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-slate-50">{{ $products->total() }}</p>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Products currently matching your filters.</p>
-                    </div>
-                    <div class="storefront-chip rounded-[1.5rem] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Categories</p>
-                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-slate-50">{{ $categories->count() }}</p>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Browse by category for a faster shortlist.</p>
-                    </div>
-                    <div class="storefront-chip rounded-[1.5rem] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Brands</p>
-                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-slate-50">{{ $brands->count() }}</p>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Compare trusted brands in one clean view.</p>
-                    </div>
-                    <div class="rounded-[1.5rem] px-4 py-4 text-white shadow-[0_18px_50px_rgba(109,40,217,0.20)]"
-                         style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $secondaryColor }})">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">Shopping Flow</p>
-                        <p class="mt-2 text-lg font-black">Search, compare, add to cart.</p>
-                        <p class="mt-1 text-sm text-white/75">Everything stays in one simple browsing flow.</p>
-                    </div>
-                </div>
-
-                @if($categories->isNotEmpty())
-                    <div class="mt-6">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.22em]" style="color: {{ $primaryColor }}">{{ $catalogSettings['category_strip_title'] }}</p>
-                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">{{ $catalogSettings['category_strip_subtitle'] }}</p>
-                        </div>
-                    <div class="mt-4 {{ $catalogSettings['category_strip_style'] === 'cards' ? 'grid gap-3 sm:grid-cols-2 xl:grid-cols-4' : 'flex flex-wrap gap-3' }}">
+            <!-- Quick Classification Strip -->
+            @if($categories->isNotEmpty())
+                <div class="mt-12 pt-8 border-t border-slate-100 dark:border-white/5">
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6">Quick Classification</p>
+                    <div class="flex flex-wrap gap-3">
                         <button wire:click="$set('category', '')"
-                                class="{{ $catalogSettings['category_strip_style'] === 'cards' ? 'rounded-[1.5rem] px-4 py-4 text-left' : 'rounded-full px-4 py-2' }} text-sm font-semibold transition {{ $category === '' ? 'text-white shadow-lg' : 'storefront-chip text-slate-600 hover:text-slate-900' }}"
-                                @if($category === '') style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})" @endif>
-                            <span class="inline-flex items-center gap-2">
-                                @if($catalogSettings['category_show_icons'])<i class="fas fa-table-cells-large"></i>@endif
-                                All Products
-                            </span>
+                                class="rounded-full px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-all {{ $category === '' ? 'bg-slate-900 text-white shadow-xl scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}">
+                            Full Registry
                         </button>
-                        @foreach($categories->take($catalogSettings['category_strip_limit']) as $cat)
+                        @foreach($categories->take(12) as $cat)
                             <button wire:click="$set('category', '{{ $cat->id }}')"
-                                    class="{{ $catalogSettings['category_strip_style'] === 'cards' ? 'rounded-[1.5rem] px-4 py-4 text-left' : 'rounded-full px-4 py-2' }} text-sm font-semibold transition {{ (string) $category === (string) $cat->id ? 'text-white shadow-lg' : 'storefront-chip text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100' }}"
-                                    @if((string) $category === (string) $cat->id) style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})" @endif>
-                                @if($catalogSettings['category_show_icons'])
-                                    <i class="fas {{ $catalogSettings['category_icons'][$cat->id] ?? 'fa-tag' }} mr-2"></i>
-                                @endif
+                                    class="rounded-full px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-all {{ (string) $category === (string) $cat->id ? 'text-white shadow-xl scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}"
+                                    @if((string) $category === (string) $cat->id) style="background: linear-gradient(90deg, var(--primary), var(--secondary))" @endif>
                                 {{ $cat->name }}
                             </button>
                         @endforeach
                     </div>
-                    </div>
-                @endif
-            </div>
+                </div>
+            @endif
+        </div>
 
-            <div class="mt-8 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+            <div class="mt-8 grid gap-12 lg:grid-cols-[280px_minmax(0,1fr)]">
                 <aside class="hidden lg:block">
-                    <div class="storefront-panel storefront-reveal storefront-reveal-delay-1 sticky top-24 rounded-[1.75rem] p-5 shadow-[0_20px_60px_rgba(88,28,135,0.06)]">
-                        <div class="mb-5 flex items-center justify-between">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Filters</h2>
-                            <button wire:click="clearFilters" class="text-xs font-semibold text-rose-500 hover:underline">Clear all</button>
+                    <div class="sticky top-32 space-y-12">
+                        <!-- Search Protocol -->
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6">Search Registry</p>
+                            <div class="relative group">
+                                <input type="text" wire:model.live.debounce.400ms="search" placeholder="Refine results..."
+                                       class="w-full rounded-2xl border border-slate-200 bg-white px-12 py-4 text-xs font-bold uppercase tracking-widest text-slate-700 outline-none transition-all focus:border-[var(--primary)] focus:ring-8 focus:ring-[var(--primary)]/5">
+                                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 group-focus-within:text-[var(--primary)] transition-colors"></i>
+                            </div>
                         </div>
 
-                        <div class="space-y-5">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Search</label>
-                                <div class="relative mt-2">
-                                    <input type="text" wire:model.live.debounce.400ms="search"
-                                           placeholder="Search products..."
-                                           class="w-full rounded-2xl border border-slate-200 bg-white px-10 py-3 text-sm text-slate-700 focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-xs text-slate-300"></i>
-                                </div>
+                        <!-- Valuation Range -->
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6">Valuation Range</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="number" wire:model.live.debounce.600ms="min_price" placeholder="Min"
+                                       class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-xs font-bold text-slate-700 outline-none focus:border-[var(--primary)]">
+                                <input type="number" wire:model.live.debounce.600ms="max_price" placeholder="Max"
+                                       class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-xs font-bold text-slate-700 outline-none focus:border-[var(--primary)]">
                             </div>
+                        </div>
 
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Category</label>
-                                <div class="mt-3 space-y-2">
-                                    <label class="flex items-center gap-3 rounded-2xl bg-white px-3 py-2 text-sm text-slate-600 dark:bg-slate-900/70 dark:text-slate-200">
-                                        <input type="radio" wire:model.live="category" value="" class="accent-violet-600">
-                                        All Categories
+                        <!-- Classification Ledger -->
+                        <div>
+                            <div class="flex items-center justify-between mb-6">
+                                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Classifications</p>
+                                <button wire:click="clearFilters" class="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:underline">Flush</button>
+                            </div>
+                            <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                                <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
+                                    <input type="radio" wire:model.live="category" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">All Categories</span>
+                                </label>
+                                @foreach($categories as $cat)
+                                    <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
+                                        <input type="radio" wire:model.live="category" value="{{ $cat->id }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">{{ $cat->name }}</span>
                                     </label>
-                                    @foreach($categories as $cat)
-                                        <label class="flex items-center gap-3 rounded-2xl bg-white px-3 py-2 text-sm text-slate-600 dark:bg-slate-900/70 dark:text-slate-200">
-                                            <input type="radio" wire:model.live="category" value="{{ $cat->id }}" class="accent-violet-600">
-                                            {{ $cat->name }}
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Price Range</label>
-                                <div class="mt-3 grid grid-cols-2 gap-3">
-                                    <input type="number" wire:model.live.debounce.600ms="min_price" placeholder="Min"
-                                           class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                    <input type="number" wire:model.live.debounce.600ms="max_price" placeholder="Max"
-                                           class="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Brand</label>
-                                <div class="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1">
-                                    <label class="flex items-center gap-3 rounded-2xl bg-white px-3 py-2 text-sm text-slate-600 dark:bg-slate-900/70 dark:text-slate-200">
-                                        <input type="radio" wire:model.live="brand" value="" class="accent-violet-600">
-                                        All Brands
-                                    </label>
-                                    @foreach($brands as $b)
-                                        <label class="flex items-center gap-3 rounded-2xl bg-white px-3 py-2 text-sm text-slate-600 dark:bg-slate-900/70 dark:text-slate-200">
-                                            <input type="radio" wire:model.live="brand" value="{{ $b->id }}" class="accent-violet-600">
-                                            {{ $b->name }}
-                                        </label>
-                                    @endforeach
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
                 </aside>
 
                 <div class="min-w-0">
-                    <div x-show="mobileFilters" x-transition class="mb-5 lg:hidden">
-                        <div class="storefront-panel storefront-reveal storefront-reveal-delay-1 rounded-[1.75rem] p-5 shadow-[0_20px_60px_rgba(88,28,135,0.06)]">
-                            <div class="mb-5 flex items-center justify-between">
-                                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-50">Filters</h2>
-                                <button @click="mobileFilters = false" class="text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-100">Close</button>
-                            </div>
-
-                            <div class="grid gap-4 sm:grid-cols-2">
-                                <div class="sm:col-span-2">
-                                    <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Search</label>
-                                    <input type="text" wire:model.live.debounce.400ms="search"
-                                           placeholder="Search products..."
-                                           class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Category</label>
-                                    <select wire:model.live="category" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                        <option value="">All</option>
-                                        @foreach($categories as $cat)<option value="{{ $cat->id }}">{{ $cat->name }}</option>@endforeach
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Brand</label>
-                                    <select wire:model.live="brand" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                        <option value="">All</option>
-                                        @foreach($brands as $b)<option value="{{ $b->id }}">{{ $b->name }}</option>@endforeach
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Min Price</label>
-                                    <input wire:model.live.debounce.600ms="min_price" type="number" placeholder="0"
-                                           class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-400">Max Price</label>
-                                    <input wire:model.live.debounce.600ms="max_price" type="number" placeholder="Any"
-                                           class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-violet-400 focus:outline-none focus:ring-0 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-100">
-                                </div>
-                            </div>
-
-                            <button wire:click="clearFilters" class="mt-4 text-sm font-semibold text-rose-500 hover:underline">Clear all filters</button>
-                        </div>
-                    </div>
-
-                    <div class="mb-5 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-300">
-                        <span wire:loading wire:target="search,category,brand,min_price,max_price,sort" class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-violet-600 shadow-sm dark:bg-slate-900/70">
-                            <i class="fas fa-spinner fa-spin text-xs"></i>
-                            Updating results
-                        </span>
-
-                        @if($search)
-                            <span class="rounded-full bg-white px-3 py-2 shadow-sm dark:bg-slate-900/70">Search: <strong class="text-slate-800 dark:text-slate-100">{{ $search }}</strong></span>
-                        @endif
-                        @if($category)
-                            <span class="rounded-full bg-white px-3 py-2 shadow-sm dark:bg-slate-900/70">Category selected</span>
-                        @endif
-                        @if($brand)
-                            <span class="rounded-full bg-white px-3 py-2 shadow-sm dark:bg-slate-900/70">Brand selected</span>
-                        @endif
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 transition-opacity duration-200" wire:loading.class="opacity-60">
+                    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
                         @forelse($products as $product)
                             @php($inWishlist = in_array($product->id, $wishlist))
-
-                            <article wire:key="product-card-{{ $product->id }}" class="storefront-card storefront-reveal storefront-reveal-delay-2 group flex h-full max-w-sm flex-col overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(88,28,135,0.14)]">
-                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden">
-                                    <div class="h-56 bg-gradient-to-br from-white via-violet-50 to-cyan-50 p-4 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-                                        <div class="flex h-full items-center justify-center overflow-hidden rounded-[1.25rem] bg-white dark:bg-slate-900/70">
-                                            @if($product->primary_image_url)
-                                                <picture class="block h-full w-full">
-                                                    @if(!empty($product->primary_image_sources['webp']))
-                                                        <source srcset="{{ $product->primary_image_sources['webp'] }}" type="image/webp">
-                                                    @endif
-                                                    @if(!empty($product->primary_image_sources['jpeg']))
-                                                        <source srcset="{{ $product->primary_image_sources['jpeg'] }}" type="image/jpeg">
-                                                    @endif
-                                                    <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}"
-                                                         alt="{{ $product->name }}"
-                                                         loading="lazy"
-                                                         decoding="async"
-                                                         class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
-                                                </picture>
-                                            @else
-                                                <div class="text-center text-slate-300">
-                                                    <i class="fas fa-box-open text-5xl"></i>
-                                                </div>
-                                            @endif
+                            <article wire:key="product-card-{{ $product->id }}" class="premium-card group overflow-hidden flex flex-col h-full">
+                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-3 pb-0">
+                                    <div class="absolute left-6 top-6 z-10 flex flex-col gap-2">
+                                        @if($product->discount_badge)
+                                            <div class="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background: linear-gradient(90deg, #f97316, #ef4444)">{{ $product->discount_badge }}</div>
+                                        @endif
+                                        <div class="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] {{ $product->isLowStock() ? 'bg-amber-400 text-slate-900' : 'bg-white text-slate-900' }} shadow-sm">
+                                            {{ $product->isLowStock() ? 'Limited' : 'In Stock' }}
                                         </div>
                                     </div>
-
-                                    <div class="absolute left-4 top-4 flex flex-col gap-2">
-                                        @if($product->discount_badge)
-                                            <span class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white" style="background: linear-gradient(90deg, #f97316, #ef4444)">
-                                                {{ $product->discount_badge }}
-                                            </span>
-                                        @endif
-                                        @if($product->isLowStock())
-                                            <span class="rounded-full bg-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white">Low Stock</span>
+                                    <div class="flex h-64 items-center justify-center rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-8 overflow-hidden">
+                                        @if($product->primary_image_url)
+                                            <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
+                                        @else
+                                            <i class="fas fa-box-open text-4xl text-slate-200"></i>
                                         @endif
                                     </div>
                                 </a>
 
-                                <div class="flex items-start justify-between px-4">
-                                    <button wire:click="toggleWishlist({{ $product->id }})"
-                                            class="-mt-5 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition hover:scale-110 dark:bg-slate-900">
-                                        <i class="{{ $inWishlist ? 'fas fa-heart text-rose-500' : 'far fa-heart text-slate-400' }} text-sm"></i>
-                                    </button>
-                                </div>
-
-                                <div class="flex flex-1 flex-col p-4 pt-3">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-400">
-                                            {{ $product->brand?->name ?? $product->category?->name ?? $siteName }}
-                                        </p>
-                                        @if($product->category?->name)
-                                            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:bg-slate-800 dark:text-slate-300">
-                                                {{ $product->category->name }}
-                                            </span>
-                                        @endif
+                                <div class="p-6 pt-5 flex flex-col flex-1">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{{ $product->brand?->name ?? 'Premium Registry' }}</p>
+                                        <button wire:click="toggleWishlist({{ $product->id }})" class="text-slate-300 hover:text-rose-500 transition-colors">
+                                            <i class="{{ $inWishlist ? 'fas fa-heart text-rose-500' : 'far fa-heart' }} text-xs"></i>
+                                        </button>
                                     </div>
-
-                                    <a wire:navigate href="{{ url('/products/'.$product->id) }}">
-                                        <h3 class="mt-2 line-clamp-2 text-base font-semibold leading-7 text-slate-900 transition hover:opacity-75 dark:text-slate-50">{{ $product->name }}</h3>
-                                    </a>
-
-                                    <div class="mt-3 flex items-center gap-1 text-amber-400">
-                                        @for($i=0;$i<5;$i++)<i class="fas fa-star text-xs"></i>@endfor
-                                        <span class="ml-1 text-xs text-slate-400 dark:text-slate-400">(0)</span>
-                                    </div>
-
-                                    <div class="mt-4 flex flex-1 items-end justify-between gap-3">
+                                    <h3 class="text-base font-black text-slate-900 leading-tight mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
+                                    
+                                    <div class="mt-auto flex items-end justify-between gap-4">
                                         <div>
-                                            @if($product->discount_badge)
-                                                <p class="text-lg font-black" style="color: {{ $primaryColor }}">Rs {{ number_format($product->final_price,2) }}</p>
-                                                <p class="text-xs text-slate-400 line-through dark:text-slate-400">Rs {{ number_format($product->selling_price,2) }}</p>
-                                            @else
-                                                <p class="text-lg font-black text-slate-900 dark:text-slate-50">Rs {{ number_format($product->selling_price,2) }}</p>
-                                            @endif
-                                            <p class="mt-2 text-xs text-slate-400 dark:text-slate-400">
-                                                {{ $product->storefront_available_quantity > 0 ? $product->storefront_available_quantity.' available' : 'Currently unavailable' }}
-                                            </p>
+                                            <p class="text-xl font-black text-slate-900">Rs {{ number_format($product->final_price, 2) }}</p>
+                                            @if($product->discount_badge)<p class="text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
                                         </div>
-
-                                        <div class="flex items-center gap-2">
-                                            <a wire:navigate href="{{ url('/products/'.$product->id) }}"
-                                               class="inline-flex h-10 items-center justify-center rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:text-slate-100 dark:hover:bg-slate-800">
-                                                View
-                                            </a>
-                                            <button wire:click="addToCart({{ $product->id }})"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="addToCart({{ $product->id }})"
-                                                    class="inline-flex h-10 min-w-[44px] items-center justify-center rounded-full px-4 text-xs font-bold text-white transition hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})"
-                                                    {{ $product->storefront_available_quantity <= 0 ? 'disabled' : '' }}>
-                                                <span wire:loading.remove wire:target="addToCart({{ $product->id }})"><i class="fas fa-plus text-xs"></i></span>
-                                                <span wire:loading wire:target="addToCart({{ $product->id }})"><i class="fas fa-spinner fa-spin text-xs"></i></span>
+                                        <div class="flex gap-2">
+                                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="h-10 px-4 flex items-center justify-center rounded-full bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-200 transition-all">Record</a>
+                                            <button wire:click="addToCart({{ $product->id }})" class="h-10 w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                                                <i class="fas fa-shopping-bag text-xs"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             </article>
                         @empty
-                            <div class="storefront-panel col-span-full rounded-[1.75rem] px-6 py-20 text-center">
-                                <i class="fas fa-search text-5xl text-slate-300"></i>
-                                <p class="mt-5 text-xl font-semibold text-slate-700 dark:text-slate-50">No products found</p>
-                                <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">Try a different search or clear the active filters.</p>
-                                <div class="mt-6 flex flex-wrap justify-center gap-3">
-                                    <button wire:click="clearFilters"
-                                            class="inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold text-white"
-                                            style="background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }})">
-                                        Clear Filters
-                                    </button>
-                                    <a wire:navigate href="{{ route('help-center') }}"
-                                       class="inline-flex items-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                                        Help Center
-                                    </a>
-                                </div>
+                            <div class="col-span-full py-20 text-center glass rounded-[2.5rem]">
+                                <i class="fas fa-database text-4xl text-slate-200 mb-6"></i>
+                                <p class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Zero matches found in ledger</p>
+                                <button wire:click="clearFilters" class="mt-8 text-[10px] font-black uppercase tracking-widest text-[var(--primary)] hover:underline">Clear Protocol</button>
                             </div>
                         @endforelse
                     </div>
 
-                    <div class="mt-8">{{ $products->links() }}</div>
+                    <div class="mt-12">{{ $products->links() }}</div>
                 </div>
             </div>
         </div>

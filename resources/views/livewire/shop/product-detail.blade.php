@@ -3,35 +3,35 @@
          x-on:notify.window="show=true;message=$event.detail.message;type=$event.detail.type;setTimeout(()=>show=false,3000)"
          x-show="show" x-transition
          class="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-xl"
-         :class="type==='success'?'bg-green-500':(type==='error'?'bg-red-500':'bg-indigo-500')"
+         :class="type==='success'?'bg-emerald-500':(type==='error'?'bg-rose-500':'bg-indigo-500')"
          style="display:none">
         <i class="fas fa-check-circle"></i><span x-text="message"></span>
     </div>
 
-    <div class="mx-auto max-w-6xl py-8">
-        <nav class="mb-8 flex items-center gap-2 text-sm text-slate-400">
-            <a wire:navigate href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-            <i class="fas fa-chevron-right text-xs"></i>
-            <a wire:navigate href="{{ url('/products') }}" class="hover:text-slate-700 dark:hover:text-slate-100">Products</a>
-            <i class="fas fa-chevron-right text-xs"></i>
-            <span class="max-w-xs truncate font-medium text-slate-700 dark:text-slate-100">{{ $product->name }}</span>
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <!-- Breadcrumb Protocol -->
+        <nav class="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+            <a href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <a href="{{ url('/products') }}" class="hover:text-[var(--primary)] transition-colors">Registry</a>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-slate-900 dark:text-white">{{ $product->name }}</span>
         </nav>
-
-        <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
-            <div>
-                <div class="surface card-shadow storefront-reveal mb-3 flex h-96 items-center justify-center overflow-hidden rounded-[2rem]">
-                    @if($imageUrls->isNotEmpty() && !empty($imageUrls[$activeImage]))
-                        <picture class="block h-96 w-full">
+        <div class="grid gap-12 lg:grid-cols-[1fr_0.8fr]">
+            <div class="space-y-8">
+                <div class="premium-card !p-0 !rounded-[3.5rem] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-white/5 h-[600px] border border-slate-100 dark:border-white/5">
+                    @if(!empty($imageUrls))
+                        <picture class="h-full w-full">
                             @if(!empty($imageSourceSets[$activeImage]['webp']))
                                 <source srcset="{{ $imageSourceSets[$activeImage]['webp'] }}" type="image/webp">
                             @endif
                             @if(!empty($imageSourceSets[$activeImage]['jpeg']))
                                 <source srcset="{{ $imageSourceSets[$activeImage]['jpeg'] }}" type="image/jpeg">
                             @endif
-                            <img src="{{ $imageSourceSets[$activeImage]['fallback'] ?? $imageUrls[$activeImage] }}" alt="{{ $product->name }}" loading="eager" decoding="async" class="h-96 w-full object-cover">
+                            <img src="{{ $imageSourceSets[$activeImage]['fallback'] ?? $imageUrls[$activeImage] }}" alt="{{ $product->name }}" loading="eager" decoding="async" class="h-full w-full object-cover">
                         </picture>
                     @else
-                        <i class="fas fa-box text-8xl text-slate-300"></i>
+                        <i class="fas fa-box text-8xl text-slate-200"></i>
                     @endif
                 </div>
                 @if(!empty($product->images) && count($product->images) > 1)

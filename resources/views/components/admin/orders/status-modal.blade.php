@@ -1,34 +1,41 @@
-<div class="fixed inset-0 z-[95] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-        <div class="border-b border-slate-200 px-6 py-5">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Order Control</p>
-                    <h3 class="mt-2 text-xl font-semibold text-slate-900">Update Status</h3>
-                </div>
-                <button wire:click="closeStatusModal" wire:loading.attr="disabled" wire:target="updateStatus" class="rounded-full border border-slate-200 bg-slate-50 p-3 text-slate-500 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"><i class="fas fa-xmark"></i></button>
+<div x-data="{ show: true }" x-show="show" class="fixed inset-0 z-[110] flex items-center justify-center p-4">
+    <div @click="$wire.closeStatusModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+    <div class="relative w-full max-w-lg rounded-[2.5rem] bg-white p-10 shadow-2xl border border-slate-200">
+        <div class="flex items-center gap-4 mb-10">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xl">
+                <i class="fas fa-arrows-rotate text-sm"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Lifecycle Protocol</h3>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Adjust Order Fulfillment Stage</p>
             </div>
         </div>
-        <div class="space-y-4 p-6">
-            <div>
-                <label class="block text-sm font-medium text-slate-700">New status</label>
-                <select wire:model="newStatus" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                    @foreach(\App\Models\Order::STATUSES as $key => $status)
-                        <option value="{{ $key }}">{{ $status['label'] }}</option>
+
+        <form wire:submit="updateStatus" class="space-y-8">
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 px-1">
+                    <i class="fas fa-flag text-[10px] text-slate-400"></i>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Stage</label>
+                </div>
+                <select wire:model="newStatus" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-4 text-xs font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
+                    @foreach(\App\Models\Order::STATUSES as $val => $label)
+                        <option value="{{ $val }}">{{ $label['label'] }}</option>
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Operator note</label>
-                <textarea wire:model="statusNote" rows="4" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none" placeholder="Add context for the timeline and customer notice if needed."></textarea>
+
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 px-1">
+                    <i class="fas fa-note-sticky text-[10px] text-slate-400"></i>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Registry Note (Optional)</label>
+                </div>
+                <textarea wire:model="statusNote" placeholder="Enter administrative narrative for this transition..." rows="4" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-4 text-xs font-bold text-slate-900 shadow-inner focus:bg-white focus:ring-0"></textarea>
             </div>
-        </div>
-        <div class="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-            <button wire:click="closeStatusModal" wire:loading.attr="disabled" wire:target="updateStatus" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50">Cancel</button>
-            <button wire:click="updateStatus" wire:loading.attr="disabled" wire:target="updateStatus" class="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
-                <span wire:loading.remove wire:target="updateStatus">Save status</span>
-                <span wire:loading.inline wire:target="updateStatus"><i class="fas fa-spinner fa-spin mr-2"></i>Saving...</span>
-            </button>
-        </div>
+
+            <div class="flex items-center gap-3 pt-4">
+                <button type="button" @click="$wire.closeStatusModal()" class="flex-1 h-14 rounded-2xl bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-50 hover:text-rose-600 transition-all">Abort</button>
+                <button type="submit" class="flex-[2] h-14 rounded-2xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all">Authorize Transition</button>
+            </div>
+        </form>
     </div>
 </div>

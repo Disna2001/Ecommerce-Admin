@@ -277,6 +277,40 @@ class OrderManager extends Component
         $this->dispatch('notify', type: 'success', message: 'Order status updated.');
     }
 
+    public function quickConfirm(
+        int $id,
+        OrderWorkflowService $orderWorkflowService,
+        CustomerNotificationService $customerNotificationService
+    ): void {
+        $order = Order::findOrFail($id);
+        $order = $orderWorkflowService->updateStatus($order, 'confirmed', 'Quick confirmation by admin.', auth()->id());
+
+        $customerNotificationService->sendOrderUpdate(
+            $order,
+            'confirmed',
+            'Your order has been confirmed and is now being processed.'
+        );
+
+        $this->dispatch('notify', type: 'success', message: 'Order confirmed successfully.');
+    }
+
+    public function markAsDelivered(
+        int $id,
+        OrderWorkflowService $orderWorkflowService,
+        CustomerNotificationService $customerNotificationService
+    ): void {
+        $order = Order::findOrFail($id);
+        $order = $orderWorkflowService->updateStatus($order, 'delivered', 'Marked as delivered by admin.', auth()->id());
+
+        $customerNotificationService->sendOrderUpdate(
+            $order,
+            'delivered',
+            'Your order has been marked as delivered. Thank you for shopping with us!'
+        );
+
+        $this->dispatch('notify', type: 'success', message: 'Order marked as delivered.');
+    }
+
     public function saveTracking(
         OrderWorkflowService $orderWorkflowService,
         CustomerNotificationService $customerNotificationService

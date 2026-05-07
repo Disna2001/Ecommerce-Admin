@@ -33,11 +33,19 @@ class ProductPricingService
 
     public function finalPriceForProduct(Stock $product): float
     {
-        $discount = $this->resolveDiscountForProduct($product);
+        $basePrice = (float) $product->selling_price;
+        
+        // Check for Automated Daily Discount
+        $daily = $product->currentDailyDiscount;
+        if ($daily) {
+            $basePrice = (float) $daily->discounted_price;
+        }
 
-        return $discount
-            ? max(0, (float) $product->selling_price - $discount->calculateDiscount((float) $product->selling_price))
-            : (float) $product->selling_price;
+        $manualDiscount = $this->resolveDiscountForProduct($product);
+
+        return $manualDiscount
+            ? max(0, $basePrice - $manualDiscount->calculateDiscount($basePrice))
+            : $basePrice;
     }
 
     public function toCartItem(Stock $product, int $quantity): array

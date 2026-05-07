@@ -235,53 +235,60 @@ new #[Layout('layouts.guest')] class extends Component
     $facebookReady = SiteSetting::get('enable_facebook_login', false) && filled(SiteSetting::get('facebook_client_id')) && filled(SiteSetting::get('facebook_client_secret'));
 @endphp
 
-<div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.20),_transparent_38%),linear-gradient(180deg,_#f8fbff_0%,_#eef4ff_42%,_#f8fafc_100%)] px-4 py-8 sm:px-6 lg:py-12">
-    <div class="mx-auto w-full max-w-5xl">
-        <div class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-[0_25px_80px_rgba(15,23,42,0.12)] backdrop-blur">
-            <div class="grid lg:grid-cols-[1.05fr_0.95fr]">
-                <div class="relative overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-8 lg:px-10">
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.28),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(96,165,250,0.22),_transparent_35%)]"></div>
-                    <div class="relative">
-                        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200">Display Lanka</p>
-                        <h1 class="mt-4 max-w-md text-3xl font-semibold leading-tight sm:text-4xl">
-                            Create your account in a few easy steps.
-                        </h1>
-                        <p class="mt-4 max-w-lg text-sm leading-7 text-slate-300 sm:text-base">
-                            Choose a simple customer account or apply as a merchant. We will send a confirmation email as soon as your account is created.
-                        </p>
+<div class="min-h-screen relative flex items-center justify-center overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8 dark:bg-slate-950">
+    <!-- Decorative background blobs matching storefront -->
+    <div class="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-violet-500/20 blur-[100px] dark:bg-violet-600/20"></div>
+    <div class="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-fuchsia-500/20 blur-[100px] dark:bg-fuchsia-600/20"></div>
 
-                        <div class="mt-8 space-y-4">
-                            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                <div class="flex items-start gap-3">
-                                    <div class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-sky-400/15 text-sky-200">1</div>
+    <div class="relative mx-auto w-full max-w-5xl z-10">
+        <div class="overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/60 shadow-[0_24px_80px_rgba(0,0,0,0.07)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 dark:shadow-[0_24px_80px_rgba(0,0,0,0.4)]">
+            <div class="grid lg:grid-cols-[1.05fr_0.95fr]">
+                <!-- Left Side: Brand Panel -->
+                <div class="relative overflow-hidden text-white px-8 py-10 sm:px-12 sm:py-16" style="background:linear-gradient(135deg, var(--primary), var(--secondary))">
+                    <!-- overlay for contrast -->
+                    <div class="absolute inset-0 bg-black/10 mix-blend-multiply"></div>
+                    <div class="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
+                    
+                    <div class="relative z-10 flex h-full flex-col justify-between">
+                        <div>
+                            @if (!empty($logoPath))
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($logoPath) }}" alt="Display Lanka" class="h-10 w-auto object-contain drop-shadow-md brightness-0 invert">
+                            @else
+                                <a href="/" wire:navigate class="inline-block text-2xl font-black lowercase tracking-tight text-white drop-shadow-md hover:opacity-90 transition-opacity">display lanka</a>
+                            @endif
+
+                            <h1 class="mt-12 max-w-md text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+                                Create your account.
+                            </h1>
+                            <p class="mt-4 max-w-md text-base leading-relaxed text-white/80">
+                                Choose a simple customer account or apply as a merchant. We will send a confirmation email as soon as your account is created.
+                            </p>
+                        </div>
+
+                        <div class="mt-12 space-y-4">
+                            <div class="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md transition-all hover:bg-white/15">
+                                <div class="flex items-start gap-4">
+                                    <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-inner">
+                                        <i class="fas fa-user text-sm"></i>
+                                    </div>
                                     <div>
-                                        <h2 class="font-semibold">Fast for regular users</h2>
-                                        <p class="mt-1 text-sm leading-6 text-slate-300">
+                                        <h2 class="font-semibold text-white">Fast for regular users</h2>
+                                        <p class="mt-1 text-sm leading-relaxed text-white/70">
                                             Name, email, and password are all you need to get started.
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                <div class="flex items-start gap-3">
-                                    <div class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-sky-400/15 text-sky-200">2</div>
-                                    <div>
-                                        <h2 class="font-semibold">Merchant onboarding included</h2>
-                                        <p class="mt-1 text-sm leading-6 text-slate-300">
-                                            Upload your documents once and we will review your account within 24 to 48 hours.
-                                        </p>
+                            <div class="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md transition-all hover:bg-white/15">
+                                <div class="flex items-start gap-4">
+                                    <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-inner">
+                                        <i class="fas fa-store text-sm"></i>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-emerald-50">
-                                <div class="flex items-start gap-3">
-                                    <div class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-300/20 text-emerald-100">3</div>
                                     <div>
-                                        <h2 class="font-semibold">Email sent after signup</h2>
-                                        <p class="mt-1 text-sm leading-6 text-emerald-100/90">
-                                            You will receive a welcome email immediately after the account is created.
+                                        <h2 class="font-semibold text-white">Merchant onboarding</h2>
+                                        <p class="mt-1 text-sm leading-relaxed text-white/70">
+                                            Upload your documents once and we will review your account.
                                         </p>
                                     </div>
                                 </div>
@@ -289,184 +296,192 @@ new #[Layout('layouts.guest')] class extends Component
                         </div>
 
                         @if (App\Models\User::count() === 0)
-                            <div class="mt-8 rounded-2xl border border-amber-300/25 bg-amber-400/10 p-4 text-sm leading-6 text-amber-50">
-                                The first account created on this system is promoted automatically to administrator access.
+                            <div class="mt-8 rounded-2xl border border-amber-300/25 bg-amber-400/20 p-4 text-sm leading-6 text-amber-50 backdrop-blur-sm">
+                                <i class="fas fa-shield-alt mr-2"></i> The first account created on this system is promoted automatically to administrator access.
                             </div>
                         @endif
                     </div>
                 </div>
 
-                <div class="px-5 py-6 sm:px-8 sm:py-8">
-                    <div class="mb-6 flex items-center justify-between gap-4">
+                <!-- Right Side: Register Form -->
+                <div class="px-6 py-8 sm:px-12 sm:py-16 bg-white/50 dark:bg-slate-900/50">
+                    <div class="mb-8 flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-sm font-medium text-sky-700">New account</p>
-                            <h2 class="mt-1 text-2xl font-semibold text-slate-900">Sign up</h2>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">
-                                Fill in the form below. Merchant fields only appear when you choose a merchant account.
-                            </p>
+                            <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--primary)">New account</p>
+                            <h2 class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">Sign up</h2>
                         </div>
-
-                        <a class="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900" href="{{ route('login') }}" wire:navigate>
+                        <a class="flex items-center justify-center rounded-full border border-slate-200/80 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white" href="{{ route('login') }}" wire:navigate>
                             Sign in
                         </a>
                     </div>
 
                     @if($googleReady || $facebookReady)
-                        <div class="mb-6 grid gap-3 sm:grid-cols-2">
+                        <div class="mb-8 grid gap-3 sm:grid-cols-2">
                             @if($googleReady)
-                                <a href="{{ route('auth.social.redirect', 'google') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                                    <i class="fab fa-google text-red-500"></i> Continue with Google
+                                <a href="{{ route('auth.social.redirect', 'google') }}" class="group inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                    <i class="fab fa-google text-red-500 transition-transform group-hover:scale-110"></i> Google
                                 </a>
                             @endif
                             @if($facebookReady)
-                                <a href="{{ route('auth.social.redirect', 'facebook') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                                    <i class="fab fa-facebook text-blue-600"></i> Continue with Facebook
+                                <a href="{{ route('auth.social.redirect', 'facebook') }}" class="group inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                    <i class="fab fa-facebook text-blue-600 transition-transform group-hover:scale-110"></i> Facebook
                                 </a>
                             @endif
+                        </div>
+                        
+                        <div class="relative mb-8 flex items-center py-2">
+                            <div class="flex-grow border-t border-slate-200 dark:border-white/10"></div>
+                            <span class="mx-4 shrink-0 text-xs font-semibold text-slate-400">OR REGISTER WITH EMAIL</span>
+                            <div class="flex-grow border-t border-slate-200 dark:border-white/10"></div>
                         </div>
                     @endif
 
                     <form wire:submit="register" enctype="multipart/form-data" class="space-y-6">
                         <div>
-                            <x-input-label for="user_type" :value="__('Account Type')" class="text-sm font-semibold text-slate-800" />
+                            <x-input-label for="user_type" :value="__('Account Type')" class="text-sm font-semibold text-slate-800 dark:text-slate-200" />
                             <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                                <label class="cursor-pointer rounded-2xl border p-4 transition {{ $user_type === 'regular' ? 'border-sky-500 bg-sky-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                                <label class="cursor-pointer rounded-2xl border p-4 transition-all {{ $user_type === 'regular' ? 'border-violet-500 bg-violet-50/50 shadow-sm ring-1 ring-violet-500 dark:bg-violet-500/10 dark:border-violet-400 dark:ring-violet-400' : 'border-slate-200/80 bg-white/60 hover:border-violet-300 dark:border-white/10 dark:bg-slate-800/60 dark:hover:border-violet-400/50' }}">
                                     <input type="radio" wire:model.live="user_type" name="user_type" value="regular" class="sr-only">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <div class="font-semibold text-slate-900">Regular User</div>
-                                            <p class="mt-1 text-sm leading-6 text-slate-500">Quick signup for browsing, buying, and managing your profile.</p>
+                                            <div class="font-semibold text-slate-900 dark:text-white">Regular User</div>
+                                            <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Quick signup for browsing and buying.</p>
                                         </div>
-                                        <div class="mt-1 h-4 w-4 rounded-full border {{ $user_type === 'regular' ? 'border-sky-500 bg-sky-500 ring-4 ring-sky-100' : 'border-slate-300' }}"></div>
+                                        <div class="mt-1 h-4 w-4 shrink-0 rounded-full border {{ $user_type === 'regular' ? 'border-violet-500 bg-violet-500 ring-4 ring-violet-100 dark:ring-violet-900' : 'border-slate-300 dark:border-slate-600' }}"></div>
                                     </div>
                                 </label>
 
-                                <label class="cursor-pointer rounded-2xl border p-4 transition {{ $user_type === 'merchant' ? 'border-sky-500 bg-sky-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                                <label class="cursor-pointer rounded-2xl border p-4 transition-all {{ $user_type === 'merchant' ? 'border-violet-500 bg-violet-50/50 shadow-sm ring-1 ring-violet-500 dark:bg-violet-500/10 dark:border-violet-400 dark:ring-violet-400' : 'border-slate-200/80 bg-white/60 hover:border-violet-300 dark:border-white/10 dark:bg-slate-800/60 dark:hover:border-violet-400/50' }}">
                                     <input type="radio" wire:model.live="user_type" name="user_type" value="merchant" class="sr-only">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <div class="font-semibold text-slate-900">Merchant</div>
-                                            <p class="mt-1 text-sm leading-6 text-slate-500">Create a seller account and submit your verification documents once.</p>
+                                            <div class="font-semibold text-slate-900 dark:text-white">Merchant</div>
+                                            <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Create a seller account and submit docs.</p>
                                         </div>
-                                        <div class="mt-1 h-4 w-4 rounded-full border {{ $user_type === 'merchant' ? 'border-sky-500 bg-sky-500 ring-4 ring-sky-100' : 'border-slate-300' }}"></div>
+                                        <div class="mt-1 h-4 w-4 shrink-0 rounded-full border {{ $user_type === 'merchant' ? 'border-violet-500 bg-violet-500 ring-4 ring-violet-100 dark:ring-violet-900' : 'border-slate-300 dark:border-slate-600' }}"></div>
                                     </div>
                                 </label>
                             </div>
                             <x-input-error :messages="$errors->get('user_type')" class="mt-2" />
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-5 sm:grid-cols-2">
                             <div class="sm:col-span-2">
-                                <x-input-label for="name" :value="__('Full Name')" class="text-sm font-semibold text-slate-800" />
-                                <x-text-input wire:model.blur="name" id="name" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="text" placeholder="Enter your full name" required autofocus />
+                                <x-input-label for="name" :value="__('Full Name')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                <div class="relative mt-2">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><i class="fas fa-user"></i></div>
+                                    <x-text-input wire:model.blur="name" id="name" class="block w-full rounded-2xl border border-slate-200/80 bg-white/80 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" type="text" placeholder="Enter your full name" required autofocus />
+                                </div>
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
 
                             <div class="sm:col-span-2">
-                                <x-input-label for="email" :value="__('Email Address')" class="text-sm font-semibold text-slate-800" />
-                                <x-text-input wire:model.blur="email" id="email" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="email" placeholder="name@example.com" required autocomplete="username" />
-                                <p class="mt-2 text-xs text-slate-500">We will send account details and important updates to this address.</p>
+                                <x-input-label for="email" :value="__('Email Address')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                <div class="relative mt-2">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><i class="fas fa-envelope"></i></div>
+                                    <x-text-input wire:model.blur="email" id="email" class="block w-full rounded-2xl border border-slate-200/80 bg-white/80 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" type="email" placeholder="name@example.com" required autocomplete="username" />
+                                </div>
                                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="password" :value="__('Password')" class="text-sm font-semibold text-slate-800" />
-                                <x-text-input wire:model.blur="password" id="password" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="password" placeholder="Create a password" required autocomplete="new-password" />
-                                <p class="mt-2 text-xs text-slate-500">Use a strong password with at least 8 characters.</p>
+                                <x-input-label for="password" :value="__('Password')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                <div class="relative mt-2" x-data="{ show: false }">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><i class="fas fa-lock"></i></div>
+                                    <x-text-input wire:model.blur="password" id="password" class="block w-full rounded-2xl border border-slate-200/80 bg-white/80 py-3 pl-11 pr-12 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" x-bind:type="show ? 'text' : 'password'" placeholder="Create a password" required autocomplete="new-password" />
+                                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors focus:outline-none">
+                                        <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                    </button>
+                                </div>
                                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="password_confirmation" :value="__('Confirm Password')" class="text-sm font-semibold text-slate-800" />
-                                <x-text-input wire:model.blur="password_confirmation" id="password_confirmation" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="password" placeholder="Re-enter your password" required autocomplete="new-password" />
+                                <x-input-label for="password_confirmation" :value="__('Confirm Password')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                <div class="relative mt-2" x-data="{ show: false }">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><i class="fas fa-check-double"></i></div>
+                                    <x-text-input wire:model.blur="password_confirmation" id="password_confirmation" class="block w-full rounded-2xl border border-slate-200/80 bg-white/80 py-3 pl-11 pr-12 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" x-bind:type="show ? 'text' : 'password'" placeholder="Re-enter your password" required autocomplete="new-password" />
+                                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors focus:outline-none">
+                                        <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                    </button>
+                                </div>
                                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                             </div>
                         </div>
 
                         @if ($user_type === 'merchant')
-                            <div class="rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-5 sm:p-6">
+                            <div class="rounded-3xl border border-white/40 bg-white/40 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-slate-800/40">
                                 <div class="flex items-start justify-between gap-4">
                                     <div>
-                                        <h3 class="text-lg font-semibold text-slate-900">Merchant details</h3>
-                                        <p class="mt-1 text-sm leading-6 text-slate-500">
-                                            Provide your business and identity details once. We will review them after signup.
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Merchant details</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                            Provide your business details for verification.
                                         </p>
                                     </div>
-                                    <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">Verification required</span>
                                 </div>
 
-                                <div class="mt-5 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4 text-sm text-sky-900">
-                                    <p class="font-semibold">Before you submit</p>
-                                    <p class="mt-2 leading-6 text-sky-800">
-                                        Make sure your NIC number, business registration number, and uploaded photos match the same business owner details. Clear documents help the review team approve merchant access faster.
-                                    </p>
-                                </div>
-
-                                <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <x-input-label for="shop_name" :value="__('Shop Name')" class="text-sm font-semibold text-slate-800" />
-                                        <x-text-input wire:model.blur="shop_name" id="shop_name" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="text" placeholder="Business or shop name" required />
+                                <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                                    <div class="sm:col-span-2">
+                                        <x-input-label for="shop_name" :value="__('Shop Name')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                        <x-text-input wire:model.blur="shop_name" id="shop_name" class="mt-2 block w-full rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" type="text" placeholder="Business or shop name" required />
                                         <x-input-error :messages="$errors->get('shop_name')" class="mt-2" />
                                     </div>
 
                                     <div>
-                                        <x-input-label for="phone_number" :value="__('Phone Number')" class="text-sm font-semibold text-slate-800" />
-                                        <x-text-input wire:model.blur="phone_number" id="phone_number" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="tel" placeholder="+94 77 123 4567" required />
+                                        <x-input-label for="phone_number" :value="__('Phone Number')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                        <x-text-input wire:model.blur="phone_number" id="phone_number" class="mt-2 block w-full rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" type="tel" placeholder="+94 77 123 4567" required />
                                         <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                                     </div>
 
                                     <div>
-                                        <x-input-label for="nic_number" :value="__('NIC Number')" class="text-sm font-semibold text-slate-800" />
-                                        <x-text-input wire:model.blur="nic_number" id="nic_number" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="text" placeholder="National ID number" required />
+                                        <x-input-label for="nic_number" :value="__('NIC Number')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                        <x-text-input wire:model.blur="nic_number" id="nic_number" class="mt-2 block w-full rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" type="text" placeholder="National ID number" required />
                                         <x-input-error :messages="$errors->get('nic_number')" class="mt-2" />
                                     </div>
 
-                                    <div>
-                                        <x-input-label for="br_number" :value="__('Business Registration Number')" class="text-sm font-semibold text-slate-800" />
-                                        <x-text-input wire:model.blur="br_number" id="br_number" class="mt-2 block w-full rounded-2xl border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" type="text" placeholder="BR registration number" required />
+                                    <div class="sm:col-span-2">
+                                        <x-input-label for="br_number" :value="__('Business Registration Number')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                        <x-text-input wire:model.blur="br_number" id="br_number" class="mt-2 block w-full rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" type="text" placeholder="BR registration number" required />
                                         <x-input-error :messages="$errors->get('br_number')" class="mt-2" />
                                     </div>
 
                                     <div class="sm:col-span-2">
-                                        <x-input-label for="shop_address" :value="__('Shop Address')" class="text-sm font-semibold text-slate-800" />
-                                        <textarea wire:model.blur="shop_address" id="shop_address" rows="3" class="mt-2 block w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-900 shadow-none focus:border-sky-500 focus:ring-sky-500" placeholder="Enter your full business address" required></textarea>
+                                        <x-input-label for="shop_address" :value="__('Shop Address')" class="ml-1 text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                        <textarea wire:model.blur="shop_address" id="shop_address" rows="3" class="mt-2 block w-full rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition-all duration-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900" placeholder="Enter your full business address" required></textarea>
                                         <x-input-error :messages="$errors->get('shop_address')" class="mt-2" />
                                     </div>
                                 </div>
 
                                 <div class="mt-6">
-                                    <h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Documents</h4>
-                                    <div class="mt-3 grid gap-4">
-                                        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-                                            <x-input-label for="nic_image" :value="__('NIC Image')" class="text-sm font-semibold text-slate-800" />
-                                            <input type="file" wire:model="nic_image" id="nic_image" class="mt-2 block w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-600" accept="image/jpeg,image/png,image/jpg" required>
-                                            <p class="mt-2 text-xs text-slate-500">Upload a clear image in JPG or PNG format up to 5MB.</p>
+                                    <h4 class="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Required Documents</h4>
+                                    <div class="mt-4 grid gap-4">
+                                        <div class="rounded-2xl border border-white/40 bg-white/50 p-4 dark:border-white/10 dark:bg-slate-800/50">
+                                            <x-input-label for="nic_image" :value="__('NIC Image')" class="text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                            <input type="file" wire:model="nic_image" id="nic_image" class="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:file:bg-violet-500/10 dark:file:text-violet-400 dark:hover:file:bg-violet-500/20 file:transition-all file:cursor-pointer cursor-pointer rounded-xl border border-dashed border-slate-300 bg-white/50 px-3 py-2.5 hover:border-violet-300 transition-all dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:border-violet-500/50" accept="image/jpeg,image/png,image/jpg" required>
                                             @if ($nic_image)
-                                                <div class="mt-3 overflow-hidden rounded-2xl border border-slate-200">
+                                                <div class="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
                                                     <img src="{{ $nic_image->temporaryUrl() }}" class="h-36 w-full object-cover" alt="NIC preview">
                                                 </div>
                                             @endif
                                             <x-input-error :messages="$errors->get('nic_image')" class="mt-2" />
                                         </div>
 
-                                        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-                                            <x-input-label for="shop_image" :value="__('Shop Image')" class="text-sm font-semibold text-slate-800" />
-                                            <input type="file" wire:model="shop_image" id="shop_image" class="mt-2 block w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-600" accept="image/jpeg,image/png,image/jpg" required>
-                                            <p class="mt-2 text-xs text-slate-500">Show the storefront or inside of the shop clearly.</p>
+                                        <div class="rounded-2xl border border-white/40 bg-white/50 p-4 dark:border-white/10 dark:bg-slate-800/50">
+                                            <x-input-label for="shop_image" :value="__('Shop Image')" class="text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                            <input type="file" wire:model="shop_image" id="shop_image" class="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:file:bg-violet-500/10 dark:file:text-violet-400 dark:hover:file:bg-violet-500/20 file:transition-all file:cursor-pointer cursor-pointer rounded-xl border border-dashed border-slate-300 bg-white/50 px-3 py-2.5 hover:border-violet-300 transition-all dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:border-violet-500/50" accept="image/jpeg,image/png,image/jpg" required>
                                             @if ($shop_image)
-                                                <div class="mt-3 overflow-hidden rounded-2xl border border-slate-200">
+                                                <div class="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
                                                     <img src="{{ $shop_image->temporaryUrl() }}" class="h-36 w-full object-cover" alt="Shop preview">
                                                 </div>
                                             @endif
                                             <x-input-error :messages="$errors->get('shop_image')" class="mt-2" />
                                         </div>
 
-                                        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-                                            <x-input-label for="merchant_selfie" :value="__('Selfie with Owner')" class="text-sm font-semibold text-slate-800" />
-                                            <input type="file" wire:model="merchant_selfie" id="merchant_selfie" class="mt-2 block w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-600" accept="image/jpeg,image/png,image/jpg" required>
-                                            <p class="mt-2 text-xs text-slate-500">A recent selfie helps us complete identity verification faster.</p>
+                                        <div class="rounded-2xl border border-white/40 bg-white/50 p-4 dark:border-white/10 dark:bg-slate-800/50">
+                                            <x-input-label for="merchant_selfie" :value="__('Selfie with Owner')" class="text-sm font-semibold text-slate-800 dark:text-slate-200" />
+                                            <input type="file" wire:model="merchant_selfie" id="merchant_selfie" class="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:file:bg-violet-500/10 dark:file:text-violet-400 dark:hover:file:bg-violet-500/20 file:transition-all file:cursor-pointer cursor-pointer rounded-xl border border-dashed border-slate-300 bg-white/50 px-3 py-2.5 hover:border-violet-300 transition-all dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:border-violet-500/50" accept="image/jpeg,image/png,image/jpg" required>
                                             @if ($merchant_selfie)
-                                                <div class="mt-3 overflow-hidden rounded-2xl border border-slate-200">
+                                                <div class="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
                                                     <img src="{{ $merchant_selfie->temporaryUrl() }}" class="h-36 w-full object-cover" alt="Merchant selfie preview">
                                                 </div>
                                             @endif
@@ -477,19 +492,12 @@ new #[Layout('layouts.guest')] class extends Component
                             </div>
                         @endif
 
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-                            By creating an account, you confirm that your information is accurate and that we may email you about your account and verification status.
-                        </div>
-
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <a class="text-sm font-medium text-slate-600 underline-offset-4 transition hover:text-slate-900 hover:underline" href="{{ route('login') }}" wire:navigate>
-                                Already registered?
-                            </a>
-
-                            <button type="submit" wire:loading.attr="disabled" class="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
-                                <span wire:loading.remove wire:target="register,nic_image,shop_image,merchant_selfie">Create account</span>
-                                <span wire:loading wire:target="register">Creating account...</span>
-                                <span wire:loading wire:target="nic_image,shop_image,merchant_selfie">Uploading files...</span>
+                        <div class="mt-8">
+                            <button type="submit" wire:loading.attr="disabled" class="group relative flex w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-70" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                                <span wire:loading.remove wire:target="register,nic_image,shop_image,merchant_selfie">Create Account</span>
+                                <span wire:loading wire:target="register">Creating...</span>
+                                <span wire:loading wire:target="nic_image,shop_image,merchant_selfie">Uploading...</span>
+                                <i wire:loading.remove wire:target="register,nic_image,shop_image,merchant_selfie" class="fas fa-arrow-right transition-transform group-hover:translate-x-1"></i>
                             </button>
                         </div>
                     </form>

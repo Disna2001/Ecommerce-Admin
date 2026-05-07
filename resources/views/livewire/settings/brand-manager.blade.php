@@ -173,7 +173,7 @@
                             <div class="space-y-5">
                                 <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
                                     <h4 class="text-base font-semibold text-slate-900">Brand Logo</h4>
-                                    <input type="file" wire:model="logo" accept="image/*" class="mt-4 block w-full text-sm text-slate-600">
+                                    <input type="file" wire:model="logo" accept="image/*" class="mt-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 dark:file:bg-violet-500/10 dark:file:text-violet-400 dark:hover:file:bg-violet-500/20 file:transition-all file:cursor-pointer cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-3 py-2.5 hover:border-violet-300 transition-all dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-violet-500/50">
                                     @error('logo') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
 
                                     @if($logo && !$errors->has('logo'))

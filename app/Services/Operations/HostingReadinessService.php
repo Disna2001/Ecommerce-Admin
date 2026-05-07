@@ -231,11 +231,34 @@ class HostingReadinessService
             : collect();
 
         $metrics = [
-            'queued' => $queued,
-            'stale_queued' => $staleQueued,
-            'failed' => $failedNotifications,
-            'retried' => $retriedNotifications,
-            'low_stock' => $lowStockCount,
+            [
+                'label' => 'Queued Signal',
+                'value' => number_format($queued),
+                'icon' => 'fa-tower-broadcast',
+                'status' => $staleQueued > 0 ? 'Stale' : 'Healthy',
+                'status_tone' => $staleQueued > 0 ? 'amber' : 'emerald',
+            ],
+            [
+                'label' => 'Failed Signal',
+                'value' => number_format($failedNotifications),
+                'icon' => 'fa-triangle-exclamation',
+                'status' => $failedNotifications > 0 ? 'Attention' : 'Optimal',
+                'status_tone' => $failedNotifications > 0 ? 'rose' : 'emerald',
+            ],
+            [
+                'label' => 'Retried Signal',
+                'value' => number_format($retriedNotifications),
+                'icon' => 'fa-rotate-right',
+                'status' => $retriedNotifications > 50 ? 'High' : 'Normal',
+                'status_tone' => $retriedNotifications > 50 ? 'amber' : 'emerald',
+            ],
+            [
+                'label' => 'Low Stock',
+                'value' => number_format($lowStockCount),
+                'icon' => 'fa-box-open',
+                'status' => $lowStockCount > 0 ? 'Replenish' : 'Healthy',
+                'status_tone' => $lowStockCount > 0 ? 'amber' : 'emerald',
+            ],
         ];
 
         $healthyCount = collect($checks)->where('status', 'healthy')->count();
@@ -279,10 +302,10 @@ class HostingReadinessService
             'scoreTone' => $scoreTone,
             'checklist' => $checklist,
             'deployCommands' => [
-                'php artisan migrate --force',
-                'php artisan storage:link',
-                'php artisan system:prepare-hosting',
-                'php artisan system:health-check',
+                ['label' => 'Database Migration', 'command' => 'php artisan migrate --force'],
+                ['label' => 'Asset Linkage', 'command' => 'php artisan storage:link'],
+                ['label' => 'Environment Prep', 'command' => 'php artisan system:prepare-hosting'],
+                ['label' => 'Diagnostic Suite', 'command' => 'php artisan system:health-check'],
             ],
         ];
     }

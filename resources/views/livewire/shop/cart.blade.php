@@ -3,158 +3,157 @@
          x-on:notify.window="show=true;message=$event.detail.message;type=$event.detail.type;setTimeout(()=>show=false,3000)"
          x-show="show" x-transition
          class="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-xl"
-         :class="type==='success'?'bg-green-500':'bg-indigo-500'"
+         :class="type==='success'?'bg-emerald-500':'bg-rose-500'"
          style="display:none">
         <i class="fas fa-check-circle"></i><span x-text="message"></span>
     </div>
 
-    <div class="mx-auto max-w-6xl py-8">
-        <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400">
-            <a href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-            <i class="fas fa-chevron-right text-xs"></i>
-            <span class="font-medium text-slate-700 dark:text-slate-100">Cart</span>
-        </nav>
-
-        <div class="storefront-hero card-shadow storefront-reveal mb-6 rounded-[2rem] px-5 py-6 sm:px-6 sm:py-7">
-            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+    <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+        <header class="mb-12">
+            <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <a href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+                <i class="fas fa-chevron-right text-[8px]"></i>
+                <span class="text-slate-900 dark:text-white">Acquisition Buffer</span>
+            </nav>
+            <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Cart Workspace</p>
-                    <h1 class="mt-3 text-adapt text-3xl font-black">
-                        Shopping Cart
-                        <span class="ml-2 text-base font-normal text-soft">({{ $count }} items)</span>
-                    </h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-7 text-soft">Review your selected products, update quantities, and move to checkout with the same storefront flow as the home page.</p>
+                    <p class="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Cart Workspace</p>
+                    <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Acquisition Buffer</h1>
+                    <p class="mt-4 max-w-2xl text-sm font-bold text-slate-400 leading-relaxed">Review your selected assets, calibrate quantities, and initialize the final acquisition protocol.</p>
                 </div>
-                <div class="grid gap-3 sm:grid-cols-3">
-                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Items</p>
-                        <p class="mt-2 text-2xl font-black text-adapt">{{ $count }}</p>
-                    </div>
-                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Subtotal</p>
-                        <p class="mt-2 text-2xl font-black text-adapt">Rs {{ number_format($subtotal,2) }}</p>
-                    </div>
-                    <div class="rounded-[1.25rem] px-4 py-4 text-white shadow-[0_16px_42px_rgba(109,40,217,0.18)]" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">Checkout</p>
-                        <p class="mt-2 text-lg font-black">{{ $discountAmount > 0 ? 'Discount ready' : 'Ready to pay' }}</p>
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    @foreach([
+                        ['Assets', $count],
+                        ['Subtotal', 'Rs '.number_format($subtotal, 0)]
+                    ] as [$label, $value])
+                        <div class="premium-card !p-6 !rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">{{ $label }}</p>
+                            <p class="text-xl font-black text-slate-900 dark:text-white tracking-tight">{{ $value }}</p>
+                        </div>
+                    @endforeach
+                    <div class="hidden sm:block premium-card !p-6 !rounded-3xl bg-slate-900 shadow-xl">
+                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Protocol Status</p>
+                        <p class="text-xs font-black text-white tracking-widest uppercase">{{ $discountAmount > 0 ? 'Verified' : 'Ready' }}</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
         @if(empty($cart))
-            <div class="glass card-shadow rounded-[2rem] py-20 text-center">
-                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full" style="background:color-mix(in srgb,var(--primary) 12%,white)">
-                    <i class="fas fa-shopping-cart text-3xl" style="color:var(--primary)"></i>
+            <div class="glass py-24 text-center rounded-[3.5rem]">
+                <div class="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-slate-50 text-slate-300 dark:bg-white/5">
+                    <i class="fas fa-shopping-bag text-4xl"></i>
                 </div>
-                <h2 class="mb-2 text-xl font-bold text-adapt">Your cart is empty</h2>
-                <p class="mx-auto mb-6 max-w-xl text-soft">Discover products you will love, then come back here to review totals, apply coupons, and move to checkout confidently.</p>
-                <div class="flex flex-wrap justify-center gap-3">
-                    <a wire:navigate href="{{ url('/products') }}" class="btn-gradient inline-block rounded-2xl px-7 py-3 font-bold">Shop Now</a>
-                    <a wire:navigate href="{{ route('help-center') }}" class="inline-block rounded-2xl border border-slate-200 bg-white px-7 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Need Help?</a>
+                <h2 class="mb-4 text-2xl font-black text-slate-900 dark:text-white tracking-tight">Buffer is Currently Empty</h2>
+                <p class="mx-auto mb-10 max-w-md text-sm font-bold text-slate-400 leading-relaxed">Your acquisition buffer contains no assets. Explore the registry to initialize new deployment protocols.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a wire:navigate href="{{ url('/products') }}" class="h-14 px-10 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">Explore Registry</a>
+                    <a wire:navigate href="{{ route('help-center') }}" class="h-14 px-10 flex items-center justify-center rounded-full border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-50">Support Node</a>
                 </div>
             </div>
         @else
-            <div class="grid grid-cols-1 gap-7 lg:grid-cols-3">
-                <div class="space-y-3 lg:col-span-2">
+            <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
+                <div class="space-y-8">
                     @foreach($cart as $id => $item)
-                        <div class="surface card-shadow storefront-reveal storefront-reveal-delay-1 flex items-start gap-4 rounded-[1.75rem] p-4">
-                            <a href="{{ url('/products/'.$id) }}" class="flex-shrink-0">
-                                <div class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white to-violet-50 dark:from-slate-900 dark:to-slate-800">
+                        <div class="premium-card !p-6 !rounded-[2.5rem] group border border-slate-50 hover:border-[var(--primary)] transition-all dark:border-white/5">
+                            <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+                                <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-50 dark:bg-white/5">
                                     @if(!empty($item['image']))
                                         <img src="{{ $item['image'] }}" class="h-full w-full object-cover">
                                     @else
-                                        <i class="fas fa-box text-2xl text-slate-300"></i>
+                                        <div class="flex h-full w-full items-center justify-center text-slate-300"><i class="fas fa-box text-2xl"></i></div>
                                     @endif
                                 </div>
-                            </a>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-start justify-between gap-2">
-                                    <div>
-                                        <p class="text-xs uppercase tracking-[0.18em] text-soft">{{ $item['brand'] ?? '' }}</p>
-                                        <a href="{{ url('/products/'.$id) }}" class="text-sm font-semibold leading-snug text-adapt hover:opacity-75">{{ $item['name'] }}</a>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div>
+                                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{{ $item['brand'] ?? 'Premium Asset' }}</p>
+                                            <a href="{{ url('/products/'.$id) }}" class="text-base font-black text-slate-900 dark:text-white tracking-tight hover:text-[var(--primary)] transition-colors">{{ $item['name'] }}</a>
+                                        </div>
+                                        <button wire:click="removeItem({{ $id }})" class="h-8 w-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all dark:bg-white/5"><i class="fas fa-times text-xs"></i></button>
                                     </div>
-                                    <button wire:click="removeItem({{ $id }})" class="flex-shrink-0 text-slate-300 transition hover:text-red-500">
-                                        <i class="fas fa-times text-sm"></i>
-                                    </button>
-                                </div>
-                                <div class="mt-3 flex items-center justify-between">
-                                    <div class="flex items-center overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
-                                        <button wire:click="updateQuantity({{ $id }}, -1)" class="flex h-8 w-8 items-center justify-center font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">-</button>
-                                        <span class="w-10 text-center text-sm font-semibold">{{ $item['quantity'] }}</span>
-                                        <button wire:click="updateQuantity({{ $id }}, 1)" class="flex h-8 w-8 items-center justify-center font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">+</button>
-                                    </div>
-                                    <div class="text-right">
-                                        @if(isset($item['original_price']) && $item['original_price'] > $item['price'])
-                                            <p class="text-xs text-soft line-through">Rs {{ number_format($item['original_price'] * $item['quantity'],2) }}</p>
-                                        @endif
-                                        <p class="text-sm font-bold text-adapt">Rs {{ number_format($item['price'] * $item['quantity'],2) }}</p>
+                                    <div class="flex items-center justify-between mt-6">
+                                        <div class="flex items-center h-10 rounded-full border border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-white/5 overflow-hidden">
+                                            <button wire:click="updateQuantity({{ $id }}, -1)" class="w-10 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"><i class="fas fa-minus text-[10px]"></i></button>
+                                            <span class="w-12 text-center text-[11px] font-black text-slate-900 dark:text-white">{{ $item['quantity'] }}</span>
+                                            <button wire:click="updateQuantity({{ $id }}, 1)" class="w-10 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"><i class="fas fa-plus text-[10px]"></i></button>
+                                        </div>
+                                        <div class="text-right">
+                                            @if(isset($item['original_price']) && $item['original_price'] > $item['price'])
+                                                <p class="text-[10px] font-black text-slate-300 line-through">Rs {{ number_format($item['original_price'] * $item['quantity'], 0) }}</p>
+                                            @endif
+                                            <p class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Rs {{ number_format($item['price'] * $item['quantity'], 0) }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     @endforeach
 
-                    <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 rounded-[1.75rem] p-5">
-                        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-adapt">
-                            <i class="fas fa-tag" style="color:var(--primary)"></i> Coupon Code
-                        </h3>
+                    <div class="premium-card !p-8 !rounded-[2.5rem] border border-slate-50 dark:border-white/5">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Credential Injection</p>
                         @if($couponApplied)
-                            <div class="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm">
-                                <span class="font-semibold text-green-700">{{ $couponMsg }}</span>
-                                <button wire:click="removeCoupon" class="ml-3 text-xs text-red-500 hover:underline">Remove</button>
+                            <div class="flex items-center justify-between p-6 rounded-3xl bg-emerald-50 border border-emerald-100 dark:bg-emerald-500/5 dark:border-emerald-500/10">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-1">Coupon Verified</p>
+                                    <p class="text-sm font-black text-emerald-900 dark:text-emerald-200">{{ $couponMsg }}</p>
+                                </div>
+                                <button wire:click="removeCoupon" class="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:underline">Revoke</button>
                             </div>
                         @else
-                            <div class="flex gap-2">
-                                <input type="text" wire:model="couponCode" wire:keydown.enter="applyCoupon" placeholder="Enter code" class="field flex-1 uppercase">
-                                <button wire:click="applyCoupon" wire:loading.attr="disabled" class="btn-gradient rounded-xl px-5 py-2.5 text-sm font-semibold">
-                                    <span wire:loading.remove wire:target="applyCoupon">Apply</span>
+                            <div class="flex gap-4">
+                                <input type="text" wire:model="couponCode" wire:keydown.enter="applyCoupon" placeholder="PROTOCOL CODE" class="flex-1 h-14 rounded-3xl border-slate-100 bg-slate-50 px-6 text-sm font-black tracking-widest text-slate-900 placeholder:text-slate-300 focus:border-[var(--primary)] focus:ring-0 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase">
+                                <button wire:click="applyCoupon" wire:loading.attr="disabled" class="h-14 px-10 rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:scale-105 transition-all">
+                                    <span wire:loading.remove wire:target="applyCoupon">Apply Code</span>
                                     <span wire:loading wire:target="applyCoupon"><i class="fas fa-spinner fa-spin"></i></span>
                                 </button>
                             </div>
                             @if($couponMsg)
-                                <p class="mt-2 text-xs {{ $couponError ? 'text-red-500' : 'text-green-600' }}">{{ $couponMsg }}</p>
+                                <p class="mt-4 text-[9px] font-black uppercase tracking-widest {{ $couponError ? 'text-rose-500' : 'text-emerald-500' }} ml-6">{{ $couponMsg }}</p>
                             @endif
                         @endif
                     </div>
                 </div>
 
-                <div>
-                    <div class="surface card-shadow storefront-reveal storefront-reveal-delay-2 sticky top-24 rounded-[1.75rem] p-5">
-                        <h3 class="mb-5 text-base font-bold text-adapt">Order Summary</h3>
-                        <div class="mb-5 space-y-2.5 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-soft">Subtotal</span>
-                                <span class="font-medium">Rs {{ number_format($subtotal,2) }}</span>
-                            </div>
-                            @if($discountAmount > 0)
-                                <div class="flex justify-between">
-                                    <span class="text-green-600">Discount</span>
-                                    <span class="font-medium text-green-600">-Rs {{ number_format($discountAmount,2) }}</span>
+                <aside>
+                    <div class="premium-card !p-10 !rounded-[3rem] sticky top-24 border border-slate-50 shadow-2xl dark:border-white/5">
+                        <h3 class="text-2xl font-black text-slate-900 dark:text-white tracking-tighter mb-10">Ledger Metrics</h3>
+                        <div class="space-y-6">
+                            @foreach([
+                                ['Buffer Subtotal', 'Rs '.number_format($subtotal, 0), false],
+                                ['Injected Discount', $discountAmount > 0 ? '-Rs '.number_format($discountAmount, 0) : 'None', true],
+                                ['Logistics Contribution', $shipping > 0 ? 'Rs '.number_format($shipping, 0) : 'Calculated at Deployment', false]
+                            ] as [$label, $value, $isDiscount])
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $label }}</span>
+                                    <span class="text-sm font-black {{ ($isDiscount && $discountAmount > 0) ? 'text-emerald-500' : 'text-slate-900 dark:text-white' }}">{{ $value }}</span>
                                 </div>
-                            @endif
-                            <div class="flex justify-between">
-                                <span class="text-soft">Shipping</span>
-                                <span class="font-medium">{{ $shipping > 0 ? 'Rs '.number_format($shipping,2) : 'FREE' }}</span>
-                            </div>
-                            <div class="flex justify-between border-t border-slate-200 pt-3 font-bold dark:border-white/10">
-                                <span class="text-adapt">Total</span>
-                                <span class="text-xl" style="color:var(--primary)">Rs {{ number_format($total,2) }}</span>
+                            @endforeach
+                            <div class="pt-8 mt-4 border-t border-slate-100 dark:border-white/5 flex justify-between items-end">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Final Ledger</p>
+                                    <p class="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Rs {{ number_format($total, 0) }}</p>
+                                </div>
                             </div>
                         </div>
-                        <a href="{{ url('/checkout') }}" class="btn-gradient mb-3 block w-full rounded-2xl py-3.5 text-center text-sm font-bold">
-                            <i class="fas fa-lock mr-2"></i>Checkout
-                        </a>
-                        <a href="{{ url('/products') }}" class="block w-full py-1.5 text-center text-sm text-soft transition hover:opacity-75">
-                            <i class="fas fa-arrow-left mr-1"></i>Continue Shopping
-                        </a>
-                        <div class="mt-5 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-center dark:border-white/10">
-                            <div class="text-xs text-soft"><i class="fas fa-shield-alt mb-1 block text-base text-green-500"></i>Secure</div>
-                            <div class="text-xs text-soft"><i class="fas fa-undo mb-1 block text-base text-blue-500"></i>Returns</div>
-                            <div class="text-xs text-soft"><i class="fas fa-truck mb-1 block text-base text-purple-500"></i>Fast Ship</div>
+                        <div class="mt-12 space-y-4">
+                            <a href="{{ url('/checkout') }}" class="w-full h-16 flex items-center justify-center rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[10px] font-black uppercase tracking-widest text-white shadow-[0_20px_50px_-10px_var(--primary-glow)] hover:scale-[1.02] transition-all">
+                                <i class="fas fa-shield-check mr-3 text-xs"></i> Initialize Acquisition
+                            </a>
+                            <a href="{{ url('/products') }}" class="w-full h-14 flex items-center justify-center rounded-full bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-all dark:bg-white/5 dark:hover:bg-white/10">
+                                Continue Exploration
+                            </a>
+                        </div>
+                        <div class="mt-10 grid grid-cols-3 gap-6 pt-10 border-t border-slate-50 dark:border-white/5 text-center">
+                            @foreach([['Shield', 'Secure', 'text-emerald-500'], ['Undo', 'Registry', 'text-blue-500'], ['Truck', 'Deploy', 'text-purple-500']] as [$icon, $label, $color])
+                                <div>
+                                    <i class="fas fa-{{ $icon }} mb-3 block text-base {{ $color }}"></i>
+                                    <p class="text-[8px] font-black uppercase tracking-widest text-slate-400">{{ $label }}</p>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
-                </div>
+                </aside>
             </div>
         @endif
     </div>

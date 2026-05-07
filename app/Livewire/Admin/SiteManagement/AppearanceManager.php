@@ -103,7 +103,7 @@ class AppearanceManager extends Component
 
     // ── Footer ────────────────────────────────────────────────
     public $footer_tagline   = 'Your one-stop shop for everything trendy and affordable.';
-    public $footer_copyright = '© 2024 ShopEase. All rights reserved.';
+    public $footer_copyright = '© {year} ShopEase. All rights reserved.';
     public $facebook_url     = '#';
     public $twitter_url      = '#';
     public $instagram_url    = '#';

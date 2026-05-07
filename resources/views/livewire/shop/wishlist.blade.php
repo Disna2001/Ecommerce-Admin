@@ -3,117 +3,99 @@
          x-on:notify.window="show=true;message=$event.detail.message;type=$event.detail.type;setTimeout(()=>show=false,3000)"
          x-show="show" x-transition
          class="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-xl"
-         :class="type==='success'?'bg-green-500':'bg-indigo-500'"
+         :class="type==='success'?'bg-emerald-500':'bg-indigo-500'"
          style="display:none">
         <i class="fas fa-check-circle"></i><span x-text="message"></span>
     </div>
 
-    <div class="mx-auto max-w-6xl py-8">
-        <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400">
-            <a href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-            <i class="fas fa-chevron-right text-xs"></i>
-            <span class="font-medium text-slate-700 dark:text-slate-100">Wishlist</span>
-        </nav>
-
-        <div class="storefront-hero card-shadow storefront-reveal mb-6 rounded-[2rem] px-5 py-6 sm:px-6 sm:py-7">
-            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+    <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+        <header class="mb-12">
+            <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <a href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+                <i class="fas fa-chevron-right text-[8px]"></i>
+                <span class="text-slate-900 dark:text-white">Asset Buffer</span>
+            </nav>
+            <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Saved Items</p>
-                    <h1 class="flex items-center gap-3 text-3xl font-black text-adapt">
-                        <i class="fas fa-heart text-rose-500"></i> Wishlist
-                        <span class="text-base font-normal text-soft">({{ $this->items->count() }})</span>
-                    </h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-7 text-soft">Keep your favorite items in one place and send them to the cart when you are ready.</p>
+                    <p class="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Saved Registry</p>
+                    <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Asset Buffer</h1>
+                    <p class="mt-4 max-w-2xl text-sm font-bold text-slate-400 leading-relaxed">Synchronize your favorite assets in one central buffer. Ready for acquisition deployment when required.</p>
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="storefront-stat rounded-[1.25rem] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-soft">Saved</p>
-                        <p class="mt-2 text-2xl font-black text-adapt">{{ $this->items->count() }}</p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="premium-card !p-6 !rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900">
+                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Saved Assets</p>
+                        <p class="text-xl font-black text-slate-900 dark:text-white tracking-tight">{{ $this->items->count() }}</p>
                     </div>
                     @if($this->items->isNotEmpty())
-                        <button wire:click="addAllToCart" wire:loading.attr="disabled" wire:target="addAllToCart" class="btn-gradient rounded-2xl px-5 py-3 text-sm font-semibold">
-                            <span wire:loading.remove wire:target="addAllToCart"><i class="fas fa-shopping-cart mr-1"></i>Add All to Cart</span>
-                            <span wire:loading wire:target="addAllToCart"><i class="fas fa-spinner fa-spin mr-1"></i>Adding...</span>
+                        <button wire:click="addAllToCart" wire:loading.attr="disabled" wire:target="addAllToCart" class="h-16 px-10 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">
+                            <span wire:loading.remove wire:target="addAllToCart"><i class="fas fa-shopping-cart mr-3 text-xs"></i>Synchronize All to Cart</span>
+                            <span wire:loading wire:target="addAllToCart"><i class="fas fa-spinner fa-spin mr-3 text-xs"></i>Syncing...</span>
                         </button>
                     @endif
                 </div>
             </div>
-        </div>
+        </header>
 
         @if($this->items->isEmpty())
-            <div class="glass card-shadow rounded-[2rem] py-20 text-center">
-                <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-rose-50">
-                    <i class="fas fa-heart text-4xl text-rose-300"></i>
+            <div class="glass py-24 text-center rounded-[3.5rem]">
+                <div class="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-slate-50 text-rose-300 dark:bg-white/5">
+                    <i class="fas fa-heart text-4xl"></i>
                 </div>
-                <h2 class="mb-2 text-xl font-bold text-adapt">Your wishlist is empty</h2>
-                <p class="mx-auto mb-6 max-w-xl text-soft">Save items you love to come back to them later, compare prices, and move them into the cart when you are ready.</p>
-                <div class="flex flex-wrap justify-center gap-3">
-                    <a wire:navigate href="{{ url('/products') }}" class="btn-gradient inline-block rounded-2xl px-7 py-3 font-bold">Discover Products</a>
-                    <a wire:navigate href="{{ route('track-order') }}" class="inline-block rounded-2xl border border-slate-200 bg-white px-7 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Track an Order</a>
+                <h2 class="mb-4 text-2xl font-black text-slate-900 dark:text-white tracking-tight">Buffer is Currently Empty</h2>
+                <p class="mx-auto mb-10 max-w-md text-sm font-bold text-slate-400 leading-relaxed">Your asset buffer contains no records. Explore the registry to identify and save priority assets for future deployment.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a wire:navigate href="{{ url('/products') }}" class="h-14 px-10 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">Explore Registry</a>
+                    <a wire:navigate href="{{ route('track-order') }}" class="h-14 px-10 flex items-center justify-center rounded-full border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-50">Sync Protocol</a>
                 </div>
             </div>
         @else
-                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                    @foreach($this->items as $product)
-                    <div class="surface card-shadow storefront-reveal storefront-reveal-delay-1 group flex flex-col overflow-hidden rounded-[1.75rem] transition-all hover:-translate-y-1">
-                        <a href="{{ url('/products/'.$product->id) }}" class="relative block">
-                            <div class="flex h-56 items-center justify-center overflow-hidden bg-gradient-to-br from-white via-violet-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800">
-                                @if($product->primary_image_url)
-                                    <picture class="block h-56 w-full">
-                                        @if(!empty($product->primary_image_sources['webp']))
-                                            <source srcset="{{ $product->primary_image_sources['webp'] }}" type="image/webp">
-                                        @endif
-                                        @if(!empty($product->primary_image_sources['jpeg']))
-                                            <source srcset="{{ $product->primary_image_sources['jpeg'] }}" type="image/jpeg">
-                                        @endif
-                                        <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" loading="lazy" decoding="async" class="h-56 w-full object-cover transition duration-300 group-hover:scale-105">
-                                    </picture>
-                                @else
-                                    <i class="fas fa-box text-4xl text-slate-300"></i>
-                                @endif
-                            </div>
-                            @if($product->discount_badge)
-                                <span class="absolute left-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white">
-                                    {{ $product->discount_badge }}
-                                </span>
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @foreach($this->items as $product)
+                    <div class="premium-card !p-0 !rounded-[2.5rem] group overflow-hidden border border-slate-50 hover:border-[var(--primary)] transition-all dark:border-white/5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-2xl">
+                        <div class="relative h-64 overflow-hidden bg-slate-50 dark:bg-white/5">
+                            @if($product->primary_image_url)
+                                <img src="{{ $product->primary_image_url }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            @else
+                                <div class="flex h-full w-full items-center justify-center text-slate-200"><i class="fas fa-box text-5xl"></i></div>
                             @endif
+
+                            @if($product->discount_badge)
+                                <div class="absolute top-4 left-4 h-8 px-4 flex items-center justify-center rounded-full bg-emerald-500 text-[9px] font-black uppercase tracking-widest text-white shadow-lg">{{ $product->discount_badge }}</div>
+                            @endif
+
                             @if($product->storefront_available_quantity <= 0)
-                                <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-                                    <span class="rounded-full bg-white px-3 py-1.5 text-xs font-bold">Out of Stock</span>
+                                <div class="absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px]">
+                                    <span class="px-6 py-2 rounded-full bg-white text-[10px] font-black uppercase tracking-widest text-slate-900 shadow-xl">Depleted</span>
                                 </div>
                             @endif
-                        </a>
 
-                        <div class="relative -mt-4 z-10 flex justify-end pr-3">
-                            <button wire:click="remove({{ $product->id }})" class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-rose-50">
-                                <i class="fas fa-heart text-xs text-rose-500"></i>
-                            </button>
+                            <button wire:click="remove({{ $product->id }})" class="absolute top-4 right-4 h-10 w-10 flex items-center justify-center rounded-full bg-white/90 text-rose-500 shadow-lg hover:scale-110 transition-all backdrop-blur-sm"><i class="fas fa-heart text-xs"></i></button>
                         </div>
 
-                        <div class="flex flex-1 flex-col p-4 pt-2">
-                            <p class="text-xs uppercase tracking-[0.18em] text-soft">{{ $product->brand?->name ?? '' }}</p>
-                            <a href="{{ url('/products/'.$product->id) }}" class="mb-2 flex-1 text-sm font-semibold text-adapt transition hover:opacity-75">
-                                {{ $product->name }}
-                            </a>
-                            <div class="mb-3">
+                        <div class="p-6">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">{{ $product->brand?->name ?? 'Premium Asset' }}</p>
+                            <a href="{{ url('/products/'.$product->id) }}" class="block text-base font-black text-slate-900 dark:text-white tracking-tight hover:text-[var(--primary)] transition-colors mb-4 line-clamp-1">{{ $product->name }}</a>
+                            
+                            <div class="flex items-center gap-3 mb-6">
                                 @if($product->discount_badge)
-                                    <span class="text-sm font-bold text-adapt">Rs {{ number_format($product->final_price,2) }}</span>
-                                    <span class="ml-1 text-xs text-soft line-through">Rs {{ number_format($product->selling_price,2) }}</span>
+                                    <span class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Rs {{ number_format($product->final_price, 0) }}</span>
+                                    <span class="text-[10px] font-black text-slate-300 line-through">Rs {{ number_format($product->selling_price, 0) }}</span>
                                 @else
-                                    <span class="text-sm font-bold text-adapt">Rs {{ number_format($product->selling_price,2) }}</span>
+                                    <span class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Rs {{ number_format($product->selling_price, 0) }}</span>
                                 @endif
                             </div>
+
                             <button wire:click="addToCart({{ $product->id }})"
                                     wire:loading.attr="disabled"
                                     wire:target="addToCart({{ $product->id }})"
-                                    class="btn-gradient w-full rounded-xl py-2.5 text-xs font-semibold"
-                                    {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                                    class="w-full h-12 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
+                                    {{ $product->storefront_available_quantity <= 0 ? 'disabled' : '' }}>
                                 <span wire:loading.remove wire:target="addToCart({{ $product->id }})">
-                                    <i class="fas fa-shopping-cart text-xs"></i>
-                                    {{ $product->storefront_available_quantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+                                    <i class="fas fa-shopping-cart mr-2 text-[10px]"></i>
+                                    {{ $product->storefront_available_quantity > 0 ? 'Initialize Acquisition' : 'Asset Depleted' }}
                                 </span>
                                 <span wire:loading wire:target="addToCart({{ $product->id }})">
-                                    <i class="fas fa-spinner fa-spin text-xs"></i> Adding...
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Processing...
                                 </span>
                             </button>
                         </div>

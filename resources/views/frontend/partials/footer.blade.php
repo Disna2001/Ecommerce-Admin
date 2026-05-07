@@ -8,7 +8,8 @@
     $igUrl = \App\Models\SiteSetting::get('instagram_url', '#');
     $piUrl = \App\Models\SiteSetting::get('pinterest_url', '#');
     $footerTagline = \App\Models\SiteSetting::get('footer_tagline', 'Your one-stop shop.');
-    $footerCopyright = \App\Models\SiteSetting::get('footer_copyright', '© '.date('Y').' '.($siteName ?? 'Shop').'. All rights reserved.');
+    $footerCopyright = \App\Models\SiteSetting::get('footer_copyright', '© {year} '.($siteName ?? 'Shop').'. All rights reserved.');
+    $footerCopyright = str_replace('{year}', date('Y'), $footerCopyright);
     $supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', ''));
     $supportPhone = \App\Models\SiteSetting::get('support_phone', '');
     $cats = \App\Models\Category::take(5)->get();

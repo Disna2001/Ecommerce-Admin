@@ -1,17 +1,17 @@
-<div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="flex items-start gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-            <i class="fas fa-terminal"></i>
-        </div>
-        <div>
-            <h3 class="text-xl font-semibold text-slate-900">Recommended Commands</h3>
-            <p class="mt-1 text-sm text-slate-500">Run these on the server after configuration changes or before going live.</p>
-        </div>
-    </div>
-    <div class="mt-5 space-y-3">
+<div class="rounded-[2rem] border border-slate-200 bg-slate-900 p-8 text-white shadow-2xl relative overflow-hidden">
+    <div class="absolute right-0 top-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-indigo-500/10"></div>
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Deployment Protocols</p>
+    
+    <div class="space-y-4">
         @foreach($deployCommands as $command)
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <code class="text-sm font-semibold text-slate-800">{{ $command }}</code>
+            <div class="group flex flex-col gap-2 rounded-2xl bg-white/5 p-4 border border-white/5 transition-all hover:bg-white/10 hover:border-white/20">
+                <p class="text-[10px] font-black uppercase tracking-widest text-indigo-400">{{ $command['label'] }}</p>
+                <div class="flex items-center justify-between gap-4">
+                    <code class="text-xs font-mono text-white/80 select-all">{{ $command['command'] }}</code>
+                    <button x-data @click="navigator.clipboard.writeText('{{ $command['command'] }}')" class="h-8 w-8 flex items-center justify-center rounded-lg bg-white/10 text-white hover:bg-indigo-500 transition-colors">
+                        <i class="fas fa-copy text-[10px]"></i>
+                    </button>
+                </div>
             </div>
         @endforeach
     </div>

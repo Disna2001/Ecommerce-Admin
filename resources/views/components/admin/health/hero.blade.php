@@ -1,36 +1,26 @@
-<div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Production Readiness</p>
-            <h2 class="mt-2 text-2xl font-bold text-slate-900">System Health Center</h2>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Track queue readiness, delivery health, storage availability, and service configuration from one production-focused screen.</p>
+<div class="grid gap-6 lg:grid-cols-3">
+    <div class="lg:col-span-1 rounded-[2.5rem] bg-slate-900 p-10 text-white shadow-2xl relative overflow-hidden">
+        <div class="absolute right-0 top-0 -mr-12 -mt-12 h-48 w-48 rounded-full bg-{{ $scoreTone === 'emerald' ? 'emerald' : ($scoreTone === 'amber' ? 'amber' : 'rose') }}-500/10 animate-pulse"></div>
+        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Readiness Score</p>
+        <div class="mt-8 flex items-baseline gap-2">
+            <span class="text-7xl font-black tracking-tighter text-{{ $scoreTone === 'emerald' ? 'emerald-400' : ($scoreTone === 'amber' ? 'amber-400' : 'rose-400') }}">{{ $score }}</span>
+            <span class="text-xl font-bold text-white/30">/ 100</span>
         </div>
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border {{ $scoreTone === 'emerald' ? 'border-emerald-200 bg-emerald-50' : ($scoreTone === 'amber' ? 'border-amber-200 bg-amber-50' : 'border-rose-200 bg-rose-50') }} p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] {{ $scoreTone === 'emerald' ? 'text-emerald-500' : ($scoreTone === 'amber' ? 'text-amber-500' : 'text-rose-500') }}">Hosting Score</p>
-                <p class="mt-2 text-3xl font-black {{ $scoreTone === 'emerald' ? 'text-emerald-700' : ($scoreTone === 'amber' ? 'text-amber-700' : 'text-rose-700') }}">{{ $score }}%</p>
-                <p class="mt-1 text-sm {{ $scoreTone === 'emerald' ? 'text-emerald-700/80' : ($scoreTone === 'amber' ? 'text-amber-700/80' : 'text-rose-700/80') }}">Overall hosted readiness.</p>
+        <p class="mt-4 text-sm font-medium leading-relaxed opacity-60">System is currently operating with <span class="text-white font-black">{{ $scoreTone === 'emerald' ? 'Optimal' : ($scoreTone === 'amber' ? 'Degraded' : 'Critical') }}</span> integrity protocols.</p>
+    </div>
+
+    <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        @foreach($metrics as $metric)
+            <div class="group relative rounded-[2rem] border border-slate-200 bg-white p-6 transition-all hover:border-slate-900 hover:shadow-xl">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                    <i class="fas {{ $metric['icon'] }} text-xs"></i>
+                </div>
+                <p class="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $metric['label'] }}</p>
+                <div class="mt-1 flex items-center gap-2">
+                    <span class="text-lg font-black text-slate-900">{{ $metric['value'] }}</span>
+                    <span class="text-[10px] font-bold text-{{ $metric['status_tone'] === 'emerald' ? 'emerald' : ($metric['status_tone'] === 'amber' ? 'amber' : 'rose') }}-500 uppercase">{{ $metric['status'] }}</span>
+                </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Queued</p>
-                <p class="mt-2 text-3xl font-black text-slate-900">{{ $metrics['queued'] }}</p>
-                <p class="mt-1 text-sm text-slate-500">Outbox entries waiting.</p>
-            </div>
-            <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-500">Stale Queue</p>
-                <p class="mt-2 text-3xl font-black text-rose-700">{{ $metrics['stale_queued'] }}</p>
-                <p class="mt-1 text-sm text-rose-700/80">Older than {{ $this->staleWindowMinutes }} minutes.</p>
-            </div>
-            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">Failed</p>
-                <p class="mt-2 text-3xl font-black text-amber-700">{{ $metrics['failed'] }}</p>
-                <p class="mt-1 text-sm text-amber-700/80">Need review or retry.</p>
-            </div>
-            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Retried</p>
-                <p class="mt-2 text-3xl font-black text-indigo-700">{{ $metrics['retried'] }}</p>
-                <p class="mt-1 text-sm text-indigo-700/80">Entries with multiple attempts.</p>
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>

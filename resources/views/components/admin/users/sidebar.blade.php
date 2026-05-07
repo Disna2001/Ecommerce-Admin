@@ -1,4 +1,4 @@
-@props(['recentAccessChanges', 'roles', 'teams'])
+@props(['recentAccessChanges', 'roles', 'teams', 'showTeamCreator' => false])
 
 <div class="space-y-6">
     <x-admin.ui.panel padding="p-5">

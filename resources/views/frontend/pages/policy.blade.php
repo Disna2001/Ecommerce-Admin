@@ -3,77 +3,102 @@
 @section('content')
 @php($supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', '')))
 @php($supportPhone = \App\Models\SiteSetting::get('support_phone', ''))
-<div class="mx-auto max-w-6xl py-8">
-    <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400">
-        <a wire:navigate href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-        <i class="fas fa-chevron-right text-xs"></i>
-        <span class="font-medium text-slate-700 dark:text-slate-100">{{ $title }}</span>
-    </nav>
+@php
+    $panel = "premium-card !p-8 !rounded-[2.5rem]";
+    $muted = "text-[10px] font-black uppercase tracking-[0.2em] text-slate-400";
+@endphp
 
-    <div class="glass card-shadow rounded-[2rem] px-6 py-8">
-        <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">{{ $eyebrow }}</p>
-        <h1 class="mt-3 text-4xl font-black text-adapt">{{ $title }}</h1>
-        <p class="mt-4 max-w-3xl text-sm leading-7 text-soft">{{ $intro }}</p>
-        <div class="mt-6 flex flex-wrap gap-3">
-            <a wire:navigate href="{{ route('help-center') }}" class="btn-gradient rounded-full px-6 py-3 text-sm font-semibold">Open Help Center</a>
-            <a wire:navigate href="{{ route('track-order') }}" class="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Track an Order</a>
+<div class="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+    <header class="mb-12">
+        <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <a wire:navigate href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-slate-900 dark:text-white">Legal Registry</span>
+        </nav>
+        <p class="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em] mb-4">{{ $eyebrow }}</p>
+        <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{{ $title }}</h1>
+        <p class="mt-4 max-w-3xl text-sm font-bold text-slate-400 leading-relaxed">{{ $intro }}</p>
+        <div class="mt-8 flex flex-wrap gap-4">
+            <a wire:navigate href="{{ route('help-center') }}" class="h-14 px-10 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">Support Hub</a>
+            <a wire:navigate href="{{ route('track-order') }}" class="h-14 px-10 flex items-center justify-center rounded-full border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-50">Sync Protocol</a>
         </div>
-    </div>
+    </header>
 
-    <div class="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div class="space-y-6">
+    <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="space-y-12">
             @foreach($sections as $section)
-                <div class="surface card-shadow rounded-[1.75rem] p-6">
-                    <h2 class="text-xl font-bold text-adapt">{{ $section['title'] }}</h2>
-                    <div class="mt-4 space-y-3 text-sm leading-7 text-soft">
+                <section class="{{ $panel }}">
+                    <p class="{{ $muted }} mb-8">{{ $section['title'] }}</p>
+                    <div class="space-y-6 text-[11px] font-bold text-slate-500 leading-loose">
                         @foreach($section['body'] as $paragraph)
                             <p>{{ $paragraph }}</p>
                         @endforeach
                     </div>
-                </div>
+                </section>
             @endforeach
         </div>
 
-        <div class="space-y-6">
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Need help with an order?</h2>
-                <div class="mt-5 space-y-3">
+        <aside class="space-y-12">
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Operational Nodes</p>
+                <div class="space-y-4">
                     @if(!empty($supportEmail))
-                        <a href="mailto:{{ $supportEmail }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                            <span><i class="fas fa-envelope mr-3"></i>Email Support</span>
-                            <span class="text-xs text-soft">{{ $supportEmail }}</span>
+                        <a href="mailto:{{ $supportEmail }}" class="group flex items-center justify-between p-6 rounded-[2rem] bg-slate-900 text-white shadow-xl hover:scale-[1.02] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-white/10"><i class="fas fa-envelope text-xs"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Email Node</p>
+                                    <p class="text-[11px] font-black tracking-tight truncate">{{ $supportEmail }}</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right text-[10px] text-slate-500 group-hover:text-white transition-colors"></i>
                         </a>
                     @endif
                     @if(!empty($supportPhone))
-                        <a href="tel:{{ preg_replace('/\s+/', '', $supportPhone) }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                            <span><i class="fas fa-phone mr-3"></i>Call Support</span>
-                            <span class="text-xs text-soft">{{ $supportPhone }}</span>
+                        <a href="tel:{{ preg_replace('/\s+/', '', $supportPhone) }}" class="group flex items-center justify-between p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 shadow-sm hover:shadow-xl transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400"><i class="fas fa-phone text-xs"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Voice Node</p>
+                                    <p class="text-[11px] font-black text-slate-900 dark:text-white tracking-tight">{{ $supportPhone }}</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover:text-[var(--primary)] transition-colors"></i>
                         </a>
                     @endif
-                    <a wire:navigate href="{{ route('refund-policy') }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                        <span><i class="fas fa-rotate-left mr-3"></i>Refund Policy</span>
-                        <i class="fas fa-chevron-right text-xs text-soft"></i>
-                    </a>
-                    <a wire:navigate href="{{ route('privacy-policy') }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                        <span><i class="fas fa-user-shield mr-3"></i>Privacy Policy</span>
-                        <i class="fas fa-chevron-right text-xs text-soft"></i>
-                    </a>
-                    <a wire:navigate href="{{ route('terms-and-conditions') }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                        <span><i class="fas fa-file-contract mr-3"></i>Terms & Conditions</span>
-                        <i class="fas fa-chevron-right text-xs text-soft"></i>
-                    </a>
+                    
+                    @foreach([
+                        ['Refund Policy', 'refund-policy', 'fa-rotate-left'],
+                        ['Privacy Protocol', 'privacy-policy', 'fa-user-shield'],
+                        ['Matrix Terms', 'terms-and-conditions', 'fa-file-contract']
+                    ] as [$label, $route, $icon])
+                        <a wire:navigate href="{{ route($route) }}" class="group flex items-center justify-between p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 shadow-sm hover:shadow-xl transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400"><i class="fas {{ $icon }} text-xs"></i></div>
+                                <p class="text-[11px] font-black text-slate-900 dark:text-white tracking-tight">{{ $label }}</p>
+                            </div>
+                            <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover:text-[var(--primary)] transition-colors"></i>
+                        </a>
+                    @endforeach
                 </div>
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Policy notes</h2>
-                <div class="mt-5 space-y-3 text-sm leading-7 text-soft">
-                    <p><i class="fas fa-circle-check mr-2 text-emerald-500"></i>These pages are published publicly so customers can review payment and purchase terms before checkout.</p>
-                    <p><i class="fas fa-circle-check mr-2 text-emerald-500"></i>Keep policy wording aligned with how the business actually handles delivery, activation, support, and refunds.</p>
-                    <p><i class="fas fa-circle-check mr-2 text-emerald-500"></i>Update these pages whenever your payment flow, product type, or customer support process changes.</p>
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-8">Compliance Artifacts</p>
+                <div class="space-y-4">
+                    @foreach([
+                        ['fa-circle-check', 'Policies are published via the public matrix for acquisition transparency.'],
+                        ['fa-circle-check', 'Compliance nodes are audited regularly to align with distribution standards.'],
+                        ['fa-circle-check', 'Registry updates are synchronized across all legal nodes immediately.']
+                    ] as [$icon, $text])
+                        <div class="flex gap-4">
+                            <i class="fas {{ $icon }} text-emerald-500 mt-1 text-xs"></i>
+                            <p class="text-[10px] font-bold text-slate-400 leading-relaxed">{{ $text }}</p>
+                        </div>
+                    @endforeach
                 </div>
-            </div>
-        </div>
+            </section>
+        </aside>
     </div>
 </div>
 @endsection

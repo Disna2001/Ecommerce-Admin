@@ -26,6 +26,9 @@ class DisplayItemManager extends Component
     public $showRailStockStatus = true;
     public $productsPerRail = 8;
     public $publishedIds = [];
+    public $activeTab = 'curator'; // curator, blueprint, telemetry
+    public $pushQuantity = 5;
+    public $pushTarget = 'low_visibility'; // low_visibility, newest, random
 
     public function mount()
     {
@@ -117,6 +120,38 @@ class DisplayItemManager extends Component
         ])->save();
 
         $this->publishedIds = Stock::query()->where('storefront_enabled', true)->pluck('id')->all();
+    }
+
+    public function pushStockToStorefront(): void
+    {
+        $query = Stock::query()
+            ->where('status', 'active')
+            ->where('quantity', '>', 0);
+
+        if ($this->pushTarget === 'low_visibility') {
+            $query->where('storefront_enabled', false);
+        } elseif ($this->pushTarget === 'newest') {
+            $query->latest();
+        } else {
+            $query->inRandomOrder();
+        }
+
+        $stocks = $query->limit(20)->get();
+        $count = 0;
+
+        foreach ($stocks as $stock) {
+            $pushAmount = min((int) $stock->quantity, (int) $this->pushQuantity);
+            if ($pushAmount > 0) {
+                $stock->update([
+                    'storefront_enabled' => true,
+                    'storefront_quantity' => $pushAmount
+                ]);
+                $count++;
+            }
+        }
+
+        $this->publishedIds = Stock::query()->where('storefront_enabled', true)->pluck('id')->all();
+        $this->dispatch('notify', ['type' => 'success', 'message' => "Successfully pushed {$count} items to the storefront."]);
     }
 
     public function render()

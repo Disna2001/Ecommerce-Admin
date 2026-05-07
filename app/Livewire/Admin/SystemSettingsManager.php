@@ -8,10 +8,15 @@ use App\Services\Billing\BillCustomizationService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
+use App\Services\Operations\SystemDataService;
+use Livewire\WithFileUploads;
 
 class SystemSettingsManager extends Component
 {
+    use WithFileUploads;
+
     public string $activeTab = 'communications';
+    public $backupFile;
 
     public bool $saved = false;
 
@@ -136,6 +141,9 @@ class SystemSettingsManager extends Component
     public string $ai_prompt_context = 'You are a helpful business assistant specializing in retail, sales tracking, and inventory management.';
 
     public string $ai_goal_text = 'Help the team manage sales, stock levels, and operational decisions quickly.';
+    
+    public bool $maintenance_mode = false;
+    public string $maintenance_secret = 'admin-bypass';
 
     public function mount(BillCustomizationService $billCustomizationService): void
     {
@@ -163,6 +171,7 @@ class SystemSettingsManager extends Component
         $this->billing_default_profiles = $billCustomizationService->configuredAssignments();
         $this->printer_catalog = $billCustomizationService->configuredPrinterCatalog();
         $this->test_email_recipient = $this->support_notification_email ?: $this->mail_from_address;
+        $this->maintenance_mode = app()->isDownForMaintenance();
     }
 
     public function save(AuditLogService $auditLogService, BillCustomizationService $billCustomizationService): void
@@ -561,5 +570,51 @@ class SystemSettingsManager extends Component
     public function resetPrinterCatalog(BillCustomizationService $billCustomizationService): void
     {
         $this->printer_catalog = $billCustomizationService->defaultPrinterCatalog();
+    }
+
+    public function downloadBackup(SystemDataService $systemDataService)
+    {
+        try {
+            $path = $systemDataService->createBackup();
+            return response()->download($path)->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            $this->dispatch('notify', type: 'error', message: 'Backup failed: ' . $e->getMessage());
+        }
+    }
+
+    public function restoreBackup(SystemDataService $systemDataService)
+    {
+        $this->validate([
+            'backupFile' => 'required|file|mimes:zip|max:51200', // 50MB max
+        ]);
+
+        try {
+            $path = $this->backupFile->getRealPath();
+            $systemDataService->restoreBackup($path);
+            
+            $this->dispatch('notify', type: 'success', message: 'System state restored successfully.');
+            return redirect(route('admin.settings')); // Refresh entire state
+        } catch (\Throwable $e) {
+            $this->dispatch('notify', type: 'error', message: 'Restoration failed: ' . $e->getMessage());
+        }
+    }
+
+    public function toggleMaintenanceMode()
+    {
+        try {
+            if ($this->maintenance_mode) {
+                \Illuminate\Support\Facades\Artisan::call('up');
+                $this->maintenance_mode = false;
+                $this->dispatch('notify', type: 'success', message: 'System is now LIVE and accessible to all users.');
+            } else {
+                \Illuminate\Support\Facades\Artisan::call('down', [
+                    '--secret' => $this->maintenance_secret,
+                ]);
+                $this->maintenance_mode = true;
+                $this->dispatch('notify', type: 'warning', message: 'System is now in MAINTENANCE mode. Bypass secret: ' . $this->maintenance_secret);
+            }
+        } catch (\Throwable $e) {
+            $this->dispatch('notify', type: 'error', message: 'Failed to toggle maintenance mode: ' . $e->getMessage());
+        }
     }
 }

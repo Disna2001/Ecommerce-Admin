@@ -1,35 +1,89 @@
-<x-admin.ui.panel title="Review Queue" description="Keep moderation focused on the highest-signal reviews instead of a crowded table." padding="p-0">
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-            <thead class="bg-slate-50 dark:bg-slate-900/70">
-                <tr>
-                    <th class="px-4 py-3 w-10"><input type="checkbox" wire:model.live="selectAll" class="rounded border-slate-300 text-indigo-600"></th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"><button wire:click="sortBy('rating')" class="flex items-center gap-2"><span>Rating</span><i class="fas fa-sort{{ $sortField === 'rating' ? ($sortDir === 'asc' ? '-up' : '-down') : '' }} text-[10px] opacity-50"></i></button></th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Reviewer</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Product</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Review</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400"><button wire:click="sortBy('created_at')" class="flex items-center gap-2"><span>Date</span><i class="fas fa-sort{{ $sortField === 'created_at' ? ($sortDir === 'asc' ? '-up' : '-down') : '' }} text-[10px] opacity-50"></i></button></th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-900 dark:bg-slate-950/60">
-                @forelse($reviews as $review)
-                    <tr class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-900/50 {{ $review->is_flagged ? 'bg-rose-50/70 dark:bg-rose-400/5' : '' }}">
-                        <td class="px-4 py-4"><input type="checkbox" wire:model.live="selected" value="{{ $review->id }}" class="rounded border-slate-300 text-indigo-600"></td>
-                        <td class="px-4 py-4"><div class="flex items-center gap-1 text-amber-400">@for($i = 1; $i <= 5; $i++)<i class="fas fa-star text-xs {{ $i <= $review->rating ? 'opacity-100' : 'opacity-20' }}"></i>@endfor</div><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $review->rating }}/5</p></td>
-                        <td class="px-4 py-4"><div class="flex items-center gap-3"><div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-xs font-bold text-white">{{ strtoupper(substr($review->user?->name ?? 'U', 0, 1)) }}</div><div><p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $review->user?->name ?? 'Unknown' }}</p><p class="text-xs text-slate-400">{{ $review->user?->email }}</p></div></div></td>
-                        <td class="px-4 py-4"><div class="flex items-center gap-3">@if($review->stock && !empty($review->stock->images))<img src="{{ \Illuminate\Support\Facades\Storage::url($review->stock->images[0]) }}" class="h-10 w-10 rounded-2xl object-cover">@else<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-900"><i class="fas fa-box text-xs"></i></div>@endif<div><p class="text-sm font-medium text-slate-800 dark:text-slate-200">{{ $review->stock?->name ?? 'Unavailable product' }}</p>@if($review->order)<p class="text-xs text-slate-400">Order #{{ $review->order->order_number }}</p>@endif</div></div></td>
-                        <td class="px-4 py-4">@if($review->title)<p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $review->title }}</p>@endif<p class="mt-1 max-w-xs text-xs leading-5 text-slate-500 dark:text-slate-400">{{ \Illuminate\Support\Str::limit($review->body, 90) }}</p></td>
-                        <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400"><p>{{ $review->created_at->format('M d, Y') }}</p><p class="mt-1">{{ $review->created_at->diffForHumans() }}</p></td>
-                        <td class="px-4 py-4"><div class="flex flex-col gap-2"><span class="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold {{ $review->is_approved ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300' }}">{{ $review->is_approved ? 'Published' : 'Pending' }}</span>@if($review->is_flagged)<span class="inline-flex w-fit items-center rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">Flagged</span>@endif</div></td>
-                        <td class="px-4 py-4"><div class="flex flex-wrap items-center gap-2"><button wire:click="viewReview({{ $review->id }})" class="rounded-2xl bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100 dark:bg-indigo-400/10 dark:text-indigo-300">View</button><button wire:click="openEdit({{ $review->id }})" class="rounded-2xl bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-600 transition hover:bg-sky-100 dark:bg-sky-400/10 dark:text-sky-300">Edit</button>@if(!$review->is_approved)<button wire:click="approve({{ $review->id }})" class="rounded-2xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100 dark:bg-emerald-400/10 dark:text-emerald-300">Approve</button>@else<button wire:click="reject({{ $review->id }})" class="rounded-2xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-300">Unpublish</button>@endif<button wire:click="toggleFlag({{ $review->id }})" class="rounded-2xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-600 transition hover:bg-amber-100 dark:bg-amber-400/10 dark:text-amber-300">{{ $review->is_flagged ? 'Unflag' : 'Flag' }}</button><button wire:click="delete({{ $review->id }})" wire:confirm="Delete this review permanently?" class="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-400/10 dark:text-rose-300">Delete</button></div></td>
-                    </tr>
-                @empty
-                    <tr><td colspan="8" class="px-6 py-16"><x-admin.ui.empty-state title="No reviews found" description="Reviews from customers will appear here when products start receiving feedback." /></td></tr>
-                @endforelse
-            </tbody>
-        </table>
+<div class="space-y-4">
+    @forelse($reviews as $review)
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm group hover:border-slate-900 transition-all {{ $review->is_flagged ? 'border-rose-200 bg-rose-50/20' : '' }}">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
+                <!-- Reviewer Signal -->
+                <div class="flex items-center gap-4 min-w-[200px]">
+                    <input type="checkbox" wire:model.live="selected" value="{{ $review->id }}" class="h-4 w-4 rounded border-slate-200 text-slate-900 focus:ring-slate-900">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 font-black text-sm uppercase">
+                        {{ substr($review->user->name ?? '?', 0, 2) }}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 tracking-tight line-clamp-1">{{ $review->user->name ?? 'Guest User' }}</h4>
+                        <div class="flex items-center gap-1 mt-1">
+                            @for($i=1; $i<=5; $i++)
+                                <i class="fas fa-star text-[8px] {{ $i <= $review->rating ? 'text-amber-400' : 'text-slate-200' }}"></i>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proof Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 line-clamp-1 max-w-[150px]">{{ $review->stock->name ?? 'Deleted Item' }}</span>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{{ $review->created_at->diffForHumans() }}</span>
+                    </div>
+                    <h5 class="text-xs font-black text-slate-900 line-clamp-1">{{ $review->title }}</h5>
+                    <p class="mt-1 text-[11px] font-medium text-slate-500 line-clamp-2 leading-relaxed italic">"{{ $review->body }}"</p>
+                </div>
+
+                <!-- Moderation Action Hub -->
+                <div class="flex items-center gap-3 lg:border-l lg:border-slate-100 lg:pl-6">
+                    <div class="flex flex-col items-end gap-1 px-4">
+                        <div class="flex items-center gap-2">
+                             <div class="h-2 w-2 rounded-full {{ $review->is_approved ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></div>
+                             <span class="text-[9px] font-black text-slate-900 uppercase tracking-widest">{{ $review->is_approved ? 'Published' : 'Queue' }}</span>
+                        </div>
+                        @if($review->is_flagged)
+                            <span class="text-[8px] font-black text-rose-500 uppercase tracking-widest">Flagged Content</span>
+                        @endif
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        @if(!$review->is_approved)
+                            <button wire:click="approve({{ $review->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm">
+                                <i class="fas fa-check text-xs"></i>
+                            </button>
+                        @else
+                             <button wire:click="reject({{ $review->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                                <i class="fas fa-eye-slash text-xs"></i>
+                            </button>
+                        @endif
+
+                        <button wire:click="toggleFlag({{ $review->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl {{ $review->is_flagged ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white' }} transition-all shadow-sm">
+                            <i class="fas fa-flag text-xs"></i>
+                        </button>
+
+                        <button wire:click="viewReview({{ $review->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                            <i class="fas fa-expand text-xs"></i>
+                        </button>
+
+                         <button wire:click="openEdit({{ $review->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                            <i class="fas fa-pencil text-xs"></i>
+                        </button>
+
+                        <button 
+                            onclick="confirm('Permanently purge this social proof?') || event.stopImmediatePropagation()"
+                            wire:click="delete({{ $review->id }})" 
+                            class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                        >
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @empty
+        <div class="py-20 text-center">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white text-slate-200 shadow-sm mb-6">
+                <i class="fas fa-comment-slash text-3xl"></i>
+            </div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">No social proof identified.<br>User feedback will appear here for curation.</p>
+        </div>
+    @endforelse
+
+    <div class="pt-6">
+        {{ $reviews->links() }}
     </div>
-    <div class="border-t border-slate-200 px-6 py-4 dark:border-slate-800">{{ $reviews->links() }}</div>
-</x-admin.ui.panel>
+</div>

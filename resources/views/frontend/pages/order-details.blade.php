@@ -1,5 +1,5 @@
 @extends('layouts.shop')
-@section('title', 'Order '.$order->order_number)
+@section('title', 'Protocol #'.$order->order_number)
 @section('content')
 @php
     $progressStages = [
@@ -13,276 +13,229 @@
     $currentProgress = $progressStages[$order->status] ?? null;
     $progressPercent = $currentProgress === null ? 0 : (int) round(($currentProgress / 5) * 100);
     $canRequestReturn = $order->canBeReturned() && ! $order->isReturnPending() && ! in_array($order->status, ['returned', 'refunded'], true);
+    
+    $panel = "premium-card !p-8 !rounded-[2.5rem]";
+    $muted = "text-[10px] font-black uppercase tracking-[0.2em] text-slate-400";
+    $input = "w-full h-14 rounded-3xl border-slate-100 bg-slate-50 px-6 text-sm font-bold text-slate-900 focus:border-[var(--primary)] focus:ring-0 transition-all dark:border-white/5 dark:bg-white/5 dark:text-white";
 @endphp
-<div class="mx-auto max-w-6xl py-8">
-    <nav class="mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-        <a wire:navigate href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-        <i class="fas fa-chevron-right text-xs"></i>
-        <a wire:navigate href="{{ route('profile.index', ['tab' => 'orders']) }}" class="hover:text-slate-700 dark:hover:text-slate-100">My Orders</a>
-        <i class="fas fa-chevron-right text-xs"></i>
-        <span class="font-medium text-slate-700 dark:text-slate-100">{{ $order->order_number }}</span>
-    </nav>
 
-    <div class="glass card-shadow rounded-[2rem] px-6 py-8">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Order Details</p>
-                <h1 class="mt-3 text-4xl font-black text-adapt">{{ $order->order_number }}</h1>
-                <p class="mt-3 max-w-3xl text-sm leading-7 text-soft">Review every part of the order in one place, including payment status, item breakdown, shipping progress, and the full status timeline.</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex rounded-full px-4 py-2 text-xs font-semibold text-white" style="background: {{ $order->status_color }}">
-                    {{ $order->status_label }}
-                </span>
-                <span class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                    Payment: {{ ucfirst($order->payment_status ?? 'unpaid') }}
-                </span>
-            </div>
+<div class="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+    <header class="mb-12 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <a wire:navigate href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+                <i class="fas fa-chevron-right text-[8px]"></i>
+                <a wire:navigate href="{{ route('profile.index', ['tab' => 'orders']) }}" class="hover:text-[var(--primary)] transition-colors">Registry</a>
+                <i class="fas fa-chevron-right text-[8px]"></i>
+                <span class="text-slate-900 dark:text-white">Protocol {{ $order->order_number }}</span>
+            </nav>
+            <p class="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Transaction Intelligence</p>
+            <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Protocol #{{ $order->order_number }}</h1>
         </div>
-    </div>
+        <div class="flex flex-wrap items-center gap-4">
+            <span class="h-12 px-8 flex items-center justify-center rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-xl" style="background: {{ $order->status_color }}">
+                {{ $order->status_label }}
+            </span>
+            <span class="h-12 px-8 flex items-center justify-center rounded-full border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm dark:border-white/5 dark:bg-slate-900 dark:text-slate-400">
+                Ledger: {{ ucfirst($order->payment_status ?? 'unpaid') }}
+            </span>
+        </div>
+    </header>
 
-    <div class="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div class="space-y-6">
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="space-y-12">
+            <section class="{{ $panel }}">
+                <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between mb-12">
                     <div>
-                        <h2 class="text-xl font-bold text-adapt">Order progress</h2>
-                        <p class="mt-2 text-sm text-soft">A quick view of where this order is in the fulfilment flow.</p>
+                        <p class="{{ $muted }} mb-2">Fulfilment Stream</p>
+                        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Execution Progress</h2>
                     </div>
-                    <span class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                        {{ $order->status_label }}
-                    </span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Current Phase: {{ $order->status_label }}</span>
                 </div>
+                
                 @if($currentProgress !== null)
-                    <div class="mt-6">
-                        <div class="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                            <div class="h-full rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+                    <div class="relative pt-4">
+                        <div class="h-1.5 w-full bg-slate-100 rounded-full dark:bg-white/5">
+                            <div class="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] transition-all duration-1000" style="width: {{ $progressPercent }}%"></div>
                         </div>
-                        <div class="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                        <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                             @foreach(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed'] as $index => $stage)
-                                @php
-                                    $active = $currentProgress >= $index;
-                                @endphp
-                                <div class="rounded-2xl border px-3 py-3 text-center {{ $active ? 'border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-200' : 'border-slate-200 bg-white text-slate-400 dark:border-white/10 dark:bg-slate-900 dark:text-slate-500' }}">
-                                    <p class="text-[11px] font-black uppercase tracking-[0.18em]">{{ str_replace('_', ' ', $stage) }}</p>
+                                @php $active = $currentProgress >= $index; @endphp
+                                <div class="rounded-3xl border p-4 text-center transition-all {{ $active ? 'border-[var(--primary)]/20 bg-[var(--primary)]/5 text-[var(--primary)]' : 'border-slate-50 bg-slate-50/50 text-slate-400 dark:border-white/5 dark:bg-white/5' }}">
+                                    <p class="text-[8px] font-black uppercase tracking-widest">{{ str_replace('_', ' ', $stage) }}</p>
                                 </div>
                             @endforeach
                         </div>
                     </div>
                 @else
-                    <div class="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-soft dark:border-white/10 dark:bg-slate-900/70">
-                        This order is currently in a special state such as cancellation, return review, or refund.
+                    <div class="p-8 rounded-3xl bg-amber-50/50 border border-amber-100 dark:bg-amber-500/5 dark:border-amber-500/10">
+                        <p class="text-sm font-bold text-amber-700 dark:text-amber-200">Protocol Intervention Active</p>
+                        <p class="mt-2 text-xs text-amber-600/80 dark:text-amber-200/60">This protocol is currently in a specialized state (Cancellation / Return / Refund Review).</p>
                     </div>
                 @endif
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Order summary</h2>
-                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Placed on</p>
-                        <p class="mt-2 text-sm font-semibold text-adapt">{{ $order->created_at?->format('M d, Y h:i A') }}</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Payment method</p>
-                        <p class="mt-2 text-sm font-semibold text-adapt">{{ ucfirst(str_replace('_', ' ', $order->payment_method ?: 'not set')) }}</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Gateway</p>
-                        <p class="mt-2 text-sm font-semibold text-adapt">{{ $order->payment_gateway ?: 'Manual / offline' }}</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Subtotal</p>
-                        <p class="mt-2 text-sm font-semibold text-adapt">Rs {{ number_format((float) $order->subtotal, 2) }}</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Shipping fee</p>
-                        <p class="mt-2 text-sm font-semibold text-adapt">Rs {{ number_format((float) $order->shipping_fee, 2) }}</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Grand total</p>
-                        <p class="mt-2 text-sm font-semibold text-adapt">Rs {{ number_format((float) $order->total, 2) }}</p>
-                    </div>
-                </div>
-                @if($order->payment_reference || $order->payment_gateway_transaction_id || $order->notes)
-                    <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                        @if($order->payment_reference)
-                            <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Payment reference</p>
-                                <p class="mt-2 break-all text-sm font-semibold text-adapt">{{ $order->payment_reference }}</p>
-                            </div>
-                        @endif
-                        @if($order->payment_gateway_transaction_id)
-                            <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Transaction ID</p>
-                                <p class="mt-2 break-all text-sm font-semibold text-adapt">{{ $order->payment_gateway_transaction_id }}</p>
-                            </div>
-                        @endif
-                    </div>
-                    @if($order->notes)
-                        <div class="mt-4 rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Order note</p>
-                            <p class="mt-2 text-sm leading-7 text-soft">{{ $order->notes }}</p>
-                        </div>
-                    @endif
-                @endif
-            </div>
-
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Items in this order</h2>
-                <div class="mt-5 space-y-4">
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Asset Ledger</p>
+                <div class="space-y-6">
                     @foreach($order->items as $item)
                         @php
                             $itemName = $item->product_name ?: ($item->stock?->name ?: 'Ordered item');
                             $itemPrice = (float) ($item->sale_price ?? $item->unit_price ?? 0);
                             $itemSubtotal = (float) ($item->subtotal ?? ($itemPrice * (int) $item->quantity));
                         @endphp
-                        <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-900/70">
-                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-adapt">{{ $itemName }}</p>
-                                    <div class="mt-2 flex flex-wrap gap-2 text-xs text-soft">
-                                        @if($item->product_sku)
-                                            <span class="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">SKU: {{ $item->product_sku }}</span>
-                                        @endif
-                                        <span class="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">Qty {{ $item->quantity }}</span>
-                                    </div>
+                        <div class="group flex flex-col gap-6 p-6 rounded-3xl border border-slate-50 hover:bg-slate-50 transition-all dark:border-white/5 dark:hover:bg-white/5 md:flex-row md:items-center">
+                            <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100 dark:bg-white/5">
+                                @if($item->stock?->image_url)
+                                    <img src="{{ $item->stock->image_url }}" alt="" class="h-full w-full object-cover">
+                                @else
+                                    <div class="flex h-full w-full items-center justify-center text-slate-300"><i class="fas fa-box text-xl"></i></div>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight line-clamp-1">{{ $itemName }}</h3>
+                                <div class="mt-2 flex flex-wrap gap-4">
+                                    @if($item->product_sku)<span class="text-[9px] font-black uppercase tracking-widest text-slate-400">SKU: {{ $item->product_sku }}</span>@endif
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Qty: {{ $item->quantity }}</span>
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-[var(--primary)]">Unit: Rs {{ number_format($itemPrice, 2) }}</span>
                                 </div>
-                                <div class="text-left sm:text-right">
-                                    <p class="text-sm font-semibold text-adapt">Rs {{ number_format($itemSubtotal, 2) }}</p>
-                                    <p class="mt-1 text-xs text-soft">Unit price: Rs {{ number_format($itemPrice, 2) }}</p>
-                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Rs {{ number_format($itemSubtotal, 2) }}</p>
                             </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Tracking timeline</h2>
-                <div class="mt-5 space-y-4">
+                <div class="mt-12 pt-12 border-t border-slate-100 dark:border-white/5 grid gap-8 sm:grid-cols-3">
+                    @foreach([
+                        ['Subtotal Accumulation', 'Rs '.number_format((float) $order->subtotal, 2)],
+                        ['Logistics Contribution', 'Rs '.number_format((float) $order->shipping_fee, 2)],
+                        ['Grand Total Ledger', 'Rs '.number_format((float) $order->total, 2), true]
+                    ] as [$label, $value, $bold = false])
+                        <div class="p-6 rounded-3xl bg-slate-50/50 dark:bg-white/5">
+                            <p class="{{ $muted }} mb-2">{{ $label }}</p>
+                            <p class="text-base font-black {{ $bold ? 'text-[var(--primary)]' : 'text-slate-900 dark:text-white' }} tracking-tight">{{ $value }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Audit Trail</p>
+                <div class="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-slate-100 dark:before:bg-white/5">
                     @forelse($order->statusHistory as $history)
-                        <div class="flex gap-4">
-                            <div class="mt-1 h-3 w-3 rounded-full" style="background:var(--primary)"></div>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-adapt">{{ ucfirst(str_replace('_', ' ', $history->status)) }}</p>
-                                <p class="mt-1 text-sm text-soft">{{ $history->note ?: 'Status updated by the team.' }}</p>
-                                <div class="mt-1 flex flex-wrap gap-2 text-xs text-slate-400">
-                                    <span>{{ $history->created_at?->format('M d, Y h:i A') }}</span>
-                                    @if($history->changedBy)
-                                        <span>by {{ $history->changedBy->name }}</span>
-                                    @endif
+                        <div class="relative pl-10">
+                            <div class="absolute left-0 top-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-white border-4 border-slate-100 dark:bg-slate-900 dark:border-white/5 z-10">
+                                <div class="h-2 w-2 rounded-full bg-[var(--primary)]"></div>
+                            </div>
+                            <div class="p-6 rounded-3xl bg-slate-50/50 dark:bg-white/5 hover:bg-slate-50 transition-colors">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ ucfirst(str_replace('_', ' ', $history->status)) }}</p>
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">{{ $history->created_at?->format('M d, Y | h:i A') }}</span>
                                 </div>
+                                <p class="text-[11px] font-bold text-slate-500 leading-relaxed">{{ $history->note ?: 'Operational status synchronized successfully.' }}</p>
+                                @if($history->changedBy)
+                                    <p class="mt-4 text-[9px] font-black uppercase tracking-widest text-[var(--primary)]">Verified by: {{ $history->changedBy->name }}</p>
+                                @endif
                             </div>
                         </div>
                     @empty
-                        <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-soft">This order exists, but no timeline items have been recorded yet.</div>
+                        <div class="py-12 text-center glass rounded-[2.5rem]">
+                            <i class="fas fa-history text-2xl text-slate-200 mb-4"></i>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">No Historical Records</p>
+                        </div>
                     @endforelse
                 </div>
-            </div>
+            </section>
         </div>
 
-        <div class="space-y-6">
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Customer details</h2>
-                <div class="mt-5 space-y-4 text-sm">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Name</p>
-                        <p class="mt-2 font-semibold text-adapt">{{ $order->customer_name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Email</p>
-                        <p class="mt-2 font-semibold text-adapt">{{ $order->customer_email }}</p>
-                    </div>
-                    @if($order->customer_phone)
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Phone</p>
-                            <p class="mt-2 font-semibold text-adapt">{{ $order->customer_phone }}</p>
+        <aside class="space-y-12">
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Entity Intelligence</p>
+                <div class="space-y-8">
+                    @foreach([
+                        ['Identification', $order->customer_name],
+                        ['Communication', $order->customer_email],
+                        ['Direct Channel', $order->customer_phone ?: 'Unlisted']
+                    ] as [$label, $value])
+                        <div class="rounded-3xl bg-slate-50/50 p-6 dark:bg-white/5">
+                            <p class="{{ $muted }} mb-2">{{ $label }}</p>
+                            <p class="text-sm font-black text-slate-900 dark:text-white tracking-tight">{{ $value }}</p>
                         </div>
-                    @endif
+                    @endforeach
                 </div>
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Shipping details</h2>
-                <div class="mt-5 space-y-4 text-sm">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Address</p>
-                        <p class="mt-2 leading-7 text-adapt">
-                            {{ $order->shipping_address ?: 'No shipping address recorded.' }}
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Geospatial Distribution</p>
+                <div class="space-y-8">
+                    <div class="rounded-3xl bg-slate-50/50 p-6 dark:bg-white/5">
+                        <p class="{{ $muted }} mb-4">Destination Node</p>
+                        <p class="text-[11px] font-bold text-slate-400 leading-relaxed">
+                            {{ $order->shipping_address ?: 'Coordinates not registered.' }}
                             @if($order->shipping_city), {{ $order->shipping_city }}@endif
                             @if($order->shipping_postal_code), {{ $order->shipping_postal_code }}@endif
-                            @if($order->shipping_country), {{ $order->shipping_country }}@endif
                         </p>
                     </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Courier</p>
-                        <p class="mt-2 font-semibold text-adapt">{{ $order->courier ?: 'Not assigned yet' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-soft">Tracking number</p>
-                        <p class="mt-2 font-semibold text-adapt">{{ $order->tracking_number ?: 'Pending' }}</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="rounded-3xl bg-slate-50/50 p-6 dark:bg-white/5">
+                            <p class="{{ $muted }} mb-2">Carrier</p>
+                            <p class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $order->courier ?: 'Unassigned' }}</p>
+                        </div>
+                        <div class="rounded-3xl bg-slate-50/50 p-6 dark:bg-white/5">
+                            <p class="{{ $muted }} mb-2">Index</p>
+                            <p class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $order->tracking_number ?: 'Pending' }}</p>
+                        </div>
                     </div>
                     @if($order->tracking_url)
-                        <a href="{{ $order->tracking_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                            Open courier tracking
-                            <i class="fas fa-arrow-up-right-from-square text-xs"></i>
-                        </a>
+                        <a href="{{ $order->tracking_url }}" target="_blank" class="w-full h-12 flex items-center justify-center rounded-full bg-slate-900 text-[9px] font-black uppercase tracking-widest text-white shadow-lg hover:scale-105 transition-all">Launch Tracking Interface</a>
                     @endif
                 </div>
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Need help?</h2>
-                <p class="mt-3 text-sm leading-7 text-soft">If anything looks incorrect, use the help center or the support chat on the storefront and mention this order number.</p>
-                <div class="mt-4 flex flex-wrap gap-3">
-                    <a href="{{ route('orders.invoice', $order) }}" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Download Invoice</a>
-                    <a href="{{ route('orders.receipt', $order) }}" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Download Receipt</a>
-                    <a wire:navigate href="{{ route('help-center') }}" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Open Help Center</a>
-                    <a wire:navigate href="{{ route('track-order', ['order_number' => $order->order_number, 'email' => $order->customer_email]) }}" class="btn-gradient rounded-full px-5 py-3 text-sm font-semibold">Open Public Tracker</a>
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Protocol Resources</p>
+                <div class="grid gap-4">
+                    <a href="{{ route('orders.invoice', $order) }}" class="h-12 px-8 flex items-center gap-3 rounded-full border border-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all dark:border-white/5">
+                        <i class="fas fa-file-invoice text-xs"></i> Acquisition Invoice
+                    </a>
+                    <a href="{{ route('orders.receipt', $order) }}" class="h-12 px-8 flex items-center gap-3 rounded-full border border-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all dark:border-white/5">
+                        <i class="fas fa-receipt text-xs"></i> Operational Receipt
+                    </a>
+                    <a wire:navigate href="{{ route('track-order', ['order_number' => $order->order_number, 'email' => $order->customer_email]) }}" class="h-12 px-8 flex items-center gap-3 rounded-full bg-slate-900 text-[9px] font-black uppercase tracking-widest text-white shadow-lg hover:scale-105 transition-all">
+                        <i class="fas fa-satellite text-xs"></i> Public Tracking Node
+                    </a>
                 </div>
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Returns & refunds</h2>
+            <section class="{{ $panel }} group">
+                <p class="{{ $muted }} mb-10">Retraction Protocol</p>
                 @if($canRequestReturn)
-                    <p class="mt-3 text-sm leading-7 text-soft">This order is eligible for a return request. Share the reason and any details that will help the team review it faster.</p>
-                    <form method="POST" action="{{ route('orders.return-request', $order) }}" class="mt-5 space-y-4">
+                    <form method="POST" action="{{ route('orders.return-request', $order) }}" class="space-y-6">
                         @csrf
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-soft">Reason</label>
-                            <input type="text" name="return_reason" value="{{ old('return_reason') }}" class="field" placeholder="Wrong item, activation issue, duplicate purchase">
-                            @error('return_reason')
-                                <p class="mt-2 text-xs text-rose-500">{{ $message }}</p>
-                            @enderror
+                        <div class="space-y-2">
+                            <label class="{{ $muted }}">Retraction Reason</label>
+                            <input type="text" name="return_reason" class="{{ $input }}" placeholder="Verification issue, deployment failure">
                         </div>
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-soft">Extra details</label>
-                            <textarea name="return_notes" rows="4" class="field resize-none" placeholder="Add any extra explanation, account issue, or delivery problem">{{ old('return_notes') }}</textarea>
-                            @error('return_notes')
-                                <p class="mt-2 text-xs text-rose-500">{{ $message }}</p>
-                            @enderror
+                        <div class="space-y-2">
+                            <label class="{{ $muted }}">Analytical Notes</label>
+                            <textarea name="return_notes" rows="3" class="{{ $input }} !h-auto !py-4 resize-none" placeholder="Provide technical metadata for return review"></textarea>
                         </div>
-                        <button type="submit" class="rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white dark:bg-white dark:text-slate-950">Request return</button>
+                        <button type="submit" class="w-full h-14 rounded-full bg-rose-500 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:scale-105 transition-all">Execute Retraction Request</button>
                     </form>
                 @elseif($order->isReturnPending())
-                    <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-                        A return request is already under review for this order.
-                        @if($order->return_reason)
-                            <div class="mt-2 font-semibold">Reason: {{ $order->return_reason }}</div>
-                        @endif
-                    </div>
-                @elseif(in_array($order->status, ['returned', 'refunded'], true))
-                    <div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-7 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200">
-                        This order has already completed the return or refund flow.
+                    <div class="p-8 rounded-3xl bg-amber-50/50 border border-amber-100 dark:bg-amber-500/5 dark:border-amber-500/10">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-200 mb-2">Pending Review</p>
+                        <p class="text-[11px] font-bold text-amber-600/80 dark:text-amber-200/60 leading-relaxed">A retraction protocol has been initialized and is currently awaiting administrative approval.</p>
                     </div>
                 @else
-                    <div class="mt-4 rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm leading-7 text-soft dark:border-white/10 dark:bg-slate-900/70">
-                        Return requests become available after the order reaches a delivered or completed state.
+                    <div class="p-8 rounded-3xl bg-slate-50/50 dark:bg-white/5">
+                        <p class="text-[11px] font-bold text-slate-400 leading-relaxed">Retraction protocols are only available for synchronized, delivered deployments.</p>
                     </div>
                 @endif
-            </div>
-        </div>
+            </section>
+        </aside>
     </div>
 </div>
 @endsection

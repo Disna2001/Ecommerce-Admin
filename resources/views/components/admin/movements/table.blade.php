@@ -1,33 +1,69 @@
-<div class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
+<div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-                <tr>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">Stock</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">Direction</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">Quantity</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">Before / After</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">Context</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">Actor</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-500">View</th>
+        <table class="min-w-full divide-y divide-slate-100">
+            <thead>
+                <tr class="bg-slate-50/50">
+                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Timestamp</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Resource</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mutation</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Context</th>
+                    <th class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Operations</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
-                @forelse($movements as $movement)
-                    <tr>
-                        <td class="px-4 py-4"><p class="font-semibold text-slate-900">{{ $movement->stock?->name ?? 'Deleted stock' }}</p><p class="mt-1 text-xs text-slate-400">{{ $movement->stock?->sku ?? 'n/a' }}</p></td>
-                        <td class="px-4 py-4"><span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $movement->direction === 'out' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' }}">{{ strtoupper($movement->direction) }}</span></td>
-                        <td class="px-4 py-4 text-slate-600">{{ $movement->quantity }}</td>
-                        <td class="px-4 py-4 text-slate-600">{{ $movement->before_quantity }} -> {{ $movement->after_quantity }}</td>
-                        <td class="px-4 py-4 text-slate-600">{{ $movement->context }}</td>
-                        <td class="px-4 py-4 text-slate-600">{{ $movement->user?->name ?? 'System / Unknown' }}</td>
-                        <td class="px-4 py-4"><button wire:click="openDetailModal({{ $movement->id }})" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-white"><i class="fas fa-eye"></i> Details</button></td>
+                @forelse($movements as $m)
+                    <tr class="group transition-colors hover:bg-slate-50/50">
+                        <td class="px-6 py-4">
+                            <div class="space-y-1">
+                                <p class="text-xs font-black text-slate-900">{{ $m->created_at->format('M d, H:i') }}</p>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ $m->created_at->diffForHumans() }}</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="space-y-1">
+                                <p class="text-xs font-black text-slate-900">{{ $m->stock->name ?? 'Deleted Resource' }}</p>
+                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">{{ $m->stock->sku ?? 'N/A' }}</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $m->direction === 'in' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600 shadow-inner' }}">
+                                    <i class="fas {{ $m->direction === 'in' ? 'fa-arrow-down-long' : 'fa-arrow-up-long' }} text-[10px]"></i>
+                                </div>
+                                <div class="space-y-0.5">
+                                    <p class="text-sm font-black {{ $m->direction === 'in' ? 'text-emerald-700' : 'text-rose-700' }}">{{ $m->direction === 'in' ? '+' : '-' }}{{ $m->quantity }}</p>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Post-Balance: {{ $m->post_quantity }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-600 border border-slate-100 shadow-sm">
+                                {{ str_replace('_', ' ', $m->context) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button wire:click="openDetailModal({{ $m->id }})" class="h-8 w-8 rounded-lg text-slate-400 transition hover:bg-slate-900 hover:text-white shadow-sm">
+                                <i class="fas fa-eye text-xs"></i>
+                            </button>
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="px-4 py-12 text-center text-slate-500">No stock movement records match the current filters.</td></tr>
+                    <tr>
+                        <td colspan="5" class="py-20 text-center">
+                            <div class="flex flex-col items-center">
+                                <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-200">
+                                    <i class="fas fa-box-open text-2xl"></i>
+                                </div>
+                                <p class="text-sm font-bold text-slate-500">No inventory mutations recorded in this segment</p>
+                            </div>
+                        </td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="p-4">{{ $movements->links() }}</div>
+</div>
+
+<div class="mt-6">
+    {{ $movements->links() }}
 </div>

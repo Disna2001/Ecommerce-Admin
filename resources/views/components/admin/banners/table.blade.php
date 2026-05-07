@@ -1,73 +1,106 @@
-<x-admin.ui.panel title="Banner Queue" description="Preview what is live, what is scheduled, and which promo surface each banner controls.">
-    <div class="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-4 dark:border-indigo-400/20 dark:bg-indigo-400/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300">Total</p>
-            <p class="mt-2 text-3xl font-black text-indigo-700 dark:text-indigo-200">{{ $bannerStats['total'] }}</p>
-        </div>
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 dark:border-emerald-400/20 dark:bg-emerald-400/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-300">Live</p>
-            <p class="mt-2 text-3xl font-black text-emerald-700 dark:text-emerald-200">{{ $bannerStats['live'] }}</p>
-        </div>
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 dark:border-amber-400/20 dark:bg-amber-400/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">Scheduled</p>
-            <p class="mt-2 text-3xl font-black text-amber-700 dark:text-amber-200">{{ $bannerStats['scheduled'] }}</p>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Hero slots</p>
-            <p class="mt-2 text-3xl font-black text-slate-900 dark:text-white">{{ $bannerStats['hero'] }}</p>
-        </div>
-    </div>
+<div class="space-y-6">
+    @foreach($positions as $posKey => $posLabel)
+        @php $posBanners = $banners->where('position', $posKey); @endphp
+        
+        @if($posBanners->count() > 0)
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 px-4">
+                    <div class="h-1.5 w-1.5 rounded-full bg-slate-900"></div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">{{ $posLabel }} Queue</h3>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ $posBanners->count() }} active items</span>
+                </div>
 
-    <div class="mb-5 grid gap-3 lg:grid-cols-3">
-        <button type="button" wire:click="applyPreset('hero_launch')" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">Hero launch card</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Create a larger campaign banner for the top of the storefront.</p>
-        </button>
-        <button type="button" wire:click="applyPreset('promo_strip')" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">Promo strip</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Quick-start a compact promotional card under the hero.</p>
-        </button>
-        <button type="button" wire:click="applyPreset('top_notice')" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">Top notice</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Use a simpler service update or trust-message banner.</p>
-        </button>
-    </div>
-
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-            <thead class="bg-slate-50 dark:bg-slate-900/70">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Preview</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Title</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Position</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Schedule</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-900">
-                @if(isset($banners) && $banners->count() > 0)
-                    @foreach($banners as $banner)
-                        <tr class="bg-white transition hover:bg-slate-50/80 dark:bg-slate-950/60 dark:hover:bg-slate-900/50">
-                            <td class="px-4 py-4"><div class="flex h-14 w-24 items-center justify-center overflow-hidden rounded-2xl text-xs font-semibold text-white" style="background: linear-gradient(to right, {{ $banner->bg_color }}, {{ $banner->bg_color }}cc)">@if($banner->image_path)<img src="{{ Storage::url($banner->image_path) }}" class="h-14 w-24 object-cover">@else{{ \Illuminate\Support\Str::limit($banner->title, 16) }}@endif</div></td>
-                            <td class="px-4 py-4"><p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $banner->title }}</p>@if($banner->subtitle)<p class="mt-1 text-xs text-slate-400">{{ \Illuminate\Support\Str::limit($banner->subtitle, 50) }}</p>@endif</td>
-                            <td class="px-4 py-4"><span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-400/10 dark:text-indigo-300">{{ isset($positions) && isset($positions[$banner->position]) ? $positions[$banner->position] : $banner->position }}</span></td>
-                            <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">@if($banner->starts_at || $banner->ends_at)@if($banner->starts_at)<p>Starts {{ $banner->starts_at->format('M d, Y H:i') }}</p>@endif @if($banner->ends_at)<p class="mt-1">Ends {{ $banner->ends_at->format('M d, Y H:i') }}</p>@endif @else <span>Always live</span>@endif</td>
-                            <td class="px-4 py-4"><button wire:click="toggleActive({{ $banner->id }})" class="rounded-full px-3 py-1 text-xs font-semibold {{ $banner->is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-300' }}">{{ $banner->is_active ? 'Active' : 'Inactive' }}</button>@if(!$banner->isLive() && $banner->is_active)<p class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-300">Scheduled</p>@endif</td>
-                            <td class="px-4 py-4">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <button wire:click="moveUp({{ $banner->id }})" class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">Up</button>
-                                    <button wire:click="moveDown({{ $banner->id }})" class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">Down</button>
-                                    <button wire:click="edit({{ $banner->id }})" class="rounded-2xl bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100 dark:bg-indigo-400/10 dark:text-indigo-300">Edit</button>
-                                    <button wire:click="delete({{ $banner->id }})" onclick="confirm('Delete this banner?') || event.stopImmediatePropagation()" class="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-400/10 dark:text-rose-300">Delete</button>
+                <div class="grid gap-4">
+                    @foreach($posBanners as $banner)
+                        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm group hover:border-slate-900 transition-all">
+                            <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
+                                <!-- Visual Preview -->
+                                <div class="relative h-24 w-40 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 shadow-inner group-hover:scale-[1.02] transition-transform">
+                                    @if($banner->image_path)
+                                        <img src="{{ Storage::url($banner->image_path) }}" class="h-full w-full object-cover">
+                                    @else
+                                        <div class="flex h-full w-full items-center justify-center text-slate-200" style="background: {{ $banner->bg_color }}">
+                                            <i class="fas fa-image text-xl"></i>
+                                        </div>
+                                    @endif
+                                    <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors"></div>
+                                    <div class="absolute bottom-2 left-2 flex gap-1">
+                                         <div class="h-2 w-2 rounded-full {{ $banner->isLive() ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></div>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
+
+                                <!-- Campaign Context -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">{{ $banner->position }}</span>
+                                            @if($banner->starts_at || $banner->ends_at)
+                                                <span class="text-[9px] font-bold text-sky-600 uppercase tracking-tight">
+                                                    <i class="fas fa-clock text-[8px] mr-1"></i>
+                                                    Scheduled
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <span class="text-[9px] font-mono font-bold text-slate-400">#{{ $banner->id }}</span>
+                                    </div>
+                                    <h4 class="text-sm font-black text-slate-900 truncate tracking-tight">{{ $banner->title }}</h4>
+                                    <p class="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight line-clamp-1">{{ $banner->caption ?: $banner->subtitle }}</p>
+                                    
+                                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                                        <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 border border-slate-100">
+                                            <div class="h-2 w-2 rounded-full" style="background-color: {{ $banner->bg_color }}"></div>
+                                            <span class="text-[9px] font-black text-slate-900 uppercase tracking-widest">Theme Palette</span>
+                                        </div>
+                                        @if($banner->button_text)
+                                            <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 border border-slate-100">
+                                                <i class="fas fa-link text-[8px] text-slate-400"></i>
+                                                <span class="text-[9px] font-black text-slate-900 uppercase tracking-widest">{{ $banner->button_text }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Action Workspace -->
+                                <div class="flex items-center gap-3 lg:border-l lg:border-slate-100 lg:pl-6">
+                                    <div class="flex flex-col gap-1">
+                                        <button wire:click="moveUp({{ $banner->id }})" class="p-1.5 text-slate-400 hover:text-slate-900 transition-colors"><i class="fas fa-chevron-up text-[10px]"></i></button>
+                                        <button wire:click="moveDown({{ $banner->id }})" class="p-1.5 text-slate-400 hover:text-slate-900 transition-colors"><i class="fas fa-chevron-down text-[10px]"></i></button>
+                                    </div>
+                                    
+                                    <button 
+                                        wire:click="toggleActive({{ $banner->id }})"
+                                        class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors {{ $banner->is_active ? 'bg-emerald-500' : 'bg-slate-200' }}"
+                                    >
+                                        <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $banner->is_active ? 'translate-x-8' : 'translate-x-1' }}"></span>
+                                    </button>
+
+                                    <div class="flex items-center gap-2">
+                                        <button wire:click="edit({{ $banner->id }})" class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                                            <i class="fas fa-pencil text-xs"></i>
+                                        </button>
+                                        <button 
+                                            onclick="confirm('Decommission this campaign?') || event.stopImmediatePropagation()"
+                                            wire:click="delete({{ $banner->id }})" 
+                                            class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                                        >
+                                            <i class="fas fa-trash-alt text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @endforeach
-                @else
-                    <tr><td colspan="6" class="px-6 py-16"><x-admin.ui.empty-state title="No banners yet" description="Create your first banner to manage homepage promos and announcement strips from here." /></td></tr>
-                @endif
-            </tbody>
-        </table>
-    </div>
-</x-admin.ui.panel>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
+    @if($banners->count() === 0)
+        <div class="py-20 text-center">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white text-slate-200 shadow-sm mb-6">
+                <i class="fas fa-panorama text-3xl"></i>
+            </div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">No campaign assets found.<br>Deploy your first banner to activate storefront marketing.</p>
+        </div>
+    @endif
+</div>

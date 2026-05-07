@@ -163,6 +163,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/reviews', [SiteManagementController::class, 'reviews'])
             ->middleware('permission:view site management')
             ->name('reviews');
+        Route::get('/automated-discounts', \App\Livewire\Admin\Promotions\AutomatedDiscountHub::class)
+            ->middleware('permission:view site management')
+            ->name('automated-discounts');
     });
 });
 

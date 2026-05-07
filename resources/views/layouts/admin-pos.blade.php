@@ -74,7 +74,7 @@
     <script>
         function adminPosLayout() {
             return {
-                theme: localStorage.getItem('adminTheme') || 'light',
+                theme: localStorage.getItem('site-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
                 profileDropdownOpen: false,
                 notificationDropdownOpen: false,
 
@@ -84,7 +84,7 @@
 
                 applyTheme(value) {
                     this.theme = value;
-                    localStorage.setItem('adminTheme', value);
+                    localStorage.setItem('site-theme', value);
                     document.documentElement.classList.toggle('dark', value === 'dark');
                 },
 

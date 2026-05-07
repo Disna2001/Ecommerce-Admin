@@ -1,95 +1,126 @@
 @extends('layouts.shop')
-@section('title', 'Help Center')
+@section('title', 'Intelligence Hub')
 @section('content')
 @php($supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', '')))
 @php($supportPhone = \App\Models\SiteSetting::get('support_phone', ''))
-<div class="mx-auto max-w-6xl py-8">
-    <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400">
-        <a wire:navigate href="/" class="hover:text-slate-700 dark:hover:text-slate-100">Home</a>
-        <i class="fas fa-chevron-right text-xs"></i>
-        <span class="font-medium text-slate-700 dark:text-slate-100">Help Center</span>
-    </nav>
+@php
+    $panel = "premium-card !p-8 !rounded-[2.5rem]";
+    $muted = "text-[10px] font-black uppercase tracking-[0.2em] text-slate-400";
+@endphp
 
-    <div class="glass card-shadow rounded-[2rem] px-6 py-8">
-        <p class="text-xs font-semibold uppercase tracking-[0.28em]" style="color:var(--primary)">Support Hub</p>
-        <h1 class="mt-3 text-4xl font-black text-adapt">Help customers move faster.</h1>
-        <p class="mt-4 max-w-3xl text-sm leading-7 text-soft">Use this page for common purchase questions, payment guidance, order tracking help, and support contact routes when customers need assistance.</p>
-        <div class="mt-6 flex flex-wrap gap-3">
-            <a wire:navigate href="{{ route('track-order') }}" class="btn-gradient rounded-full px-6 py-3 text-sm font-semibold">Track an Order</a>
-            <a wire:navigate href="{{ route('products.index') }}" class="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">Browse Products</a>
+<div class="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+    <header class="mb-12">
+        <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <a wire:navigate href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-slate-900 dark:text-white">Intelligence Hub</span>
+        </nav>
+        <p class="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Centralized Support Node</p>
+        <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Intelligence Hub</h1>
+        <p class="mt-4 max-w-3xl text-sm font-bold text-slate-400 leading-relaxed">Access common acquisition protocols, payment guidance, and direct communication channels for operational assistance.</p>
+        <div class="mt-8 flex flex-wrap gap-4">
+            <a wire:navigate href="{{ route('track-order') }}" class="h-14 px-10 flex items-center justify-center rounded-full bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl hover:scale-105 transition-all">Synchronize Order Status</a>
+            <a wire:navigate href="{{ route('products.index') }}" class="h-14 px-10 flex items-center justify-center rounded-full border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-50">Explore Registry</a>
         </div>
-    </div>
+    </header>
 
-    <div class="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div class="space-y-6">
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Frequently Asked Questions</h2>
-                <div class="mt-5 space-y-4">
+    <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="space-y-12">
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Frequently Executed Queries (FAQ)</p>
+                <div class="grid gap-6">
                     @foreach([
-                        ['How do I know if my order was placed?', 'After checkout, the site creates your order immediately and sends an email update to the address you entered.'],
-                        ['What happens for bank or online payments?', 'You can submit your reference and proof during checkout. The admin team reviews it before progressing the order.'],
-                        ['Can I track my order status?', 'Yes. Use the order tracking page with your order number and email to see the latest recorded status.'],
-                        ['What if an item is out of stock?', 'You can save it in wishlist, and the site team can restock items from admin when inventory returns.'],
+                        ['How do I verify order placement?', 'Upon successful initialization, the system records your acquisition immediately and dispatches a verification artifact via SMTP.'],
+                        ['What are the payment verification protocols?', 'Manual transfer artifacts (receipts) are audited by the administrative core. Automated gateways synchronize status in real-time.'],
+                        ['How can I monitor protocol progress?', 'Utilize the Sync Node with your protocol identifier (Order #) and registry email for real-time lifecycle tracking.'],
+                        ['What if an asset is depleted (Out of Stock)?', 'Add the asset to your local buffer (Wishlist). Our distribution team monitors depletion levels for restocking protocols.'],
                     ] as [$question, $answer])
-                        <div class="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-slate-900/70">
-                            <p class="text-sm font-semibold text-adapt">{{ $question }}</p>
-                            <p class="mt-2 text-sm leading-7 text-soft">{{ $answer }}</p>
+                        <div class="group p-6 rounded-[2rem] bg-slate-50/50 hover:bg-white dark:bg-white/5 dark:hover:bg-white/10 border border-slate-50 dark:border-white/5 transition-all shadow-sm hover:shadow-xl">
+                            <p class="text-sm font-black text-slate-900 dark:text-white tracking-tight mb-4 flex items-center gap-3">
+                                <i class="fas fa-circle-info text-[var(--primary)] text-xs"></i> {{ $question }}
+                            </p>
+                            <p class="text-[11px] font-bold text-slate-400 leading-relaxed">{{ $answer }}</p>
                         </div>
                     @endforeach
                 </div>
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Payment and order guidance</h2>
-                <div class="mt-5 grid gap-4 md:grid-cols-2">
-                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                        <p class="text-sm font-semibold text-emerald-800 dark:text-emerald-300"><i class="fas fa-shield-check mr-2"></i>Checkout confidence</p>
-                        <p class="mt-2 text-sm leading-7 text-emerald-700/90 dark:text-emerald-200/80">The storefront shows totals before order placement and records review notes for proof-based payments.</p>
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Operational Guidance Matrix</p>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="p-8 rounded-[2.5rem] bg-emerald-500/5 border border-emerald-500/10">
+                        <p class="text-xs font-black text-emerald-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="fas fa-shield-check"></i> Acquisition Security
+                        </p>
+                        <p class="text-[11px] font-bold text-emerald-700/80 leading-relaxed">The storefront workspace enforces high-fidelity verification for all settlement artifacts, ensuring secure asset distribution.</p>
                     </div>
-                    <div class="rounded-2xl border border-violet-200 bg-violet-50 p-5 dark:border-violet-500/20 dark:bg-violet-500/10">
-                        <p class="text-sm font-semibold text-violet-800 dark:text-violet-300"><i class="fas fa-envelope-open-text mr-2"></i>Status updates</p>
-                        <p class="mt-2 text-sm leading-7 text-violet-700/90 dark:text-violet-200/80">Customers receive order progress emails at placement, verification, approval, shipping, and completion stages.</p>
+                    <div class="p-8 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10">
+                        <p class="text-xs font-black text-indigo-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="fas fa-sync"></i> Lifecycle Sync
+                        </p>
+                        <p class="text-[11px] font-bold text-indigo-700/80 leading-relaxed">Status nodes synchronize automatically across placement, verification, logistics deployment, and final acquisition completion.</p>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
 
-        <div class="space-y-6">
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Need direct help?</h2>
-                <div class="mt-5 space-y-3">
+        <aside class="space-y-12">
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-10">Direct Support Channels</p>
+                <div class="space-y-4">
                     @if(!empty($supportEmail))
-                        <a href="mailto:{{ $supportEmail }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                            <span><i class="fas fa-envelope mr-3"></i>Email Support</span>
-                            <span class="text-xs text-soft">{{ $supportEmail }}</span>
+                        <a href="mailto:{{ $supportEmail }}" class="group flex items-center justify-between p-6 rounded-[2rem] bg-slate-900 text-white shadow-xl hover:scale-[1.02] transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-white/10"><i class="fas fa-envelope text-xs"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Email Node</p>
+                                    <p class="text-[11px] font-black tracking-tight truncate">{{ $supportEmail }}</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right text-[10px] text-slate-500 group-hover:text-white transition-colors"></i>
                         </a>
                     @endif
                     @if(!empty($supportPhone))
-                        <a href="tel:{{ preg_replace('/\s+/', '', $supportPhone) }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                            <span><i class="fas fa-phone mr-3"></i>Call Support</span>
-                            <span class="text-xs text-soft">{{ $supportPhone }}</span>
+                        <a href="tel:{{ preg_replace('/\s+/', '', $supportPhone) }}" class="group flex items-center justify-between p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 shadow-sm hover:shadow-xl transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400"><i class="fas fa-phone text-xs"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Voice Channel</p>
+                                    <p class="text-[11px] font-black text-slate-900 dark:text-white tracking-tight">{{ $supportPhone }}</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover:text-[var(--primary)] transition-colors"></i>
                         </a>
                     @endif
-                    <a wire:navigate href="{{ route('track-order') }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                        <span><i class="fas fa-location-crosshairs mr-3"></i>Track Your Order</span>
-                        <i class="fas fa-chevron-right text-xs text-soft"></i>
-                    </a>
-                    <a wire:navigate href="{{ route('products.index') }}" class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-100">
-                        <span><i class="fas fa-store mr-3"></i>Continue Shopping</span>
-                        <i class="fas fa-chevron-right text-xs text-soft"></i>
+                    <a wire:navigate href="{{ route('track-order') }}" class="group flex items-center justify-between p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 bg-white dark:bg-white/5 shadow-sm hover:shadow-xl transition-all">
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400"><i class="fas fa-location-crosshairs text-xs"></i></div>
+                            <div>
+                                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Status Retrieval</p>
+                                <p class="text-[11px] font-black text-slate-900 dark:text-white tracking-tight">Synchronize Order Node</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-arrow-right text-[10px] text-slate-300 group-hover:text-[var(--primary)] transition-colors"></i>
                     </a>
                 </div>
-            </div>
+            </section>
 
-            <div class="surface card-shadow rounded-[1.75rem] p-6">
-                <h2 class="text-xl font-bold text-adapt">Best next actions</h2>
-                <div class="mt-5 space-y-3 text-sm leading-7 text-soft">
-                    <p><i class="fas fa-check-circle mr-2 text-emerald-500"></i>Use the tracking page if you already have an order number.</p>
-                    <p><i class="fas fa-check-circle mr-2 text-emerald-500"></i>Use the cart and wishlist flows to save items before checkout.</p>
-                    <p><i class="fas fa-check-circle mr-2 text-emerald-500"></i>Contact support if payment proof needs clarification.</p>
+            <section class="{{ $panel }}">
+                <p class="{{ $muted }} mb-8">Optimization Strategies</p>
+                <div class="space-y-4">
+                    @foreach([
+                        ['fa-magnifying-glass', 'Utilize the Sync Node for immediate status intelligence.'],
+                        ['fa-heart', 'Leverage Wishlist buffers to monitor asset depletion.'],
+                        ['fa-shield-halved', 'Archive your acquisition artifacts for post-purchase audits.']
+                    ] as [$icon, $text])
+                        <div class="flex gap-4">
+                            <i class="fas {{ $icon }} text-[var(--primary)] mt-1 text-xs"></i>
+                            <p class="text-[10px] font-bold text-slate-400 leading-relaxed">{{ $text }}</p>
+                        </div>
+                    @endforeach
                 </div>
-            </div>
-        </div>
+            </section>
+        </aside>
     </div>
 </div>
 @endsection

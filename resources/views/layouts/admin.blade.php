@@ -64,7 +64,7 @@
                 profileDropdownOpen: false,
                 notificationDropdownOpen: false,
                 isMobile: window.innerWidth < 1024,
-                theme: localStorage.getItem('adminTheme') || 'light',
+                theme: localStorage.getItem('site-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
 
                 init() {
                     this.applyTheme(this.theme);
@@ -92,7 +92,7 @@
 
                 applyTheme(value) {
                     this.theme = value;
-                    localStorage.setItem('adminTheme', value);
+                    localStorage.setItem('site-theme', value);
                     document.documentElement.classList.toggle('dark', value === 'dark');
                 },
 
@@ -134,5 +134,6 @@
         }
     </script>
 
+    @include('components.admin.ui.notifications')
 </body>
 </html>

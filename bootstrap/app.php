@@ -11,6 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->preventRequestsDuringMaintenance(except: [
+            'admin',
+            'admin/*',
+            'login',
+            'logout',
+            'admin-bypass',
+        ]);
+
         $middleware->trustProxies(at: '*');
         $middleware->validateCsrfTokens(except: [
             'whatsapp/webhook',

@@ -1,37 +1,117 @@
-<x-admin.ui.panel padding="p-6">
-    <x-slot:header>
-        <div class="mb-6">
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Email sending and alert routing</h3>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose the email identity and transport the system should use for order, support, and operational notifications.</p>
+<div class="space-y-8">
+    <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner"><i class="fas fa-envelope-open-text text-lg"></i></div>
+        <div>
+            <h3 class="text-xl font-black text-slate-900 tracking-tight">Communications Bridge</h3>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Email Transport & Alert Routing</p>
         </div>
-    </x-slot:header>
-
-    <div class="grid gap-4 lg:grid-cols-2">
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Mailer</label><select wire:model="mail_mailer" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"><option value="smtp">SMTP</option><option value="log">Log</option><option value="ses">Amazon SES</option><option value="mailgun">Mailgun</option></select></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">From Name</label><input type="text" wire:model="mail_from_name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">From Address</label><input type="email" wire:model="mail_from_address" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">SMTP Host</label><input type="text" wire:model="mail_smtp_host" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">SMTP Port</label><input type="text" wire:model="mail_smtp_port" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Encryption</label><input type="text" wire:model="mail_smtp_encryption" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">SMTP Username</label><input type="text" wire:model="mail_smtp_username" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">SMTP Password</label><input type="password" wire:model="mail_smtp_password" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Order Notification Email</label><input type="email" wire:model="order_notification_email" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Support Notification Email</label><input type="email" wire:model="support_notification_email" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
     </div>
 
-    <div class="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-                <h4 class="text-lg font-semibold text-slate-900 dark:text-white">Live mail test</h4>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Send a real test email with the current form values so you can verify hosting before going live.</p>
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mail Identity</p>
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Transport Protocol</label>
+                    <select wire:model="mail_mailer" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                        <option value="smtp">SMTP (Recommended)</option>
+                        <option value="log">Log (Testing only)</option>
+                        <option value="ses">Amazon SES</option>
+                        <option value="mailgun">Mailgun</option>
+                    </select>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-1.5">
+                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name</label>
+                        <input type="text" wire:model="mail_from_name" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Address</label>
+                        <input type="email" wire:model="mail_from_address" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                    </div>
+                </div>
             </div>
-            <div class="flex w-full flex-col gap-3 sm:flex-row xl:w-auto">
-                <input type="email" wire:model="test_email_recipient" placeholder="ops@example.com" class="w-full min-w-[260px] rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-                <button wire:click="sendTestEmail" type="button" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
-                    <span wire:loading.remove wire:target="sendTestEmail"><i class="fas fa-paper-plane"></i> Send Test Email</span>
-                    <span wire:loading wire:target="sendTestEmail"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+        </div>
+
+        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Alert Routing</p>
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Commerce Notifications</label>
+                    <input type="email" wire:model="order_notification_email" placeholder="orders@yourcompany.com" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Support Alerts</label>
+                    <input type="email" wire:model="support_notification_email" placeholder="support-alerts@yourcompany.com" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-sky-500 focus:ring-0 transition-all">
+                </div>
+                <p class="text-[10px] font-medium text-slate-400 leading-relaxed italic">Internal system alerts will be dispatched to these addresses immediately upon triggering.</p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SMTP Gateway Authentication</p>
+            <div class="grid gap-6 md:grid-cols-3">
+                <div class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hostname</label>
+                        <input type="text" wire:model="mail_smtp_host" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                    </div>
+                    <div class="grid gap-4 grid-cols-2">
+                        <div class="space-y-1.5">
+                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Port</label>
+                            <input type="text" wire:model="mail_smtp_port" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Security</label>
+                            <input type="text" wire:model="mail_smtp_encryption" placeholder="tls" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4 md:col-span-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-1.5">
+                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Username / API Key</label>
+                            <input type="text" wire:model="mail_smtp_username" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Password / Secret</label>
+                            <div class="relative" x-data="{ show: false }">
+                                <input :type="show ? 'text' : 'password'" wire:model="mail_smtp_password" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-indigo-600 transition-colors">
+                                    <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl bg-slate-900/5 p-4 border border-slate-100">
+                         <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Security Advisory</p>
+                         <p class="text-[10px] leading-relaxed text-slate-400">Ensure your SMTP credentials have restricted scopes. For SES or Mailgun, use IAM policies that only allow 'SendRawEmail' actions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-[2.5rem] bg-indigo-600 p-8 text-white shadow-2xl shadow-indigo-100 overflow-hidden relative group">
+        <div class="absolute right-0 top-0 -mr-12 -mt-12 h-48 w-48 rounded-full bg-white/10 transition-transform group-hover:scale-150"></div>
+        <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-1">
+                <h4 class="text-xl font-black">Live Connectivity Test</h4>
+                <p class="text-xs font-medium text-indigo-100">Validate your bridge configuration with a real-time dispatch test.</p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <input type="email" wire:model="test_email_recipient" placeholder="Enter recipient email..." class="min-w-[280px] rounded-2xl border-transparent bg-white/10 px-6 py-4 text-sm font-bold text-white placeholder-white/40 shadow-inner backdrop-blur-md focus:bg-white focus:text-indigo-900 focus:ring-0 transition-all">
+                <button wire:click="sendTestEmail" type="button" class="group flex items-center justify-center gap-3 rounded-2xl bg-white px-8 py-4 text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    <span wire:loading.remove wire:target="sendTestEmail">
+                        <i class="fas fa-paper-plane text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                        Initiate Test
+                    </span>
+                    <span wire:loading wire:target="sendTestEmail">
+                        <i class="fas fa-spinner fa-spin text-xs"></i>
+                        Dispatching...
+                    </span>
                 </button>
             </div>
         </div>
     </div>
-</x-admin.ui.panel>
+</div>

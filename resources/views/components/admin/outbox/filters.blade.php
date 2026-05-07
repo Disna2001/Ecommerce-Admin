@@ -1,26 +1,37 @@
-<div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="grid gap-4 xl:grid-cols-6">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search recipient or subject..." class="rounded-2xl border-slate-200 text-sm shadow-none xl:col-span-2">
-        <select wire:model.live="channelFilter" class="rounded-2xl border-slate-200 text-sm shadow-none">
-            <option value="">All channels</option>
-            <option value="email">Email</option>
-            <option value="whatsapp">WhatsApp</option>
-        </select>
-        <select wire:model.live="statusFilter" class="rounded-2xl border-slate-200 text-sm shadow-none">
-            <option value="">All statuses</option>
-            <option value="queued">Queued</option>
-            <option value="sent">Sent</option>
-            <option value="failed">Failed</option>
-            <option value="skipped">Skipped</option>
-        </select>
-        <input type="date" wire:model.live="dateFrom" class="rounded-2xl border-slate-200 text-sm shadow-none">
-        <input type="date" wire:model.live="dateTo" class="rounded-2xl border-slate-200 text-sm shadow-none">
-    </div>
+<div class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Pipeline Filters</p>
+    
+    <div class="space-y-4">
+        <div class="space-y-1">
+            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Channel</label>
+            <select wire:model.live="channelFilter" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 text-xs font-bold focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
+                <option value="">All Mediums</option>
+                <option value="whatsapp">WhatsApp Cloud</option>
+                <option value="email">SMTP / Mail</option>
+            </select>
+        </div>
 
-    <div class="mt-4 flex flex-wrap gap-3">
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">Email: <span class="font-semibold text-slate-900">{{ $stats['email'] }}</span></div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">WhatsApp: <span class="font-semibold text-slate-900">{{ $stats['whatsapp'] }}</span></div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">Queued: <span class="font-semibold text-slate-900">{{ $stats['queued'] }}</span></div>
-        <button wire:click="clearFilters" class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Clear Filters</button>
+        <div class="space-y-1">
+            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Delivery Status</label>
+            <select wire:model.live="statusFilter" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 text-xs font-bold focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
+                <option value="">All States</option>
+                <option value="sent">Delivered</option>
+                <option value="queued">Queued</option>
+                <option value="failed">Failed</option>
+                <option value="skipped">Skipped</option>
+            </select>
+        </div>
+
+        <div class="space-y-1">
+            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Temporal Range</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="date" wire:model.live="dateFrom" class="rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
+                <input type="date" wire:model.live="dateTo" class="rounded-2xl border-slate-100 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
+            </div>
+        </div>
+
+        <button type="button" wire:click="clearFilters" class="mt-4 w-full rounded-2xl border border-slate-100 bg-slate-50 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all">
+            Purge Filters
+        </button>
     </div>
 </div>

@@ -1,30 +1,32 @@
-<div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="mb-5 flex items-start gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
-            <i class="fas fa-siren-on"></i>
-        </div>
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-inner"><i class="fas fa-eye text-lg"></i></div>
         <div>
-            <h3 class="text-xl font-semibold text-slate-900">Immediate Attention</h3>
-            <p class="mt-1 text-sm text-slate-500">Operational issues that should be handled before routine admin work.</p>
+            <h3 class="text-xl font-black text-slate-900 tracking-tight">Diagnostic Observations</h3>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active System Warnings & Advice</p>
         </div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="space-y-4">
         @forelse($attention as $item)
-            <a href="{{ $item['route'] }}" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl {{ $item['tone'] === 'rose' ? 'bg-rose-100 text-rose-600' : ($item['tone'] === 'amber' ? 'bg-amber-100 text-amber-600' : ($item['tone'] === 'emerald' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600')) }}">
-                        <i class="fas {{ $item['icon'] }}"></i>
+            <a href="{{ $item['route'] }}" class="group flex items-start gap-5 rounded-[2rem] border border-slate-200 bg-white p-6 transition-all hover:border-{{ $item['tone'] }}-400 hover:shadow-xl hover:shadow-{{ $item['tone'] }}-50">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-{{ $item['tone'] }}-50 text-{{ $item['tone'] }}-600 group-hover:bg-{{ $item['tone'] }}-500 group-hover:text-white transition-colors">
+                    <i class="fas {{ $item['icon'] ?? 'fa-circle-info' }} text-sm"></i>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-black text-slate-900">{{ $item['title'] }}</p>
+                        <span class="rounded-lg bg-{{ $item['tone'] }}-100 px-2 py-0.5 text-[10px] font-black text-{{ $item['tone'] }}-700">{{ $item['count'] }}</span>
                     </div>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-900">{{ $item['title'] }}</p>
-                        <p class="mt-2 text-3xl font-black text-slate-900">{{ $item['count'] }}</p>
-                        <p class="mt-2 text-xs leading-6 text-slate-500">{{ $item['note'] }}</p>
-                    </div>
+                    <p class="text-xs font-medium leading-relaxed text-slate-500">{{ $item['note'] }}</p>
                 </div>
             </a>
         @empty
-            <div class="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">No urgent production issues are visible right now.</div>
+            <div class="rounded-[2.5rem] border-2 border-dashed border-slate-100 p-12 text-center bg-slate-50/50">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-200 shadow-sm mb-4"><i class="fas fa-shield-check text-2xl"></i></div>
+                <p class="text-sm font-black text-slate-900">Operational Integrity Maintained</p>
+                <p class="mt-1 text-xs font-medium text-slate-400">No diagnostic warnings require immediate administrative attention.</p>
+            </div>
         @endforelse
     </div>
 </div>

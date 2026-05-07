@@ -1,33 +1,67 @@
-<x-admin.ui.panel padding="p-6">
-    <x-slot:header>
-        <div class="mb-6">
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">API credentials vault</h3>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Keep core platform keys in one place so integrations are easier to identify and rotate.</p>
+<div class="space-y-8">
+    <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-inner"><i class="fas fa-key text-lg"></i></div>
+        <div>
+            <h3 class="text-xl font-black text-slate-900 tracking-tight">API Credentials Vault</h3>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Secure Secret Storage & Rotation</p>
         </div>
-    </x-slot:header>
-
-    <div class="grid gap-4 lg:grid-cols-2">
-        <div class="lg:col-span-2 grid gap-3 md:grid-cols-3">
-            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-4 text-sm font-semibold text-violet-800 transition hover:border-violet-300 hover:bg-violet-100 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-200">
-                <i class="fas fa-key mr-2"></i>OpenAI API keys
-                <span class="mt-1 block text-xs font-normal leading-5">Create a key for the admin AI assistant.</span>
-            </a>
-            <a href="https://app.resend.com/api-keys" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                <i class="fas fa-envelope mr-2"></i>Resend mail keys
-                <span class="mt-1 block text-xs font-normal leading-5">Use if the client sends mail through Resend.</span>
-            </a>
-            <a href="https://app.mailgun.com/app/sending/domains" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                <i class="fas fa-paper-plane mr-2"></i>Mailgun domains
-                <span class="mt-1 block text-xs font-normal leading-5">Get mail API credentials and verify sending domains.</span>
-            </a>
-        </div>
-
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Mail API Key</label><input type="password" wire:model="mail_api_key" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Mail API Secret</label><input type="password" wire:model="mail_api_secret" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">WhatsApp API Key / Token</label><input type="password" wire:model="whatsapp_api_key" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">AI API Key</label><input type="password" wire:model="ai_api_key" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-        <div class="lg:col-span-2"><label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Custom Integration API Key</label><input type="password" wire:model="custom_integrations_api_key" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
     </div>
 
-    <p class="mt-4 text-xs leading-6 text-slate-500 dark:text-slate-400">Secret fields are stored encrypted in site settings. Use this tab for tokens and keys, and use `Hosting & Identity` for public URLs and customer-facing contact data.</p>
-</x-admin.ui.panel>
+    <div class="grid gap-4 lg:grid-cols-3">
+        @foreach([
+            ['label' => 'OpenAI Platform', 'url' => 'https://platform.openai.com/api-keys', 'icon' => 'fa-robot', 'color' => 'indigo'],
+            ['label' => 'Resend Mail', 'url' => 'https://app.resend.com/api-keys', 'icon' => 'fa-paper-plane', 'color' => 'sky'],
+            ['label' => 'Mailgun Domains', 'url' => 'https://app.mailgun.com/app/sending/domains', 'icon' => 'fa-envelope', 'color' => 'rose']
+        ] as $link)
+            <a href="{{ $link['url'] }}" target="_blank" rel="noopener" class="group flex items-center gap-4 rounded-[2rem] border border-slate-200 bg-white p-6 transition-all hover:border-{{ $link['color'] }}-400 hover:shadow-xl hover:shadow-{{ $link['color'] }}-50">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 group-hover:bg-{{ $link['color'] }}-500 group-hover:text-white transition-colors"><i class="fas {{ $link['icon'] }} text-xs"></i></div>
+                <div>
+                    <p class="text-xs font-black text-slate-900">{{ $link['label'] }}</p>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">External Dashboard</p>
+                </div>
+            </a>
+        @endforeach
+    </div>
+
+    <div class="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-sm">
+        <p class="px-2 mb-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Secure Integration Secrets</p>
+        
+        <div class="grid gap-6 md:grid-cols-2">
+            @foreach([
+                'mail_api_key' => ['Mail Gateway Key', 'Primary transport token for communications.'],
+                'mail_api_secret' => ['Mail Gateway Secret', 'Secondary authentication secret for mailers.'],
+                'whatsapp_api_key' => ['WhatsApp Meta Token', 'System-wide token for automated messaging.'],
+                'ai_api_key' => ['Master Intelligence Key', 'Direct access credential for neural services.'],
+            ] as $wire => [$label, $desc])
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $label }}</label>
+                    <div class="relative" x-data="{ show: false }">
+                        <input :type="show ? 'text' : 'password'" wire:model="{{ $wire }}" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
+                        <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-slate-900 transition-colors">
+                            <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+                    <p class="px-1 text-[9px] font-medium text-slate-400 italic">{{ $desc }}</p>
+                </div>
+            @endforeach
+
+            <div class="md:col-span-2 space-y-1.5 mt-4 pt-6 border-t border-slate-100">
+                <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Integration Secret</label>
+                <div class="relative" x-data="{ show: false }">
+                    <input :type="show ? 'text' : 'password'" wire:model="custom_integrations_api_key" placeholder="Third-party bridge token..." class="w-full rounded-2xl border-slate-100 bg-slate-50 px-6 py-4 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
+                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-slate-900 transition-colors">
+                        <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-2xl bg-slate-900 p-6 flex gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white"><i class="fas fa-shield-halved text-xs"></i></div>
+        <div>
+            <p class="text-xs font-bold text-white leading-relaxed">Cryptographic Policy</p>
+            <p class="mt-1 text-[10px] font-medium text-white/50 leading-relaxed">Secret fields are stored with AES-256 encryption within the site settings registry. Access to these values is restricted to high-privilege administrative sessions only.</p>
+        </div>
+    </div>
+</div>

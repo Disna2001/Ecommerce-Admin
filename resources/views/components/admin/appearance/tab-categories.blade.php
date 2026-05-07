@@ -1,100 +1,142 @@
-<x-admin.ui.panel title="Category Discovery" description="Customize the homepage category strip and the catalog landing experience from one place.">
-    @php $cats = \App\Models\Category::all(); @endphp
-    <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div class="space-y-6">
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
-                <h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Homepage category strip</h4>
-                <div class="mt-4 grid gap-4 md:grid-cols-2">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Strip title</label>
-                        <input type="text" wire:model="category_strip_title" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+@php $cats = \App\Models\Category::all(); @endphp
+
+<div class="space-y-8">
+    <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-inner">
+            <i class="fas fa-tags text-lg"></i>
+        </div>
+        <div>
+            <h3 class="text-xl font-black text-slate-900 tracking-tight">Discovery Taxonomy</h3>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Category Strips & Catalog Heroes</p>
+        </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1fr_400px]">
+        <div class="space-y-8">
+            <!-- Homepage Strip Configuration -->
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Homepage Discovery Strip</p>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="group">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Strip Headline</label>
+                        <input type="text" wire:model="category_strip_title" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Visible categories</label>
-                        <input type="number" min="4" max="12" wire:model="category_strip_limit" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-                        @error('category_strip_limit') <span class="mt-2 block text-xs text-rose-500">{{ $message }}</span> @enderror
+                    <div class="group">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Display Limit</label>
+                        <input type="number" min="4" max="12" wire:model="category_strip_limit" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Strip subtitle</label>
-                        <textarea wire:model="category_strip_subtitle" rows="3" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white"></textarea>
+                    <div class="md:col-span-2 group">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Contextual Subtitle</label>
+                        <textarea wire:model="category_strip_subtitle" rows="2" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner"></textarea>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Strip style</label>
-                        <select wire:model="category_strip_style" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-                            <option value="chips">Compact chips</option>
-                            <option value="cards">Icon cards</option>
-                            <option value="minimal">Minimal pills</option>
+                    <div class="group">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Visual Aesthetic</label>
+                        <select wire:model="category_strip_style" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 text-xs font-bold">
+                            <option value="chips">Compact Chips</option>
+                            <option value="cards">Icon Cards</option>
+                            <option value="minimal">Minimal Pills</option>
                         </select>
                     </div>
-                    <label class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
-                        <input type="checkbox" wire:model="category_show_icons" class="rounded border-slate-300 text-slate-900">
-                        Show icons on category links
-                    </label>
-                </div>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
-                <h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Catalog landing hero</h4>
-                <div class="mt-4 grid gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Hero badge</label>
-                        <input type="text" wire:model="catalog_hero_badge" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Hero title</label>
-                        <input type="text" wire:model="catalog_hero_title" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Hero subtitle</label>
-                        <textarea wire:model="catalog_hero_subtitle" rows="3" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white"></textarea>
+                    <div class="flex items-center gap-4">
+                        <button 
+                            wire:click="$set('category_show_icons', {{ !$category_show_icons ? 'true' : 'false' }})"
+                            class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none {{ $category_show_icons ? 'bg-amber-500' : 'bg-slate-200' }}"
+                        >
+                            <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $category_show_icons ? 'translate-x-8' : 'translate-x-1' }}"></span>
+                        </button>
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Show Icons</span>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
-                <h4 class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Category icon mapping</h4>
-                <div class="mt-4 grid gap-3">
+            <!-- Catalog Hero Configuration -->
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Catalog Landing Hub</p>
+                <div class="grid gap-6">
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="group">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Badge</label>
+                            <input type="text" wire:model="catalog_hero_badge" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                        <div class="group">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Headline</label>
+                            <input type="text" wire:model="catalog_hero_title" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                    </div>
+                    <div class="group">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Narrative</label>
+                        <textarea wire:model="catalog_hero_subtitle" rows="2" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Icon Mapping Matrix -->
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Icon Mapping Matrix</p>
+                <div class="grid gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                     @forelse($cats as $cat)
-                        <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:flex-row md:items-center dark:border-slate-700 dark:bg-slate-950">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
-                                <i class="fas {{ $category_icons[$cat->id] ?? 'fa-tag' }}"></i>
+                        <div class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-white hover:shadow-md">
+                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white text-indigo-500 shadow-sm transition-colors group-hover:bg-indigo-500 group-hover:text-white">
+                                <i class="fas {{ $category_icons[$cat->id] ?? 'fa-tag' }} text-sm"></i>
                             </div>
-                            <div class="min-w-[180px] font-medium text-slate-800 dark:text-white">{{ $cat->name }}</div>
-                            <select wire:model.live="category_icons.{{ $cat->id }}" class="w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950 dark:text-white">
-                                <option value="">-- Select Icon --</option>
-                                @foreach($iconOptions as $icon => $label)
-                                    <option value="{{ $icon }}">{{ $label }} ({{ $icon }})</option>
-                                @endforeach
-                            </select>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Taxonomy Label</p>
+                                <p class="text-xs font-black text-slate-900 truncate">{{ $cat->name }}</p>
+                            </div>
+                            <div class="w-48">
+                                <select wire:model.live="category_icons.{{ $cat->id }}" class="w-full rounded-xl border-slate-200 bg-white text-[10px] font-bold py-2">
+                                    <option value="">Default Tag</option>
+                                    @foreach($iconOptions as $icon => $label)
+                                        <option value="{{ $icon }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     @empty
-                        <p class="rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-400">No categories found yet.</p>
+                        <div class="py-12 text-center">
+                            <i class="fas fa-folder-open text-slate-200 text-3xl mb-4"></i>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">No categories identified in taxonomy</p>
+                        </div>
                     @endforelse
                 </div>
             </div>
         </div>
 
-        <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">Discovery preview</p>
-            <div class="mt-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
-                <span class="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:bg-slate-950 dark:text-slate-300">{{ $catalog_hero_badge }}</span>
-                <h4 class="mt-4 text-2xl font-black text-slate-900 dark:text-white">{{ $catalog_hero_title }}</h4>
-                <p class="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400">{{ $catalog_hero_subtitle }}</p>
-            </div>
-            <div class="mt-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">{{ $category_strip_title }}</p>
-                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ $category_strip_subtitle }}</p>
-                <div class="mt-4 {{ $category_strip_style === 'cards' ? 'grid grid-cols-2 gap-3' : 'flex flex-wrap gap-3' }}">
-                    @foreach($cats->take(max(1, min(6, (int) $category_strip_limit))) as $cat)
-                        <div class="{{ $category_strip_style === 'cards' ? 'rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100' : 'rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100' }}">
-                            @if($category_show_icons)
-                                <i class="fas {{ $category_icons[$cat->id] ?? 'fa-tag' }} mr-2 text-violet-500"></i>
-                            @endif
-                            {{ $cat->name }}
+        <!-- Real-time Preview Hub -->
+        <div class="space-y-6">
+            <div class="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8">Taxonomy Preview</p>
+                
+                <div class="space-y-8">
+                    <!-- Catalog Hero Preview -->
+                    <div class="rounded-[2rem] border border-slate-100 bg-slate-50 p-6 shadow-inner">
+                        <span class="inline-flex rounded-full bg-white px-3 py-1 text-[9px] font-black uppercase tracking-widest text-slate-400 shadow-sm">{{ $catalog_hero_badge ?: 'HUB' }}</span>
+                        <h4 class="mt-4 text-xl font-black text-slate-900 leading-none">{{ $catalog_hero_title ?: 'Hub Title' }}</h4>
+                        <p class="mt-3 text-[10px] font-bold text-slate-400 leading-relaxed">{{ $catalog_hero_subtitle ?: 'Hub description goes here...' }}</p>
+                    </div>
+
+                    <!-- Discovery Strip Preview -->
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-[10px] font-black text-slate-900 uppercase tracking-widest">{{ $category_strip_title ?: 'Discovery Strip' }}</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{{ $category_strip_subtitle ?: 'Contextual discovery message' }}</p>
                         </div>
-                    @endforeach
+                        
+                        <div class="{{ $category_strip_style === 'cards' ? 'grid grid-cols-2 gap-3' : 'flex flex-wrap gap-2' }}">
+                            @foreach($cats->take(max(1, min(6, (int) $category_strip_limit))) as $cat)
+                                <div class="transition-all hover:scale-[1.02] {{ $category_strip_style === 'cards' ? 'rounded-2xl border border-slate-100 bg-white p-4 shadow-sm' : 'rounded-full border border-slate-100 bg-white px-4 py-2 shadow-sm' }}">
+                                    <div class="flex items-center gap-2">
+                                        @if($category_show_icons)
+                                            <i class="fas {{ $category_icons[$cat->id] ?? 'fa-tag' }} text-[10px] text-amber-500"></i>
+                                        @endif
+                                        <span class="text-[10px] font-black text-slate-900 truncate">{{ $cat->name }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</x-admin.ui.panel>
+</div>

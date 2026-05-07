@@ -1,27 +1,18 @@
-<div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="flex items-start gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
-            <i class="fas fa-wave-square"></i>
-        </div>
-        <div>
-            <h3 class="text-xl font-semibold text-slate-900">Recent Operational Signals</h3>
-            <p class="mt-1 text-sm text-slate-500">Latest admin events that help explain current system state.</p>
-        </div>
-    </div>
-    <div class="mt-5 space-y-3">
+<div class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Recent System Signals</p>
+    
+    <div class="space-y-6">
         @forelse($recentSignals as $signal)
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-sm font-semibold text-slate-900">{{ \Illuminate\Support\Str::headline(str_replace('.', ' ', $signal->action)) }}</p>
-                <p class="mt-2 text-xs leading-6 text-slate-500">
-                    {{ $signal->description ?: 'An admin action was recorded.' }}
-                    @if($signal->user)
-                        by {{ $signal->user->name }}
-                    @endif
-                </p>
-                <p class="mt-2 text-xs font-medium text-slate-400">{{ $signal->created_at->diffForHumans() }}</p>
+            <div class="relative pl-6 border-l-2 border-slate-200 group-hover:border-slate-900 transition-colors">
+                <div class="absolute -left-[9px] top-0 h-4 w-4 rounded-full border-4 border-white bg-slate-400"></div>
+                <div class="flex items-center justify-between gap-4">
+                    <p class="text-xs font-black text-slate-900 uppercase tracking-tighter">{{ str_replace('_', ' ', $signal->context) }}</p>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">{{ $signal->created_at->diffForHumans() }}</span>
+                </div>
+                <p class="mt-1 text-[10px] font-medium text-slate-500 leading-relaxed">{{ \Illuminate\Support\Str::limit($signal->notes, 80) }}</p>
             </div>
         @empty
-            <div class="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">No recent signals are available yet.</div>
+            <p class="text-xs text-slate-400 italic">No telemetry signals recorded.</p>
         @endforelse
     </div>
 </div>

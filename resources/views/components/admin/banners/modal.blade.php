@@ -1,61 +1,166 @@
-@if($isOpen)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex min-h-screen items-center justify-center px-4 py-8">
-            <div class="fixed inset-0 bg-slate-950/60"></div>
-            <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl dark:border-white/10 dark:bg-slate-950">
-                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-800"><div><p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Banner Builder</p><h3 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">{{ $banner_id ? 'Edit campaign banner' : 'New campaign banner' }}</h3></div><button wire:click="$set('isOpen', false)" class="text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"><i class="fas fa-times text-lg"></i></button></div>
-                <form wire:submit.prevent="store">
-                    <div class="grid max-h-[72vh] grid-cols-1 gap-5 overflow-y-auto p-6 md:grid-cols-2">
-                        <div class="md:col-span-2 grid gap-3 md:grid-cols-3">
-                            <button type="button" wire:click="applyPreset('hero_launch')" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Hero launch</button>
-                            <button type="button" wire:click="applyPreset('promo_strip')" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Promo strip</button>
-                            <button type="button" wire:click="applyPreset('top_notice')" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Top notice</button>
-                        </div>
-                        <div class="md:col-span-2"><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Title</label><input type="text" wire:model="title" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">@error('title') <span class="mt-2 block text-xs text-rose-500">{{ $message }}</span> @enderror</div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Subtitle</label><input type="text" wire:model="subtitle" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Position</label><select wire:model="position" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">@if(isset($positions) && is_array($positions))@foreach($positions as $val => $label)<option value="{{ $val }}">{{ $label }}</option>@endforeach @endif</select></div>
-                        <div class="md:col-span-2"><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Caption</label><textarea wire:model="caption" rows="3" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></textarea></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Button text</label><input type="text" wire:model="button_text" placeholder="Shop now" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Button link</label><input type="text" wire:model="button_link" placeholder="/products" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Background color</label><div class="mt-2 flex gap-2"><input type="color" wire:model="bg_color" class="h-11 w-14 rounded-xl border border-slate-200 bg-white p-1"><input type="text" wire:model="bg_color" class="flex-1 rounded-2xl border-slate-200 font-mono text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Text color</label><div class="mt-2 flex gap-2"><input type="color" wire:model="text_color" class="h-11 w-14 rounded-xl border border-slate-200 bg-white p-1"><input type="text" wire:model="text_color" class="flex-1 rounded-2xl border-slate-200 font-mono text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Starts at</label><input type="datetime-local" wire:model="starts_at" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Ends at</label><input type="datetime-local" wire:model="ends_at" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white">@error('ends_at') <span class="mt-2 block text-xs text-rose-500">{{ $message }}</span> @enderror</div>
-                        <div class="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-                            <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Banner image</label>
-                            @if($image_path)<img src="{{ Storage::url($image_path) }}" class="mt-2 h-28 w-full rounded-2xl object-cover">@endif
-                            <input type="file" wire:model="image" accept="image/*" class="mt-3 block w-full text-sm text-slate-600 dark:text-slate-300">
-                            <div wire:loading wire:target="image" class="mt-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs font-semibold text-blue-700"><i class="fas fa-spinner fa-spin mr-2"></i>Uploading banner image...</div>
-                            @if($image)
-                                <div class="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700">
-                                    <div class="font-semibold">Image ready to save</div>
-                                    <div class="mt-1">{{ $image->getClientOriginalName() }}</div>
-                                    <img src="{{ $image->temporaryUrl() }}" class="mt-3 h-36 w-full rounded-xl object-cover" alt="Banner preview">
-                                </div>
-                            @endif
-                        </div>
-                        <div class="md:col-span-2 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">Live preview</p>
-                            <div class="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200 dark:border-slate-800">
-                                <div class="p-5 text-white" style="background:linear-gradient(135deg, {{ $bg_color ?: '#4f46e5' }}, {{ $bg_color ?: '#4f46e5' }}cc); color: {{ $text_color ?: '#ffffff' }};">
-                                    @if($subtitle)<p class="text-xs font-semibold uppercase tracking-[0.2em]" style="color: {{ $text_color ?: '#ffffff' }}cc;">{{ $subtitle }}</p>@endif
-                                    <h4 class="mt-3 text-2xl font-black">{{ $title ?: 'Banner title preview' }}</h4>
-                                    @if($caption)<p class="mt-2 text-sm leading-7" style="color: {{ $text_color ?: '#ffffff' }}dd;">{{ $caption }}</p>@endif
-                                    @if($button_text)<div class="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900">{{ $button_text }}</div>@endif
-                                </div>
-                                @if($image)
-                                    <img src="{{ $image->temporaryUrl() }}" class="h-40 w-full object-cover" alt="Banner preview image">
-                                @elseif($image_path)
-                                    <img src="{{ Storage::url($image_path) }}" class="h-40 w-full object-cover" alt="Saved banner image">
-                                @endif
-                            </div>
-                        </div>
-                        <label class="flex items-center gap-3 pt-8 text-sm font-semibold text-slate-700 dark:text-slate-200"><input type="checkbox" wire:model="is_active" class="rounded border-slate-300 text-indigo-500">Active</label>
-                        <div><label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Sort order</label><input type="number" wire:model="sort_order" min="0" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"></div>
-                    </div>
-                    <div class="flex justify-end gap-3 border-t border-slate-200 px-6 py-4 dark:border-slate-800"><button type="button" wire:click="$set('isOpen', false)" class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900">Cancel</button><button type="submit" class="rounded-2xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">{{ $banner_id ? 'Update banner' : 'Create banner' }}</button></div>
-                </form>
+<div 
+    x-data="{ show: @entangle('isOpen') }" 
+    x-show="show" 
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto custom-scrollbar"
+    x-cloak
+>
+    <div 
+        x-show="show" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+        x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+        class="relative w-full max-w-4xl rounded-[3rem] border border-slate-200 bg-white shadow-2xl overflow-hidden"
+    >
+        <!-- Modal Header -->
+        <div class="border-b border-slate-100 bg-slate-50/50 p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Campaign Deployment</p>
+                    <h3 class="mt-2 text-2xl font-black tracking-tight text-slate-900">{{ $banner_id ? 'Refine Campaign' : 'Deploy New Campaign' }}</h3>
+                </div>
+                <button @click="show = false" class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm transition-all hover:bg-slate-900 hover:text-white">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
             </div>
         </div>
+
+        <!-- Modal Body -->
+        <div class="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div class="grid gap-8 lg:grid-cols-2">
+                <!-- Visual Asset Section -->
+                <div class="space-y-6">
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm group">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Visual Asset</p>
+                        
+                        <div class="relative flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-100 bg-slate-50/50 p-8 transition-all hover:border-indigo-200 group/upload">
+                            @if($image)
+                                <img src="{{ $image->temporaryUrl() }}" class="h-40 w-full object-cover rounded-2xl shadow-xl">
+                            @elseif($image_path)
+                                <img src="{{ Storage::url($image_path) }}" class="h-40 w-full object-cover rounded-2xl shadow-xl">
+                            @else
+                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm text-slate-200 mb-4">
+                                    <i class="fas fa-panorama text-2xl"></i>
+                                </div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Asset Loaded</p>
+                            @endif
+
+                            <label class="mt-6 flex cursor-pointer items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-[10px] font-black text-white uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>{{ $image || $image_path ? 'Change Asset' : 'Upload Asset' }}</span>
+                                <input type="file" wire:model="image" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+                        
+                        <div wire:loading wire:target="image" class="mt-4 flex items-center justify-center gap-2 rounded-xl bg-indigo-50 p-3 text-[9px] font-black text-indigo-600 uppercase tracking-widest">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <span>Transferring Asset...</span>
+                        </div>
+                    </div>
+
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Chromatic Signature</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Background</label>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <input type="color" wire:model.live="bg_color" class="h-10 w-10 overflow-hidden rounded-lg border-none p-0">
+                                    <input type="text" wire:model.live="bg_color" class="flex-1 rounded-lg border-slate-100 bg-slate-50 px-3 py-2 font-mono text-[10px] font-black uppercase">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Typography</label>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <input type="color" wire:model.live="text_color" class="h-10 w-10 overflow-hidden rounded-lg border-none p-0">
+                                    <input type="text" wire:model.live="text_color" class="flex-1 rounded-lg border-slate-100 bg-slate-50 px-3 py-2 font-mono text-[10px] font-black uppercase">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaign Details Section -->
+                <div class="space-y-6">
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Campaign Title</label>
+                            <input type="text" wire:model="title" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                            @error('title') <p class="mt-1 text-[9px] font-black text-rose-500 uppercase">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Sub-headline</label>
+                            <input type="text" wire:model="subtitle" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div class="group/input">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Campaign Narrative (Caption)</label>
+                        <textarea wire:model="caption" rows="3" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner"></textarea>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Button Label</label>
+                            <input type="text" wire:model="button_text" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Link</label>
+                            <input type="text" wire:model="button_link" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Strategic Position</label>
+                            <select wire:model="position" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 text-xs font-bold py-3 shadow-inner">
+                                @foreach($positions as $val => $lbl)
+                                    <option value="{{ $val }}">{{ $lbl }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Scheduling Order</label>
+                            <input type="number" wire:model="sort_order" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Activation Start</label>
+                            <input type="datetime-local" wire:model="starts_at" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                        <div class="group/input">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Activation End</label>
+                            <input type="datetime-local" wire:model="ends_at" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 p-4 rounded-[2rem] bg-slate-900 text-white shadow-xl">
+                        <button 
+                            wire:click="$set('is_active', {{ !$is_active ? 'true' : 'false' }})"
+                            type="button"
+                            class="relative inline-flex h-8 w-16 items-center rounded-full transition-colors {{ $is_active ? 'bg-indigo-500' : 'bg-white/10' }}"
+                        >
+                            <span class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform {{ $is_active ? 'translate-x-9' : 'translate-x-1' }}"></span>
+                        </button>
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-widest leading-none">Campaign Pulse</p>
+                            <p class="text-[9px] font-bold text-white/40 uppercase tracking-tighter mt-1">{{ $is_active ? 'Active & Verifiable' : 'Dormant (Draft)' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="border-t border-slate-100 bg-slate-50/50 p-8 flex items-center justify-end gap-3">
+            <button @click="show = false" class="rounded-2xl px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">Discard Draft</button>
+            <button wire:click="store" class="flex items-center gap-3 rounded-2xl bg-slate-900 px-10 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <i class="fas fa-rocket text-[10px] opacity-50"></i>
+                Deploy Campaign
+            </button>
+        </div>
     </div>
-@endif
+</div>

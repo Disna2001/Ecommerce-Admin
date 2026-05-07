@@ -1,17 +1,24 @@
-<div class="rounded-[2rem] bg-gradient-to-r from-slate-900 via-indigo-900 to-violet-700 p-6 text-white shadow-xl">
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-white/60">Admin Operations Center</p>
-            <h2 class="mt-3 text-3xl font-black">Run sales, delivery, stock, and control actions from one structured dashboard.</h2>
-            <p class="mt-3 max-w-2xl text-sm leading-7 text-white/75">
-                Focus first on what needs attention, then move into inventory, delivery health, storefront management, and AI-guided control tasks without hopping between disconnected pages.
-            </p>
+@props(['todayOrders', 'pendingPaymentReviews', 'monthRevenue', 'failedOutbox'])
+
+<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+    @foreach([
+        ['Revenue (Month)', 'Rs ' . number_format($monthRevenue, 0), 'fa-chart-line', 'indigo', 'Performance'],
+        ['Daily Orders', $todayOrders, 'fa-cart-shopping', 'emerald', 'Volume'],
+        ['Payment Reviews', $pendingPaymentReviews, 'fa-shield-check', 'amber', 'Security'],
+        ['Communication Failures', $failedOutbox, 'fa-wifi-exclamation', 'rose', 'Integrity']
+    ] as [$label, $val, $icon, $color, $category])
+        <div class="group relative rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-sm transition-all hover:shadow-2xl hover:-translate-y-1 overflow-hidden">
+            <div class="absolute right-0 top-0 -mr-16 -mt-16 h-48 w-48 rounded-full bg-{{ $color }}-50/50 group-hover:scale-110 transition-transform"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-{{ $color }}-50 text-{{ $color }}-600 shadow-inner group-hover:bg-{{ $color }}-600 group-hover:text-white transition-colors">
+                        <i class="fas {{ $icon }} text-sm"></i>
+                    </div>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-{{ $color }}-600 bg-{{ $color }}-50 px-3 py-1 rounded-full">{{ $category }}</span>
+                </div>
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{{ $label }}</p>
+                <h3 class="text-3xl font-black tracking-tight text-slate-900">{{ $val }}</h3>
+            </div>
         </div>
-        <div class="grid gap-3 sm:grid-cols-4">
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur"><p class="text-xs uppercase tracking-[0.2em] text-white/60">Today</p><p class="mt-2 text-2xl font-black">{{ $todayOrders }}</p><p class="mt-1 text-xs text-white/60">Orders created</p></div>
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur"><p class="text-xs uppercase tracking-[0.2em] text-white/60">Payments</p><p class="mt-2 text-2xl font-black">{{ $pendingPaymentReviews }}</p><p class="mt-1 text-xs text-white/60">Awaiting review</p></div>
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur"><p class="text-xs uppercase tracking-[0.2em] text-white/60">Revenue</p><p class="mt-2 text-2xl font-black">Rs {{ number_format($monthRevenue, 0) }}</p><p class="mt-1 text-xs text-white/60">This month</p></div>
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 backdrop-blur"><p class="text-xs uppercase tracking-[0.2em] text-white/60">Outbox</p><p class="mt-2 text-2xl font-black">{{ $failedOutbox }}</p><p class="mt-1 text-xs text-white/60">Failed deliveries</p></div>
-        </div>
-    </div>
+    @endforeach
 </div>

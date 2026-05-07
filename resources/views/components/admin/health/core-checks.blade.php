@@ -1,27 +1,33 @@
-<div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-    <div class="mb-5 flex items-start gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-            <i class="fas fa-heart-pulse"></i>
-        </div>
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner"><i class="fas fa-microchip text-lg"></i></div>
         <div>
-            <h3 class="text-xl font-semibold text-slate-900">Core Checks</h3>
-            <p class="mt-1 text-sm text-slate-500">The fastest way to see whether the app is ready for daily production usage.</p>
+            <h3 class="text-xl font-black text-slate-900 tracking-tight">Protocol Surveillance</h3>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Core Infrastructure Readiness</p>
         </div>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2">
         @foreach($checks as $check)
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl {{ $check['status'] === 'healthy' ? 'bg-emerald-100 text-emerald-600' : ($check['status'] === 'warning' ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-600') }}">
-                        <i class="fas {{ $check['icon'] }}"></i>
+            @php
+                $isHealthy = $check['status'] === 'healthy';
+                $isWarning = $check['status'] === 'warning';
+                $tone = $isHealthy ? 'emerald' : ($isWarning ? 'rose' : 'slate');
+            @endphp
+            <div class="group relative rounded-[2.5rem] border border-slate-200 bg-white p-6 transition-all hover:border-{{ $tone }}-400 hover:shadow-xl hover:shadow-{{ $tone }}-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $isHealthy ? 'bg-emerald-50 text-emerald-600' : ($isWarning ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-slate-400') }} shadow-inner transition-colors">
+                            <i class="fas {{ $check['icon'] ?? ($isHealthy ? 'fa-check-double' : 'fa-triangle-exclamation') }} text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-slate-900">{{ $check['label'] }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $check['value'] }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-900">{{ $check['label'] }}</p>
-                        <p class="mt-1 text-sm font-medium {{ $check['status'] === 'healthy' ? 'text-emerald-700' : ($check['status'] === 'warning' ? 'text-amber-700' : 'text-slate-600') }}">{{ $check['value'] }}</p>
-                        <p class="mt-2 text-xs leading-6 text-slate-500">{{ $check['help'] }}</p>
-                    </div>
+                    <div class="h-2 w-2 rounded-full {{ $isHealthy ? 'bg-emerald-500' : ($isWarning ? 'bg-rose-500 animate-ping' : 'bg-slate-300') }}"></div>
                 </div>
+                <p class="mt-4 text-xs font-medium leading-relaxed text-slate-500 italic">"{{ $check['help'] }}"</p>
             </div>
         @endforeach
     </div>

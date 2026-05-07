@@ -124,6 +124,11 @@ class Stock extends Model
         return $this->belongsTo(ItemType::class, 'target_item_type_id');
     }
 
+    public function currentDailyDiscount()
+    {
+        return $this->hasOne(DailyDiscount::class)->where('applied_date', now()->toDateString());
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------

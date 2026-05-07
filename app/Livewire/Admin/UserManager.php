@@ -18,6 +18,7 @@ class UserManager extends Component
 {
     use WithPagination;
 
+    public string $userWorkspaceTab = 'staff';
     public string $search = '';
     public string $selectedRole = '';
     public string $selectedTeam = '';
@@ -31,9 +32,13 @@ class UserManager extends Component
     public string $newTeamColor = 'sky';
     public string $newTeamDefaultRole = '';
     public bool $showTeamCreator = false;
+    public bool $showRoleCreator = false;
+    public string $newRoleName = '';
+    public array $selectedPermissions = [];
 
     protected $queryString = [
         'search' => ['except' => ''],
+        'userWorkspaceTab' => ['except' => 'staff'],
         'selectedRole' => ['except' => ''],
         'selectedTeam' => ['except' => ''],
         'statusFilter' => ['except' => ''],
@@ -60,8 +65,23 @@ class UserManager extends Component
         $summaryQuery = clone $filteredQuery;
         $adminRoleNames = $this->existingAdminRoleNames();
 
+        // Specific handling for merchant requests
+        if ($this->userWorkspaceTab === 'requests') {
+            $merchantRequests = \App\Models\Merchant::with('user')
+                ->where('verification_status', 'pending')
+                ->when($this->search, function ($query) {
+                    $query->whereHas('user', function ($u) {
+                        $u->where('name', 'like', '%' . $this->search . '%')
+                          ->orWhere('email', 'like', '%' . $this->search . '%');
+                    });
+                })
+                ->paginate($this->perPage);
+        } else {
+            $merchantRequests = collect();
+        }
+
         $users = $filteredQuery
-            ->with(['roles', 'teams'])
+            ->with(['roles', 'teams', 'merchant'])
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
@@ -84,23 +104,44 @@ class UserManager extends Component
 
         return view('livewire.admin.user-manager', [
             'users' => $users,
+            'merchantRequests' => $merchantRequests,
             'roles' => $roles,
             'teams' => $teams,
             'selectedUser' => $selectedUser,
             'totalUsers' => User::count(),
             'verifiedUsers' => User::whereNotNull('email_verified_at')->count(),
-            'filteredUsers' => $summaryQuery->count(),
+            'filteredUsers' => ($this->userWorkspaceTab === 'requests') ? $merchantRequests->total() : $summaryQuery->count(),
             'attentionQueues' => $attentionQueues,
             'recentAccessChanges' => User::with(['roles', 'teams'])
                 ->latest('updated_at')
                 ->take(5)
                 ->get(),
+            'allPermissions' => \Spatie\Permission\Models\Permission::orderBy('name')->get(),
         ]);
     }
 
     protected function usersQuery(): Builder
     {
         return User::query()
+            ->when($this->userWorkspaceTab === 'staff', function (Builder $query) {
+                $query->whereHas('roles', function ($q) {
+                    $q->whereIn('name', ['Admin', 'Super Admin', 'Staff', 'Editor', 'Manager']);
+                });
+            })
+            ->when($this->userWorkspaceTab === 'merchants', function (Builder $query) {
+                $query->whereHas('merchant', function ($q) {
+                    $q->where('verification_status', 'verified');
+                });
+            })
+            ->when($this->userWorkspaceTab === 'regular', function (Builder $query) {
+                $query->whereDoesntHave('merchant')
+                    ->where(function ($q) {
+                        $q->whereDoesntHave('roles')
+                          ->orWhereHas('roles', function ($rq) {
+                              $rq->whereNotIn('name', ['Admin', 'Super Admin', 'Staff', 'Editor', 'Manager']);
+                          });
+                    });
+            })
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $inner) {
                     $inner->where('name', 'like', '%' . $this->search . '%')
@@ -110,10 +151,8 @@ class UserManager extends Component
             ->when($this->selectedRole, function (Builder $query) {
                 if ($this->selectedRole === '__no_role__') {
                     $query->doesntHave('roles');
-
                     return;
                 }
-
                 $query->whereHas('roles', function (Builder $roleQuery) {
                     $roleQuery->where('name', $this->selectedRole);
                 });
@@ -121,10 +160,8 @@ class UserManager extends Component
             ->when($this->selectedTeam, function (Builder $query) {
                 if ($this->selectedTeam === '__no_team__') {
                     $query->doesntHave('teams');
-
                     return;
                 }
-
                 $query->whereHas('teams', function (Builder $teamQuery) {
                     $teamQuery->where('slug', $this->selectedTeam);
                 });
@@ -183,6 +220,12 @@ class UserManager extends Component
         $this->selectedUserId = null;
     }
 
+    public function setUserWorkspaceTab(string $tab): void
+    {
+        $this->userWorkspaceTab = $tab;
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->reset(['search', 'selectedRole', 'selectedTeam', 'statusFilter']);
@@ -190,6 +233,42 @@ class UserManager extends Component
         $this->sortDirection = 'desc';
         $this->perPage = 10;
         $this->resetPage();
+    }
+
+    public function approveMerchant(int $merchantId): void
+    {
+        $merchant = \App\Models\Merchant::findOrFail($merchantId);
+        $merchant->update([
+            'verification_status' => 'verified',
+            'verified_at' => now(),
+        ]);
+
+        $merchant->user->assignRole('Merchant');
+        session()->flash('message', "Merchant access granted for {$merchant->shop_name}.");
+    }
+
+    public function rejectMerchant(int $merchantId, string $reason): void
+    {
+        $merchant = \App\Models\Merchant::findOrFail($merchantId);
+        $merchant->update([
+            'verification_status' => 'rejected',
+            'rejection_reason' => $reason,
+        ]);
+        session()->flash('message', "Merchant request rejected for {$merchant->shop_name}.");
+    }
+
+    public function createRole(): void
+    {
+        $this->validate([
+            'newRoleName' => 'required|unique:roles,name',
+            'selectedPermissions' => 'required|array|min:1',
+        ]);
+
+        $role = Role::create(['name' => $this->newRoleName]);
+        $role->syncPermissions($this->selectedPermissions);
+
+        $this->reset(['newRoleName', 'selectedPermissions', 'showRoleCreator']);
+        session()->flash('message', "Role '{$role->name}' created successfully.");
     }
 
     public function assignRole(int $userId, string $roleName): void
