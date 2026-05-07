@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <header class="sticky top-0 z-50 px-4 py-6">
+    <header class="sticky top-0 z-50 px-4 py-4 sm:py-6" x-data="{ mobileMenuOpen: false, searchOpen: false }">
         <div class="glass mx-auto flex max-w-7xl flex-col gap-4 rounded-[2.5rem] px-6 py-4 shadow-[0_25px_80px_rgba(0,0,0,0.06)]">
             <div class="flex items-center justify-between gap-8">
                 <!-- Branding Protocol -->
@@ -40,8 +40,13 @@
                 </form>
 
                 <!-- Action Hub -->
-                <div class="flex shrink-0 items-center gap-3">
-                    <button @click="toggle()" type="button" class="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <div class="flex shrink-0 items-center gap-1 sm:gap-3">
+                    <!-- Mobile Search Toggle -->
+                    <button @click="searchOpen = !searchOpen" type="button" class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors md:hidden">
+                        <i class="fas" :class="searchOpen ? 'fa-times' : 'fa-search'"></i>
+                    </button>
+
+                    <button @click="toggle()" type="button" class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i class="fas" :class="dark ? 'fa-sun' : 'fa-moon'"></i>
                     </button>
 
@@ -110,7 +115,21 @@
                             </div>
                         </div>
                     @endguest
+
+                    <!-- Mobile Menu Toggle -->
+                    <button @click="mobileMenuOpen = true" type="button" class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors lg:hidden">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Mobile Search Dropdown -->
+            <div x-show="searchOpen" x-collapse class="md:hidden">
+                <form action="{{ url('/products') }}" method="GET" class="relative group mt-2">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ $layout['searchPlaceholder'] }}" 
+                           class="w-full rounded-full border border-slate-200/50 bg-slate-100/50 px-12 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 outline-none transition-all duration-500 focus:border-[var(--primary)] focus:bg-white focus:ring-8 focus:ring-[var(--primary)]/5 dark:border-white/5 dark:bg-slate-900/50 dark:text-white">
+                    <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 group-focus-within:text-[var(--primary)] transition-colors"></i>
+                </form>
             </div>
 
             <!-- Navigation Protocol -->
@@ -130,6 +149,42 @@
                             </a>
                         @endif
                     @endforeach
+                </nav>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Overlay -->
+        <div x-show="mobileMenuOpen" style="display:none;" class="fixed inset-0 z-[100] lg:hidden">
+            <div x-show="mobileMenuOpen" x-transition.opacity class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="mobileMenuOpen = false"></div>
+            <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" 
+                 class="absolute bottom-0 right-0 top-0 w-4/5 max-w-sm border-l border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95 flex flex-col">
+                <div class="flex items-center justify-between mb-8">
+                    <span class="text-lg font-black tracking-tighter text-slate-900 dark:text-white">Menu</span>
+                    <button @click="mobileMenuOpen = false" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <nav class="flex flex-col gap-4 overflow-y-auto">
+                    @foreach([
+                        ['url' => '/products', 'label' => $layout['navProductsLabel'], 'icon' => 'fa-box-open'],
+                        ['url' => '/#categories', 'label' => $layout['navCategoriesLabel'], 'icon' => 'fa-tags'],
+                        ['url' => '/#deals', 'label' => $layout['navDealsLabel'], 'condition' => $layout['showDealsLink'], 'icon' => 'fa-fire'],
+                        ['url' => route('track-order'), 'label' => $layout['navTrackLabel'], 'icon' => 'fa-truck-fast'],
+                        ['url' => route('help-center'), 'label' => $layout['navHelpLabel'], 'icon' => 'fa-headset']
+                    ] as $nav)
+                        @if(!isset($nav['condition']) || $nav['condition'])
+                            <a href="{{ $nav['url'] }}" class="flex items-center gap-4 rounded-2xl p-4 text-xs font-black uppercase tracking-widest text-slate-600 transition-colors hover:bg-slate-50 hover:text-[var(--primary)] dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white">
+                                <i class="fas {{ $nav['icon'] }} w-5 text-center text-slate-400"></i>
+                                {{ $nav['label'] }}
+                            </a>
+                        @endif
+                    @endforeach
+                    @guest
+                        <div class="mt-8 border-t border-slate-100 pt-8 dark:border-white/5 space-y-4">
+                            <a wire:navigate href="{{ route('login') }}" class="flex w-full items-center justify-center rounded-2xl border border-slate-200 p-4 text-xs font-black uppercase tracking-widest text-slate-600 dark:border-white/10 dark:text-slate-300">Login</a>
+                            <a wire:navigate href="{{ route('register') }}" class="flex w-full items-center justify-center rounded-2xl p-4 text-xs font-black uppercase tracking-widest text-white" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">Sign Up</a>
+                        </div>
+                    @endguest
                 </nav>
             </div>
         </div>

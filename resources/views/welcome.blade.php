@@ -44,8 +44,8 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\" fill-rule=\"evenodd\"%3E%3Ccircle cx=\"3\" cy=\"3\" r=\"3\"/%3E%3Ccircle cx=\"13\" cy=\"13\" r=\"3\"/%3E%3C/g%3E%3C/svg%3E');"></div>
             @endif
             
-            <div class="relative z-10 px-8 py-20 lg:px-16 lg:py-24">
-                <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : 'grid gap-16 lg:grid-cols-2 lg:items-center' }}">
+            <div class="relative z-10 px-6 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24">
+                <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : 'grid gap-10 sm:gap-16 lg:grid-cols-2 lg:items-center' }}">
                     <div class="{{ $heroLayout === 'centered' ? '' : 'text-left' }}">
                         <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 {{ $heroSurface !== 'minimal' ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 text-slate-500' }}">
                             <span class="relative flex h-2 w-2">
@@ -55,7 +55,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                             {{ $siteTagline }}
                         </div>
                         
-                        <h1 class="text-5xl font-black leading-[1.1] text-slate-900 sm:text-6xl lg:text-7xl {{ $heroSurface !== 'minimal' ? 'text-white' : '' }} tracking-tight">
+                        <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] text-slate-900 {{ $heroSurface !== 'minimal' ? 'text-white' : '' }} tracking-tight">
                             {{ $heroTitle }}
                             <span class="block mt-2 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">{{ $heroHighlight }}</span>
                         </h1>
@@ -64,13 +64,13 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                             {{ $heroSubtitle }} <span class="font-bold {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-900' }}">{{ $heroMicrocopy }}</span>
                         </p>
                         
-                        <div class="mt-12 flex flex-wrap items-center gap-6 {{ $heroLayout === 'centered' ? 'justify-center' : '' }}">
-                            <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="inline-flex items-center gap-4 rounded-full px-10 py-5 text-xs font-black text-white uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-indigo-500/40 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                        <div class="mt-10 flex flex-col sm:flex-row flex-wrap items-center gap-4 sm:gap-6 {{ $heroLayout === 'centered' ? 'justify-center' : '' }}">
+                            <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-4 rounded-full px-10 py-4 sm:py-5 text-xs font-black text-white uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-indigo-500/40 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
                                 <span>{{ $heroBtnText }}</span>
                                 <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
                             </a>
                             @guest
-                                <a wire:navigate href="{{ route('register') }}" class="inline-flex items-center rounded-full border px-10 py-5 text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm hover:shadow-lg' }}">
+                                <a wire:navigate href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border px-10 py-4 sm:py-5 text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm hover:shadow-lg' }}">
                                     Onboard Now
                                 </a>
                             @endguest
@@ -80,8 +80,8 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                     @if($heroImagePath && $heroLayout !== 'centered')
                         <div class="relative group">
                             <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
-                            <div class="relative overflow-hidden rounded-[2.5rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-2xl' : 'border-slate-200 bg-white shadow-xl' }} p-4">
-                                <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
+                            <div class="relative overflow-hidden rounded-[2.5rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-2xl' : 'border-slate-200 bg-white shadow-xl' }} p-2 sm:p-4">
+                                <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[250px] sm:h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
                             </div>
                         </div>
                     @endif
@@ -94,7 +94,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
             <div class="mb-8 flex items-end justify-between">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{{ $categoryStripTitle }}</p>
-                    <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Browse Registry</h2>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Browse Registry</h2>
                 </div>
                 <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">See Ledger <i class="fas fa-arrow-right ml-2"></i></a>
             </div>
@@ -143,7 +143,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div class="mb-10 flex items-end justify-between">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">Curated Intelligence</p>
-                        <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Personalized Ledger</h2>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Personalized Ledger</h2>
                     </div>
                 </div>
                 <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
@@ -192,7 +192,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                     <div class="mb-10 flex items-end justify-between">
                         <div>
                             <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">{{ $badge }}</p>
-                            <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ $sectionTitle }}</h2>
+                            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ $sectionTitle }}</h2>
                         </div>
                         <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">View All <i class="fas fa-arrow-right ml-2"></i></a>
                     </div>
@@ -240,8 +240,8 @@ $cartCount = collect(session('cart', []))->sum('quantity');
         <section id="reviews" class="mx-auto max-w-7xl px-4 py-12">
             <div class="text-center mb-12">
                 <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--primary)] mb-3">Public Audit</p>
-                <h2 class="text-4xl font-black text-slate-900 tracking-tight">{{ $reviewsSectionTitle }}</h2>
-                <p class="mt-4 text-slate-500 max-w-2xl mx-auto">{{ $reviewsSectionSubtitle }}</p>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">{{ $reviewsSectionTitle }}</h2>
+                <p class="mt-4 text-sm sm:text-base text-slate-500 max-w-2xl mx-auto">{{ $reviewsSectionSubtitle }}</p>
             </div>
             <div class="grid gap-8 md:grid-cols-3">
                 @forelse($reviews as $review)
@@ -281,9 +281,9 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
                 <div class="relative z-10">
                     <p class="text-[10px] font-black uppercase tracking-[0.5em] text-white/60 mb-6">Execution Phase</p>
-                    <h2 class="text-4xl font-black sm:text-5xl lg:text-6xl tracking-tight mb-6">{{ $finalCtaTitle }}</h2>
+                    <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tight mb-6">{{ $finalCtaTitle }}</h2>
                     <p class="mx-auto max-w-2xl text-lg text-white/80 mb-12">{{ $finalCtaSubtitle }}</p>
-                    <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex items-center gap-4 rounded-full bg-white px-12 py-5 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition-all group">
+                    <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex w-full sm:w-auto justify-center items-center gap-4 rounded-full bg-white px-12 py-4 sm:py-5 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition-all group">
                         {{ $finalCtaButtonText }}
                         <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
                     </a>
@@ -294,9 +294,9 @@ $cartCount = collect(session('cart', []))->sum('quantity');
 
     <!-- Global Footer -->
     <footer id="footer" class="mt-24 px-4 pb-12">
-        <div class="mx-auto max-w-7xl rounded-[3.5rem] bg-slate-950 px-12 py-20 text-white relative overflow-hidden">
+        <div class="mx-auto max-w-7xl rounded-[3.5rem] bg-slate-950 px-8 py-12 sm:px-12 sm:py-20 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-indigo-500/10 blur-[120px] rounded-full"></div>
-            <div class="relative z-10 grid gap-16 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+            <div class="relative z-10 grid gap-10 sm:gap-16 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
                 <div>
                     <div class="flex items-center gap-3 mb-8">
                         @if($logoPath)
@@ -337,7 +337,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                     </div>
                 </div>
             </div>
-            <div class="mt-20 pt-8 border-t border-white/5 flex flex-wrap justify-between items-center gap-4">
+            <div class="mt-12 sm:mt-20 pt-8 border-t border-white/5 flex flex-col sm:flex-row flex-wrap justify-between items-center gap-6 sm:gap-4 text-center sm:text-left">
                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">{{ $footerCopy }}</p>
                 <div class="flex gap-6">
                     <i class="fab fa-cc-visa text-xl text-slate-700"></i>

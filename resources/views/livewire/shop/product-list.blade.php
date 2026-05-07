@@ -177,7 +177,67 @@
 
                     <div class="mt-12">{{ $products->links() }}</div>
                 </div>
+        </div>
+    </div>
+
+    <!-- Mobile Filters Overlay -->
+    <div x-show="mobileFilters" style="display:none;" class="fixed inset-0 z-[100] lg:hidden">
+        <div x-show="mobileFilters" x-transition.opacity class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="mobileFilters = false"></div>
+        <div x-show="mobileFilters" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" 
+             class="absolute bottom-0 left-0 top-0 w-4/5 max-w-sm overflow-y-auto bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:bg-slate-950/95 flex flex-col custom-scrollbar">
+            <div class="flex items-center justify-between mb-8">
+                <span class="text-lg font-black tracking-tighter text-slate-900 dark:text-white">Filters</span>
+                <button @click="mobileFilters = false" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            
+            <div class="space-y-10">
+                <!-- Search Protocol -->
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Search Registry</p>
+                    <div class="relative group">
+                        <input type="text" wire:model.live.debounce.400ms="search" placeholder="Refine results..."
+                               class="w-full rounded-2xl border border-slate-200 bg-white px-12 py-4 text-xs font-bold uppercase tracking-widest text-slate-700 outline-none transition-all focus:border-[var(--primary)] focus:ring-8 focus:ring-[var(--primary)]/5 dark:bg-slate-900/50 dark:border-white/10 dark:text-white">
+                        <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 group-focus-within:text-[var(--primary)] transition-colors"></i>
+                    </div>
+                </div>
+
+                <!-- Valuation Range -->
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Valuation Range</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" wire:model.live.debounce.600ms="min_price" placeholder="Min"
+                               class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-xs font-bold text-slate-700 outline-none focus:border-[var(--primary)] dark:bg-slate-900/50 dark:border-white/10 dark:text-white">
+                        <input type="number" wire:model.live.debounce.600ms="max_price" placeholder="Max"
+                               class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-xs font-bold text-slate-700 outline-none focus:border-[var(--primary)] dark:bg-slate-900/50 dark:border-white/10 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- Classification Ledger -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Classifications</p>
+                        <button @click="mobileFilters = false" wire:click="clearFilters" class="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:underline">Flush</button>
+                    </div>
+                    <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                        <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
+                            <input type="radio" wire:model.live="category" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">All Categories</span>
+                        </label>
+                        @foreach($categories as $cat)
+                            <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
+                                <input type="radio" wire:model.live="category" value="{{ $cat->id }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">{{ $cat->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            
+            <button @click="mobileFilters = false" class="mt-8 w-full rounded-full py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl hover:scale-[1.02] transition-all" style="background: linear-gradient(90deg, var(--primary), var(--secondary))">
+                View Ledger
+            </button>
         </div>
     </div>
 </div>
