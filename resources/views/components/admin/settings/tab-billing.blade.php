@@ -214,7 +214,7 @@
                         <div class="rounded-2xl bg-white shadow-2xl p-6 min-h-[300px] relative overflow-hidden text-[10px] text-slate-600">
                             <!-- Watermark Simulation -->
                             <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] rotate-[30deg] pointer-events-none">
-                                <p class="text-4xl font-black tracking-[1em] text-slate-900 uppercase">{{ $preview['status'] }}</p>
+                                <p class="text-4xl font-black tracking-[1em] text-slate-900 uppercase">{{ $preview['status'] ?? 'DRAFT' }}</p>
                             </div>
 
                             <div class="relative z-10 space-y-4">
@@ -224,20 +224,20 @@
                                         <p class="mt-1 opacity-60">{{ $billingPreviewCompany['email'] }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <p class="font-bold text-slate-900">{{ $preview['number'] }}</p>
-                                        <p class="opacity-60">{{ $preview['date'] }}</p>
+                                        <p class="font-bold text-slate-900">{{ $preview['number'] ?? 'INV-0000' }}</p>
+                                        <p class="opacity-60">{{ $preview['date'] ?? now()->format('Y-m-d') }}</p>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4 text-[9px]">
                                     <div>
                                         <p class="font-black text-slate-900 uppercase opacity-30">Enrolled To</p>
-                                        <p class="mt-1 font-bold">{{ $preview['customer_name'] }}</p>
-                                        @if($profile['show_customer_phone']) <p class="opacity-60">{{ $preview['customer_phone'] }}</p> @endif
+                                        <p class="mt-1 font-bold">{{ $preview['customer_name'] ?? 'Walk-in Customer' }}</p>
+                                        @if($profile['show_customer_phone']) <p class="opacity-60">{{ $preview['customer_phone'] ?? 'N/A' }}</p> @endif
                                     </div>
                                     <div class="text-right">
                                         <p class="font-black text-slate-900 uppercase opacity-30">Settlement</p>
-                                        <p class="mt-1 font-bold">{{ $preview['payment_method'] }}</p>
+                                        <p class="mt-1 font-bold">{{ $preview['payment_method'] ?? 'Cash' }}</p>
                                     </div>
                                 </div>
 
@@ -246,7 +246,7 @@
                                         <span>Item Description</span>
                                         <span>Sum</span>
                                     </div>
-                                    @foreach($preview['items'] as $item)
+                                    @foreach($preview['items'] ?? [] as $item)
                                         <div class="flex justify-between items-center py-1 border-b border-slate-50">
                                             <div class="min-w-0 pr-4">
                                                 <p class="font-bold truncate">{{ $item['name'] }}</p>
@@ -260,11 +260,11 @@
                                 <div class="pt-4 flex flex-col items-end gap-1 border-t border-slate-900/5">
                                     <div class="flex items-center gap-6">
                                         <span class="opacity-40 uppercase font-black text-[8px]">Subtotal</span>
-                                        <span class="font-bold">{{ $currency }} {{ number_format($preview['total'], 2) }}</span>
+                                        <span class="font-bold">{{ $currency }} {{ number_format($preview['total'] ?? 0, 2) }}</span>
                                     </div>
                                     <div class="flex items-center gap-6 text-xs text-slate-900">
                                         <span class="font-black uppercase text-[10px]">Total Due</span>
-                                        <span class="font-black">{{ $currency }} {{ number_format($preview['total'], 2) }}</span>
+                                        <span class="font-black">{{ $currency }} {{ number_format($preview['total'] ?? 0, 2) }}</span>
                                     </div>
                                 </div>
                             </div>

@@ -14,16 +14,16 @@
             ['title' => 'Flagship Neural', 'model' => 'gpt-5', 'desc' => 'Maximum reasoning for strategic decision making.', 'icon' => 'fa-crown']
         ] as $preset)
             <button type="button" wire:click="$set('ai_model', '{{ $preset['model'] }}')" 
-                class="group relative overflow-hidden rounded-[2rem] border p-6 text-left transition-all {{ $ai_model === $preset['model'] ? 'border-slate-900 bg-slate-900 text-white shadow-2xl shadow-slate-200' : 'border-slate-200 bg-white text-slate-600 hover:border-rose-400 hover:shadow-xl hover:shadow-rose-50' }}">
+                class="group relative overflow-hidden rounded-[2rem] border p-6 text-left transition-all {{ ($ai_model ?? '') === $preset['model'] ? 'border-slate-900 bg-slate-900 text-white shadow-2xl shadow-slate-200' : 'border-slate-200 bg-white text-slate-600 hover:border-rose-400 hover:shadow-xl hover:shadow-rose-50' }}">
                 <div class="flex items-center justify-between">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ $ai_model === $preset['model'] ? 'bg-white/20' : 'bg-slate-50 text-slate-400' }}"><i class="fas {{ $preset['icon'] }} text-xs"></i></div>
-                    @if($ai_model === $preset['model'])
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ ($ai_model ?? '') === $preset['model'] ? 'bg-white/20' : 'bg-slate-50 text-slate-400' }}"><i class="fas {{ $preset['icon'] }} text-xs"></i></div>
+                    @if(($ai_model ?? '') === $preset['model'])
                         <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] animate-pulse"></span>
                     @endif
                 </div>
                 <p class="mt-4 text-sm font-black">{{ $preset['title'] }}</p>
-                <p class="mt-1 text-[10px] font-bold font-mono {{ $ai_model === $preset['model'] ? 'text-white/60' : 'text-rose-500' }}">{{ $preset['model'] }}</p>
-                <p class="mt-4 text-xs leading-relaxed {{ $ai_model === $preset['model'] ? 'text-white/70' : 'text-slate-400' }}">{{ $preset['desc'] }}</p>
+                <p class="mt-1 text-[10px] font-bold font-mono {{ ($ai_model ?? '') === $preset['model'] ? 'text-white/60' : 'text-rose-500' }}">{{ $preset['model'] }}</p>
+                <p class="mt-4 text-xs leading-relaxed {{ ($ai_model ?? '') === $preset['model'] ? 'text-white/70' : 'text-slate-400' }}">{{ $preset['desc'] }}</p>
             </button>
         @endforeach
     </div>

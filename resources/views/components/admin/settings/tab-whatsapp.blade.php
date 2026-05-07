@@ -75,7 +75,7 @@
                 <div class="rounded-2xl bg-slate-900 p-6 text-white overflow-hidden relative">
                     <div class="absolute right-0 top-0 -mr-6 -mt-6 h-24 w-24 rounded-full bg-emerald-500/20"></div>
                     <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Live Endpoint URL</p>
-                    <p class="mt-2 text-xs font-mono font-bold break-all opacity-80">{{ rtrim($app_public_url ?: config('app.url'), '/') }}/whatsapp/webhook</p>
+                    <p class="mt-2 text-xs font-mono font-bold break-all opacity-80">{{ rtrim($app_public_url ?? config('app.url'), '/') }}/whatsapp/webhook</p>
                     <p class="mt-4 text-[10px] font-medium text-white/40 leading-relaxed italic">Subscribe to 'message_status' events in Meta Configuration using this URL and your Verify Token.</p>
                 </div>
             </div>
