@@ -43,7 +43,7 @@
                         <span class="text-[10px] font-bold text-slate-400">{{ $t->total_count }} MSG</span>
                     </div>
                     <div class="h-1.5 w-full rounded-full bg-slate-50 overflow-hidden shadow-inner">
-                        <div class="h-full bg-indigo-500" style="width: {{ min(100, ($t->total_count / max(1, $analytics['messageTypes'][0]->total_count)) * 100) }}%"></div>
+                        <div class="h-full bg-indigo-500" style="width: {{ min(100, ($t->total_count / max(1, optional($analytics['messageTypes']->first())->total_count ?: 1)) * 100) }}%"></div>
                     </div>
                 </div>
             @endforeach
