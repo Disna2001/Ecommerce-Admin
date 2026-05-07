@@ -1,3 +1,4 @@
+@props([])
 <div class="space-y-8">
     <div class="flex items-center gap-4">
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 shadow-inner"><i class="fas fa-server text-lg"></i></div>

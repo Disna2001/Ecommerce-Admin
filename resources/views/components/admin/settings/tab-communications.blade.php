@@ -1,3 +1,5 @@
+@props(['mail_mailer' => 'smtp', 'mail_from_name' => '', 'mail_from_address' => '', 'order_notification_email' => '', 'support_notification_email' => '', 'mail_smtp_host' => '', 'mail_smtp_port' => '', 'mail_smtp_encryption' => '', 'mail_smtp_username' => '', 'mail_smtp_password' => '', 'test_email_recipient' => ''])
+
 <div class="space-y-8">
     <div class="flex items-center gap-4">
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner"><i class="fas fa-envelope-open-text text-lg"></i></div>

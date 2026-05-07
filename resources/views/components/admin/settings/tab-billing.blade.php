@@ -4,6 +4,7 @@
     'billingPreviewCompany' => [],
     'billingPreviewDocuments' => [],
     'printerCatalog' => [],
+    'currency' => 'Rs',
 ])
 
 <div class="space-y-8">

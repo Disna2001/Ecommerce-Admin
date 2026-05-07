@@ -1,3 +1,4 @@
+@props(['ai_model' => ''])
 <div class="space-y-8">
     <div class="flex items-center gap-4">
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-inner"><i class="fas fa-brain text-lg"></i></div>

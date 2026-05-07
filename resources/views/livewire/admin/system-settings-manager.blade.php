@@ -89,6 +89,7 @@
                             :billing-preview-company="$billingPreviewCompany"
                             :billing-preview-documents="$billingPreviewDocuments"
                             :printer-catalog="$printerCatalog"
+                            :currency="$currency_symbol"
                         />
                     @elseif($activeTab === 'api_keys')
                         <x-admin.settings.tab-api-keys />

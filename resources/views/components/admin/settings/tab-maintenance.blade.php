@@ -1,4 +1,4 @@
-@props(['maintenanceMode' => false])
+@props(['maintenanceMode' => false, 'backupFile' => null])
 
 <div class="space-y-12">
     <!-- Global System State -->
