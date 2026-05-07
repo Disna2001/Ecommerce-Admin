@@ -632,9 +632,9 @@
                         <h3 class="font-bold text-gray-900 mb-4">Notification Preferences</h3>
                         <div class="space-y-4">
                             @foreach([
-                                ['email_offers',  $email_offers,  'Email Promotions',    'Receive deals and offers via email'],
-                                ['sms_alerts',    $sms_alerts,    'SMS Alerts',          'Get order updates via SMS'],
-                                ['order_updates', $order_updates, 'Order Notifications', 'Status change alerts'],
+                                ['email_offers',  $email_offers  ?? true,  'Email Promotions',    'Receive deals and offers via email'],
+                                ['sms_alerts',    $sms_alerts    ?? false,  'SMS Alerts',          'Get order updates via SMS'],
+                                ['order_updates', $order_updates ?? true,  'Order Notifications', 'Status change alerts'],
                             ] as [$prop, $val, $label, $desc])
                             <div class="flex items-center justify-between py-1">
                                 <div>
