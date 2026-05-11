@@ -97,17 +97,6 @@
                         <a href="{{ url('/products') }}" class="text-xs text-gray-400 hover:text-red-500">Clear all</a>
                     </div>
 
-                    {{-- Search --}}
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Search</label>
-                        <div class="relative">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                   placeholder="Search products..."
-                                   class="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400">
-                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-300 text-xs"></i>
-                        </div>
-                    </div>
-
                     {{-- Categories --}}
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-3">Category</label>
