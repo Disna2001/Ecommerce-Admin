@@ -111,6 +111,11 @@ class AppServiceProvider extends ServiceProvider
                 config(['mail.default' => $mailMailer]);
             }
 
+            if ($mail_api_key = SiteSetting::get('mail_api_key')) {
+                config(['services.resend.key' => $mail_api_key]);
+                config(['services.postmark.key' => $mail_api_key]);
+            }
+
             if ($mailFromAddress) {
                 config(['mail.from.address' => $mailFromAddress]);
             }
