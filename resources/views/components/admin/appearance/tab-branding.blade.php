@@ -45,7 +45,12 @@
                 </div>
 
                 <div class="relative flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-100 bg-slate-50/50 p-8 transition-all hover:border-indigo-200">
-                    @if($logo_path)
+                    @if($logo_image)
+                        <div class="relative group/logo">
+                            <img src="{{ $logo_image->temporaryUrl() }}" class="h-24 w-auto object-contain transition-transform group-hover/logo:scale-105">
+                            <div class="absolute -top-2 -right-2 bg-indigo-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">New Preview</div>
+                        </div>
+                    @elseif($logo_path)
                         <div class="relative group/logo">
                             <img src="{{ Storage::url($logo_path) }}?v={{ md5($logo_path) }}" class="h-24 w-auto object-contain transition-transform group-hover/logo:scale-105">
                         </div>
@@ -84,7 +89,14 @@
                 </div>
 
                 <div class="relative flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-100 bg-slate-50/50 p-8 transition-all hover:border-indigo-200">
-                    @if($favicon_path)
+                    @if($favicon_image)
+                        <div class="relative group/favicon">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-md p-3 relative">
+                                <img src="{{ $favicon_image->temporaryUrl() }}" class="h-full w-full object-contain">
+                                <div class="absolute -top-2 -right-2 bg-indigo-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">New</div>
+                            </div>
+                        </div>
+                    @elseif($favicon_path)
                         <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-md p-3">
                             <img src="{{ Storage::url($favicon_path) }}?v={{ md5($favicon_path) }}" class="h-full w-full object-contain">
                         </div>
