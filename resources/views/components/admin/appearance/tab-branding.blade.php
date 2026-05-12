@@ -63,6 +63,8 @@
                     </label>
                 </div>
                 
+                @error('logo_image') <p class="mt-2 text-[10px] font-black text-rose-500 uppercase tracking-widest text-center">{{ $message }}</p> @enderror
+                
                 <div wire:loading wire:target="logo_image" class="mt-4 flex items-center justify-center gap-2 rounded-xl bg-indigo-50 p-3 text-[9px] font-black text-indigo-600 uppercase tracking-widest">
                     <i class="fas fa-circle-notch fa-spin"></i>
                     <span>Transferring Asset...</span>
@@ -99,6 +101,8 @@
                         <input type="file" wire:model="favicon_image" accept="image/*" class="hidden">
                     </label>
                 </div>
+
+                @error('favicon_image') <p class="mt-2 text-[10px] font-black text-rose-500 uppercase tracking-widest text-center">{{ $message }}</p> @enderror
 
                 <div wire:loading wire:target="favicon_image" class="mt-4 flex items-center justify-center gap-2 rounded-xl bg-indigo-50 p-3 text-[9px] font-black text-indigo-600 uppercase tracking-widest">
                     <i class="fas fa-circle-notch fa-spin"></i>
