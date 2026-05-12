@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\SiteSetting;
 use App\Services\Storefront\StorefrontDataService;
 use App\Services\Tenancy\TenantManager;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -146,49 +147,36 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if ($this->safeHasTable('permissions') && $this->safeHasTable('roles')) {
-            $corePermissions = [
-                'view dashboard',
-                'view orders',
-                'manage orders',
-                'verify payments',
-                'view inventory',
-                'manage inventory',
-                'view supply chain',
-                'manage supply chain',
-                'view invoices',
-                'view pos',
-                'view users',
-                'view tenants',
-                'create users',
-                'edit users',
-                'delete users',
-                'view roles',
-                'create roles',
-                'edit roles',
-                'delete roles',
-                'view settings',
-                'edit settings',
-                'view activity logs',
-                'view notification outbox',
-                'view stock movements',
-                'view system health',
-                'view site management',
-                'manage site management',
-            ];
+            // Only sync permissions if they aren't already cached as synced today.
+            // This prevents massive DB/Cache overhead on every single request.
+            Cache::remember('core_permissions_synced', 3600, function () {
+                $corePermissions = [
+                    'view dashboard', 'view orders', 'manage orders', 'verify payments',
+                    'view inventory', 'manage inventory', 'view supply chain', 'manage supply chain',
+                    'view invoices', 'view pos', 'view users', 'view tenants',
+                    'create users', 'edit users', 'delete users', 'view roles',
+                    'create roles', 'edit roles', 'delete roles', 'view settings',
+                    'edit settings', 'view activity logs', 'view notification outbox',
+                    'view stock movements', 'view system health', 'view site management',
+                    'manage site management',
+                ];
 
-            foreach ($corePermissions as $permissionName) {
-                Permission::firstOrCreate([
-                    'name' => $permissionName,
-                    'guard_name' => 'web',
-                ]);
-            }
-
-            foreach (['Admin', 'Super Admin'] as $roleName) {
-                $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
-                if ($role) {
-                    $role->givePermissionTo($corePermissions);
+                foreach ($corePermissions as $permissionName) {
+                    Permission::firstOrCreate([
+                        'name' => $permissionName,
+                        'guard_name' => 'web',
+                    ]);
                 }
-            }
+
+                foreach (['Admin', 'Super Admin'] as $roleName) {
+                    $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
+                    if ($role) {
+                        $role->syncPermissions($corePermissions);
+                    }
+                }
+                
+                return true;
+            });
         }
     }
 
