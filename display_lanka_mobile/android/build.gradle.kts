@@ -7,7 +7,7 @@ allprojects {
 
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
-        .dir("../../build")
+        .dir("C:/flutter_builds/display_lanka")
         .get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 

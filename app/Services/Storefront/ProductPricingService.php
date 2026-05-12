@@ -63,15 +63,17 @@ class ProductPricingService
 
     public function imageUrlForProduct(Stock $product, string $preset = 'card'): ?string
     {
-        return !empty($product->images)
-            ? $this->storefrontImageService->urlForPath($product->images[0], $preset)
+        $firstImage = collect($product->images)->first();
+        return $firstImage
+            ? $this->storefrontImageService->urlForPath($firstImage, $preset)
             : null;
     }
 
     public function imageSourcesForProduct(Stock $product, string $preset = 'card'): array
     {
-        return !empty($product->images)
-            ? $this->storefrontImageService->pictureSourcesForPath($product->images[0], $preset)
+        $firstImage = collect($product->images)->first();
+        return $firstImage
+            ? $this->storefrontImageService->pictureSourcesForPath($firstImage, $preset)
             : ['fallback' => null, 'webp' => null, 'jpeg' => null];
     }
 }
