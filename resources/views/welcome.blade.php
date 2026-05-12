@@ -174,7 +174,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
         @endif
 
         @php
-            $railGridClass = 'grid gap-8 sm:grid-cols-2 xl:grid-cols-4';
+            $railGridClass = 'grid gap-4 sm:gap-8 grid-cols-2 xl:grid-cols-4';
             $sectionSubtitles = [
                 'deals' => $dealsSubtitle,
                 'featured' => $featuredSubtitle,

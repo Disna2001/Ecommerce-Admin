@@ -30,6 +30,29 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    try {
+      final response = await _dio.post('login', data: {
+        'email': email,
+        'password': password,
+        'device_name': 'flutter_mobile',
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('Login failed: $e');
+    }
+  }
+
+  Future<void> logout(String token) async {
+    try {
+      await _dio.post('logout', 
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+    } catch (e) {
+      throw Exception('Logout failed: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> getSettings() async {
     try {
       final response = await _dio.get('settings');

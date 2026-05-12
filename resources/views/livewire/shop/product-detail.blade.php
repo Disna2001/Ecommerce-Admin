@@ -19,7 +19,7 @@
         </nav>
         <div class="grid gap-12 lg:grid-cols-[1fr_0.8fr]">
             <div class="space-y-8">
-                <div class="premium-card !p-0 !rounded-[3.5rem] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-white/5 h-[600px] border border-slate-100 dark:border-white/5">
+                <div class="premium-card !p-0 !rounded-[3.5rem] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-white/5 h-[400px] sm:h-[600px] border border-slate-100 dark:border-white/5">
                     @if(!empty($imageUrls) && isset($imageUrls[$activeImage]))
                         <picture class="h-full w-full">
                             @if(isset($imageSourceSets[$activeImage]['webp']) && $imageSourceSets[$activeImage]['webp'])

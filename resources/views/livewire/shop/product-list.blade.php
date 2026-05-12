@@ -121,7 +121,7 @@
                 </aside>
 
                 <div class="min-w-0">
-                    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                    <div class="grid grid-cols-2 gap-4 sm:gap-8 xl:grid-cols-3">
                         @forelse($products as $product)
                             @php($inWishlist = in_array($product->id, $wishlist))
                             <article wire:key="product-card-{{ $product->id }}" class="premium-card group overflow-hidden flex flex-col h-full">

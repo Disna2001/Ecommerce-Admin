@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/store_models.dart';
 import '../services/api_service.dart';
 import 'package:intl/intl.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,6 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           icon: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF0F172A)),
           onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.person_outline, color: Color(0xFF0F172A)),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+            );
+          },
         ),
       ],
     );
