@@ -463,10 +463,18 @@
                                     @endforeach
                                     
                                     @foreach($tempImages as $index => $img)
-                                        <div class="relative aspect-square rounded-2xl overflow-hidden border-2 border-indigo-200 bg-indigo-50">
-                                            <img src="{{ $img->temporaryUrl() }}" class="h-full w-full object-cover opacity-60">
-                                            <div class="absolute inset-0 flex items-center justify-center">
-                                                <div class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
+                                        <div class="relative aspect-square rounded-2xl overflow-hidden border-2 border-emerald-400 bg-emerald-50">
+                                            <img src="{{ $img->temporaryUrl() }}" class="h-full w-full object-cover">
+                                            <div class="absolute inset-0 bg-emerald-500/10"></div>
+                                            <div class="absolute top-2 right-2 flex gap-1">
+                                                <div class="h-5 w-5 flex items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg">
+                                                    <i class="fas fa-check text-[8px]"></i>
+                                                </div>
+                                            </div>
+                                            <div class="absolute bottom-2 left-2 right-2">
+                                                <div class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-center shadow-sm">
+                                                    <p class="text-[7px] font-black text-emerald-600 uppercase tracking-widest">Ready to Sync</p>
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -506,15 +514,22 @@
                                     @endforeach
 
                                     @foreach($tempVideos as $index => $vid)
-                                        <div class="flex items-center justify-between p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+                                        <div class="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
                                             <div class="flex items-center gap-4">
-                                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-indigo-400 shadow-sm"><i class="fas fa-cloud-upload text-[10px]"></i></div>
+                                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-emerald-500 shadow-sm border border-emerald-100">
+                                                    <i class="fas fa-video text-[10px]"></i>
+                                                </div>
                                                 <div>
-                                                    <p class="text-[11px] font-black text-indigo-900 uppercase tracking-tight">Staged Asset</p>
-                                                    <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Ready for Synchronization</p>
+                                                    <p class="text-[11px] font-black text-emerald-900 uppercase tracking-tight">New Staged Asset</p>
+                                                    <p class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Protocol: Video Ready</p>
                                                 </div>
                                             </div>
-                                            <button type="button" wire:click="removeTempVideo({{ $index }})" class="h-8 w-8 flex items-center justify-center rounded-lg bg-white border border-indigo-200 text-indigo-300 hover:text-rose-500 transition-all shadow-sm"><i class="fas fa-times text-[10px]"></i></button>
+                                            <div class="flex items-center gap-2">
+                                                <div class="h-6 w-6 flex items-center justify-center rounded-lg bg-emerald-500 text-white shadow-md">
+                                                    <i class="fas fa-check text-[8px]"></i>
+                                                </div>
+                                                <button type="button" wire:click="removeTempVideo({{ $index }})" class="h-8 w-8 flex items-center justify-center rounded-lg bg-white border border-emerald-200 text-emerald-300 hover:text-rose-500 transition-all shadow-sm"><i class="fas fa-times text-[10px]"></i></button>
+                                            </div>
                                         </div>
                                     @endforeach
 
