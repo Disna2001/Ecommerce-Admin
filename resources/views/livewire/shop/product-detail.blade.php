@@ -20,12 +20,12 @@
         <div class="grid gap-12 lg:grid-cols-[1fr_0.8fr]">
             <div class="space-y-8">
                 <div class="premium-card !p-0 !rounded-[3.5rem] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-white/5 h-[600px] border border-slate-100 dark:border-white/5">
-                    @if(!empty($imageUrls))
+                    @if(!empty($imageUrls) && isset($imageUrls[$activeImage]))
                         <picture class="h-full w-full">
-                            @if(!empty($imageSourceSets[$activeImage]['webp']))
+                            @if(isset($imageSourceSets[$activeImage]['webp']) && $imageSourceSets[$activeImage]['webp'])
                                 <source srcset="{{ $imageSourceSets[$activeImage]['webp'] }}" type="image/webp">
                             @endif
-                            @if(!empty($imageSourceSets[$activeImage]['jpeg']))
+                            @if(isset($imageSourceSets[$activeImage]['jpeg']) && $imageSourceSets[$activeImage]['jpeg'])
                                 <source srcset="{{ $imageSourceSets[$activeImage]['jpeg'] }}" type="image/jpeg">
                             @endif
                             <img src="{{ $imageSourceSets[$activeImage]['fallback'] ?? $imageUrls[$activeImage] }}" alt="{{ $product->name }}" loading="eager" decoding="async" class="h-full w-full object-cover">

@@ -253,7 +253,9 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                             <p class="text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $review->body ?: $review->title }}"</p>
                         </div>
                         <div class="mt-8 pt-8 border-t border-slate-50 dark:border-white/5 flex items-center gap-4">
-                            <div class="h-10 w-10 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">{{ strtoupper(substr($review->user->name ?? 'V', 0, 1)) }}</div>
+                            <div class="h-10 w-10 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">
+                                {{ strtoupper(substr($review->user->name ?? 'V', 0, 1) ?: 'V') }}
+                            </div>
                             <div>
                                 <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $review->user->name ?? 'Verified Auditor' }}</p>
                                 <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Verified Purchase</p>
