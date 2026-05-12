@@ -31,9 +31,20 @@ new #[Layout('layouts.guest')] class extends Component
 @endphp
 
 <div class="min-h-screen relative flex items-center justify-center overflow-hidden bg-slate-50 p-4 sm:p-6 lg:p-8 dark:bg-slate-950">
-    <!-- Decorative background blobs matching storefront -->
-    <div class="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-violet-500/20 blur-[100px] dark:bg-violet-600/20"></div>
-    <div class="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-fuchsia-500/20 blur-[100px] dark:bg-fuchsia-600/20"></div>
+    <!-- Immersive Animated Background -->
+    <div class="absolute inset-0 z-0">
+        <!-- Mesh Gradient -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.2),transparent_50%)]"></div>
+        
+        <!-- Animated Blobs -->
+        <div class="absolute -right-20 -top-20 h-[600px] w-[600px] animate-drift rounded-full bg-violet-500/20 blur-[120px] dark:bg-violet-600/30"></div>
+        <div class="absolute -bottom-40 -left-20 h-[600px] w-[600px] animate-drift [animation-delay:-5s] rounded-full bg-fuchsia-500/20 blur-[120px] dark:bg-fuchsia-600/30"></div>
+        <div class="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow rounded-full bg-blue-500/10 blur-[100px] dark:bg-blue-600/10"></div>
+        
+        <!-- Animated Floating Shapes -->
+        <div class="absolute top-1/4 left-1/4 h-32 w-32 animate-float rounded-2xl bg-white/5 backdrop-blur-3xl border border-white/10 dark:bg-slate-800/10"></div>
+        <div class="absolute bottom-1/4 right-1/4 h-24 w-24 animate-float [animation-delay:-2s] rounded-full bg-white/5 backdrop-blur-3xl border border-white/10 dark:bg-slate-800/10"></div>
+    </div>
 
     <div class="relative mx-auto w-full max-w-5xl z-10">
         <div class="overflow-hidden rounded-[2.5rem] border border-white/40 bg-white/60 shadow-[0_24px_80px_rgba(0,0,0,0.07)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60 dark:shadow-[0_24px_80px_rgba(0,0,0,0.4)]">

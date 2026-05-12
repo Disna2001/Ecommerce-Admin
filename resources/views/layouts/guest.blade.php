@@ -28,6 +28,7 @@
     @endphp
 
     <body class="font-sans text-gray-900 antialiased bg-slate-50">
+        <x-preloader />
         @if ($immersiveAuthPage)
             {{ $slot }}
         @else
