@@ -67,13 +67,21 @@ class User extends Authenticatable
 
     public function getInitialsAttribute(): string
     {
-        $parts = explode(' ', $this->name);
+        $name = trim($this->name ?? '');
+        if (!$name) {
+            return 'U';
+        }
 
-        return strtoupper(
-            count($parts) >= 2
-                ? $parts[0][0].$parts[1][0]
-                : $parts[0][0]
-        );
+        $parts = explode(' ', $name);
+        $parts = array_filter($parts);
+
+        if (count($parts) >= 2) {
+            $first = $parts[0];
+            $last = end($parts);
+            return strtoupper($first[0] . $last[0]);
+        }
+
+        return strtoupper($parts[0][0] ?? 'U');
     }
 
     // ── Social connections helper ─────────────────────────────

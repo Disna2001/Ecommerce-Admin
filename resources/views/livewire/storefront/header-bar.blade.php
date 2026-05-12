@@ -90,8 +90,8 @@
                     @else
                         <div class="relative ml-2" x-data="{ open:false }">
                             <button @click="open=!open" type="button" class="flex items-center gap-3 rounded-full bg-slate-100/50 p-1 pr-4 dark:bg-slate-800/50 transition-all hover:bg-white dark:hover:bg-slate-800">
-                                <div class="h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-black text-white" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">{{ explode(' ', auth()->user()->name)[0] }}</span>
+                                <div class="h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-black text-white" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">{{ auth()->user()->initials }}</div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">{{ explode(' ', auth()->user()->name ?? 'User')[0] }}</span>
                                 <i class="fas fa-chevron-down text-[8px] text-slate-400"></i>
                             </button>
                             <div x-show="open" @click.away="open=false" x-transition class="absolute right-0 top-14 z-[60] w-64 overflow-hidden rounded-[1.5rem] border border-white/20 bg-white p-2 shadow-2xl dark:border-white/5 dark:bg-slate-950" style="display:none">
