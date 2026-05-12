@@ -183,6 +183,7 @@
     @stack('styles')
 </head>
 <body class="shell">
+<x-preloader />
 <div class="min-h-screen">
     <div id="site-progress" class="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-0 opacity-0 transition-[width,opacity] duration-300" style="background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));"></div>
     <livewire:storefront.header-bar />
