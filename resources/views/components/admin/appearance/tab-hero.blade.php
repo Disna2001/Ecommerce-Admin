@@ -122,7 +122,14 @@
             </div>
 
             <div class="relative flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-dashed border-slate-100 bg-slate-50/50 p-12 transition-all hover:border-sky-200 group">
-                @if($hero_image_path)
+                @if($hero_image)
+                    <div class="relative w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl transition-transform group-hover:scale-[1.02]">
+                        <img src="{{ $hero_image->temporaryUrl() }}" class="h-64 w-full object-cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-sky-500/20 backdrop-blur-[2px]">
+                            <span class="bg-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-sky-600 shadow-xl">New Campaign Asset Preview</span>
+                        </div>
+                    </div>
+                @elseif($hero_image_path)
                     <div class="relative w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl transition-transform group-hover:scale-[1.02]">
                         <img src="{{ Storage::url($hero_image_path) }}?v={{ md5($hero_image_path) }}" class="h-64 w-full object-cover">
                     </div>
