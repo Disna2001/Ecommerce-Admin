@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../models/store_models.dart';
 
@@ -13,24 +14,34 @@ class ApiService {
       final response = await _dio.get('products', queryParameters: {
         if (categoryId != null) 'category_id': categoryId,
       });
+      if (response.data == null || response.data['data'] == null) return [];
       final List data = response.data['data'];
       return data.map((json) => Product.fromJson(json)).toList();
+    } on DioException catch (e) {
+      debugPrint('API Error (getProducts): ${e.message}');
+      return []; // Return empty list instead of crashing
     } catch (e) {
-      throw Exception('Failed to load products: $e');
+      debugPrint('General Error (getProducts): $e');
+      return [];
     }
   }
 
   Future<List<Category>> getCategories() async {
     try {
       final response = await _dio.get('categories');
+      if (response.data == null) return [];
       final List data = response.data;
       return data.map((json) => Category.fromJson(json)).toList();
+    } on DioException catch (e) {
+      debugPrint('API Error (getCategories): ${e.message}');
+      return [];
     } catch (e) {
-      throw Exception('Failed to load categories: $e');
+      debugPrint('General Error (getCategories): $e');
+      return [];
     }
   }
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
       final response = await _dio.post('login', data: {
         'email': email,
@@ -38,8 +49,12 @@ class ApiService {
         'device_name': 'flutter_mobile',
       });
       return response.data;
+    } on DioException catch (e) {
+      debugPrint('Login Error: ${e.response?.data['message'] ?? e.message}');
+      rethrow;
     } catch (e) {
-      throw Exception('Login failed: $e');
+      debugPrint('Login General Error: $e');
+      rethrow;
     }
   }
 

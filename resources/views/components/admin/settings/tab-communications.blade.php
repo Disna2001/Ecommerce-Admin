@@ -15,13 +15,26 @@
             <div class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Transport Protocol</label>
-                    <select wire:model="mail_mailer" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
-                        <option value="smtp">SMTP (Recommended)</option>
+                    <select wire:model.live="mail_mailer" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                        <option value="smtp">SMTP (Legacy)</option>
+                        <option value="resend">Resend (Recommended for Hosting)</option>
+                        <option value="mailgun">Mailgun API</option>
+                        <option value="ses">Amazon SES API</option>
                         <option value="log">Log (Testing only)</option>
-                        <option value="ses">Amazon SES</option>
-                        <option value="mailgun">Mailgun</option>
                     </select>
                 </div>
+
+                @if($mail_mailer !== 'smtp' && $mail_mailer !== 'log')
+                    <div class="space-y-1.5 animate-in fade-in slide-in-from-top-2">
+                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">API Key / Secret</label>
+                        <div class="relative" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" wire:model="mail_api_key" placeholder="Enter your {{ ucfirst($mail_mailer) }} API Key" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-indigo-600 transition-colors">
+                                <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endif
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="space-y-1.5">
                         <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name</label>

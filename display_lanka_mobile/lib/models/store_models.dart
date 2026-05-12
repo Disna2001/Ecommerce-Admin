@@ -20,7 +20,7 @@ class Product {
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      price: double.parse(json['price'].toString()),
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
       image: json['primary_image_url'], // Laravel model accessor
       categoryName: json['category'] != null ? json['category']['name'] : 'Uncategorized',
     );
