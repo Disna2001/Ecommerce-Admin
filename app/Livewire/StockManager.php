@@ -102,9 +102,12 @@ class StockManager extends Component
     public $seoKeywords = [];
 
     // For file uploads
-    public $tempImages = [];
+    public $tempImages = []; // Input bridge
+    public $images = [];     // Persistent gallery store
     public $currentImages = [];
-    public $tempVideos = [];
+    
+    public $tempVideos = []; // Input bridge
+    public $tempVideosList = []; // Persistent video store
     public $currentVideos = [];
 
     // Restock Workspace
@@ -174,10 +177,10 @@ class StockManager extends Component
             'target_model'        => 'nullable|string',
             'target_model_number' => 'nullable|string',
             'wholesale_price'     => 'nullable|numeric|min:0',
-            'tempImages'          => 'nullable|array',
-            'tempImages.*'        => 'nullable|image|max:10240',
-            'tempVideos'          => 'nullable|array',
-            'tempVideos.*'        => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
+            'images'              => 'nullable|array',
+            'images.*'            => 'nullable|image|max:10240',
+            'tempVideosList'      => 'nullable|array',
+            'tempVideosList.*'    => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
         ];
     }
 
@@ -262,20 +265,68 @@ class StockManager extends Component
 
     public function updatedTempImages(): void
     {
-        $this->tempImages = array_values(array_filter(Arr::wrap($this->tempImages)));
+        $newImages = array_filter(Arr::wrap($this->tempImages));
+        
+        // Append instead of replace
+        // Note: WithFileUploads might give us a single object or an array
+        foreach ($newImages as $image) {
+            $this->images[] = $image; // We'll use $images as our persistent store
+        }
+
+        $this->tempImages = []; // Clear the input bridge
+        
         $this->validate([
-            'tempImages' => 'nullable|array',
-            'tempImages.*' => 'nullable|image|max:10240',
+            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|max:10240',
         ]);
     }
 
     public function updatedTempVideos(): void
     {
-        $this->tempVideos = array_values(array_filter(Arr::wrap($this->tempVideos)));
+        $newVideos = array_filter(Arr::wrap($this->tempVideos));
+        
+        foreach ($newVideos as $video) {
+            $this->tempVideosList[] = $video;
+        }
+
+        $this->tempVideos = []; // Clear bridge
+        
         $this->validate([
-            'tempVideos' => 'nullable|array',
-            'tempVideos.*' => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
+            'tempVideosList' => 'nullable|array',
+            'tempVideosList.*' => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
         ]);
+    }
+
+    public function removeTempImage($index)
+    {
+        if (isset($this->images[$index])) {
+            unset($this->images[$index]);
+            $this->images = array_values($this->images);
+        }
+    }
+
+    public function removeTempVideo($index)
+    {
+        if (isset($this->tempVideosList[$index])) {
+            unset($this->tempVideosList[$index]);
+            $this->tempVideosList = array_values($this->tempVideosList);
+        }
+    }
+
+    public function removeCurrentImage($index)
+    {
+        if (isset($this->currentImages[$index])) {
+            unset($this->currentImages[$index]);
+            $this->currentImages = array_values($this->currentImages);
+        }
+    }
+
+    public function removeCurrentVideo($index)
+    {
+        if (isset($this->currentVideos[$index])) {
+            unset($this->currentVideos[$index]);
+            $this->currentVideos = array_values($this->currentVideos);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -821,8 +872,10 @@ class StockManager extends Component
         $this->tags         = '';
         $this->notes        = '';
         $this->tempImages   = [];
+        $this->images       = [];
         $this->currentImages = [];
         $this->tempVideos   = [];
+        $this->tempVideosList = [];
         $this->currentVideos = [];
         $this->aiSuggestion = null;
         $this->seoKeywords  = [];
@@ -1369,12 +1422,12 @@ class StockManager extends Component
         $this->validate();
 
         $imagePaths = array_values($this->currentImages);
-        foreach ($this->tempImages as $image) {
+        foreach ($this->images as $image) {
             $imagePaths[] = $this->storeOptimizedImage($image);
         }
 
         $videoPaths = array_values($this->currentVideos);
-        foreach ($this->tempVideos as $video) {
+        foreach ($this->tempVideosList as $video) {
             $videoPaths[] = $video->store('stock-videos', 'public');
         }
 

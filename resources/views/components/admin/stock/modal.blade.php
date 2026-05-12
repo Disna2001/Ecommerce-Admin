@@ -14,9 +14,9 @@
     'showQuickSetup' => false,
     'enableTargetCategory' => false,
     'currentImages' => [],
-    'tempImages' => [],
+    'images' => [],
     'currentVideos' => [],
-    'tempVideos' => [],
+    'tempVideosList' => [],
     'name' => '',
     'sku' => '',
     'item_code' => '',
@@ -462,12 +462,15 @@
                                         </div>
                                     @endforeach
                                     
-                                    @foreach($tempImages as $index => $img)
-                                        <div class="relative aspect-square rounded-2xl overflow-hidden border-2 border-emerald-400 bg-emerald-50">
+                                    @foreach($images as $index => $img)
+                                        <div class="relative group aspect-square rounded-2xl overflow-hidden border-2 border-emerald-400 bg-emerald-50">
                                             <img src="{{ $img->temporaryUrl() }}" class="h-full w-full object-cover">
                                             <div class="absolute inset-0 bg-emerald-500/10"></div>
                                             <div class="absolute top-2 right-2 flex gap-1">
-                                                <div class="h-5 w-5 flex items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg">
+                                                <button type="button" wire:click="removeTempImage({{ $index }})" class="h-6 w-6 flex items-center justify-center rounded-lg bg-rose-500 text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <i class="fas fa-times text-[8px]"></i>
+                                                </button>
+                                                <div class="h-6 w-6 flex items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg group-hover:opacity-0 transition-opacity">
                                                     <i class="fas fa-check text-[8px]"></i>
                                                 </div>
                                             </div>
@@ -513,7 +516,7 @@
                                         </div>
                                     @endforeach
 
-                                    @foreach($tempVideos as $index => $vid)
+                                    @foreach($tempVideosList as $index => $vid)
                                         <div class="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
                                             <div class="flex items-center gap-4">
                                                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-emerald-500 shadow-sm border border-emerald-100">
