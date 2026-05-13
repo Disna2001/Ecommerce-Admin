@@ -19,7 +19,7 @@ class CartScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Colors.roseAccent),
+            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFF43F5E)),
             onPressed: () => _showClearDialog(context, cart),
           ),
         ],
@@ -205,7 +205,7 @@ class CartScreen extends StatelessWidget {
               cart.clearCart();
               Navigator.pop(context);
             },
-            child: const Text('CLEAR', style: TextStyle(color: Colors.roseAccent)),
+            child: const Text('CLEAR', style: TextStyle(color: Color(0xFFF43F5E))),
           ),
         ],
       ),

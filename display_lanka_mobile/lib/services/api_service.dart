@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:dio/dio.dart';
 import '../models/store_models.dart';
 
@@ -74,6 +74,25 @@ class ApiService {
       return response.data;
     } catch (e) {
       throw Exception('Failed to load settings: $e');
+    }
+  }
+
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _dio.post('forgot-password', data: {'email': email});
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Failed to send reset link');
+    }
+  }
+
+  Future<void> verifyOtp(String email, String otp) async {
+    try {
+      await _dio.post('verify-otp', data: {
+        'email': email,
+        'otp': otp,
+      });
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Invalid OTP');
     }
   }
 }
