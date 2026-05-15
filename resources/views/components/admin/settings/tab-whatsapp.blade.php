@@ -26,27 +26,42 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Connection Protocols</p>
-            <div class="space-y-4">
-                <label class="group flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 transition-all hover:bg-white hover:border-emerald-500">
-                    <input type="checkbox" wire:model="whatsapp_enabled" class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-0">
-                    <span class="text-xs font-bold text-slate-600 group-hover:text-slate-900">Enable Automated Commerce Dispatches</span>
-                </label>
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <div class="flex items-center justify-between px-2">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Direct Connect: WhatsApp Messaging</p>
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full {{ $whatsapp_enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $whatsapp_enabled ? 'INTEGRATION ACTIVE' : 'SYSTEM OFFLINE' }}</span>
+                </div>
+            </div>
 
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div class="space-y-1.5">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Provider</label>
-                        <select wire:model="whatsapp_provider" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all">
-                            <option value="meta_cloud">Meta Cloud API</option>
-                            <option value="twilio">Twilio Gateway</option>
-                            <option value="custom">Custom Proxy</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Phone ID</label>
-                        <input type="text" wire:model="whatsapp_phone_number" placeholder="e.g. 10482937401" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all">
-                    </div>
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach([
+                    'meta_cloud' => ['Meta Cloud API', 'fab fa-whatsapp', 'emerald'],
+                    'twilio' => ['Twilio Gateway', 'fas fa-phone-alt', 'rose'],
+                    'custom' => ['Custom Proxy', 'fas fa-terminal', 'slate'],
+                ] as $key => [$name, $icon, $color])
+                    <button type="button" wire:click="$set('whatsapp_provider', '{{ $key }}')" 
+                        class="group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all {{ $whatsapp_provider === $key ? 'border-'.$color.'-500 bg-'.$color.'-50/50 ring-4 ring-'.$color.'-500/10' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $whatsapp_provider === $key ? 'bg-'.$color.'-500 text-white' : 'bg-white text-slate-400 group-hover:text-'.$color.'-500' }} transition-colors shadow-sm">
+                            <i class="{{ $icon }} text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black {{ $whatsapp_provider === $key ? 'text-slate-900' : 'text-slate-500' }}">{{ $name }}</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">{{ $whatsapp_provider === $key ? 'SELECTED' : 'AVAILABLE' }}</p>
+                        </div>
+                        @if($whatsapp_provider === $key)
+                            <div class="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full bg-{{ $color }}-500 text-white text-[8px]"><i class="fas fa-check"></i></div>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+
+            <div class="grid gap-6 mt-8 sm:grid-cols-2">
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Phone ID</label>
+                    <input type="text" wire:model="whatsapp_phone_number" placeholder="e.g. 10482937401" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all">
                 </div>
 
                 <div class="space-y-1.5">

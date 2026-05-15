@@ -10,19 +10,40 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mail Identity</p>
-            <div class="space-y-4">
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Transport Protocol</label>
-                    <select wire:model.live="mail_mailer" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
-                        <option value="smtp">SMTP (Legacy)</option>
-                        <option value="resend">Resend (Recommended for Hosting)</option>
-                        <option value="mailgun">Mailgun API</option>
-                        <option value="ses">Amazon SES API</option>
-                        <option value="log">Log (Testing only)</option>
-                    </select>
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <div class="flex items-center justify-between px-2">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Direct Connect: Mail Infrastructure</p>
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full {{ $mail_mailer !== 'log' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $mail_mailer === 'log' ? 'OFFLINE' : 'BRIDGE ACTIVE' }}</span>
                 </div>
+            </div>
+            
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach([
+                    'resend' => ['Resend', 'fa-bolt', 'indigo'],
+                    'smtp' => ['Standard SMTP', 'fa-server', 'slate'],
+                    'sendgrid' => ['SendGrid', 'fa-paper-plane', 'sky'],
+                    'mailgun' => ['Mailgun API', 'fa-fire', 'rose'],
+                ] as $key => [$name, $icon, $color])
+                    <button type="button" wire:click="$set('mail_mailer', '{{ $key }}')" 
+                        class="group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all {{ $mail_mailer === $key ? 'border-'.$color.'-500 bg-'.$color.'-50/50 ring-4 ring-'.$color.'-500/10' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $mail_mailer === $key ? 'bg-'.$color.'-500 text-white' : 'bg-white text-slate-400 group-hover:text-'.$color.'-500' }} transition-colors shadow-sm">
+                            <i class="fas {{ $icon }} text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black {{ $mail_mailer === $key ? 'text-slate-900' : 'text-slate-500' }}">{{ $name }}</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">{{ $mail_mailer === $key ? 'SELECTED' : 'AVAILABLE' }}</p>
+                        </div>
+                        @if($mail_mailer === $key)
+                            <div class="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full bg-{{ $color }}-500 text-white text-[8px]"><i class="fas fa-check"></i></div>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+
+            <div class="grid gap-6 mt-8 sm:grid-cols-2">
 
                 @if($mail_mailer !== 'smtp' && $mail_mailer !== 'log')
                     <div class="space-y-1.5 animate-in fade-in slide-in-from-top-2">
