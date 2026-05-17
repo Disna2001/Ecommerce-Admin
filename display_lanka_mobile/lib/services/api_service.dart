@@ -167,6 +167,81 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> getAddresses(String token) async {
+    try {
+      final response = await _dio.get('addresses', 
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data as List<dynamic>;
+    } on DioException catch (e) {
+      debugPrint('API Error (getAddresses): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to load addresses');
+    } catch (e) {
+      debugPrint('General Error (getAddresses): $e');
+      throw Exception('Failed to load addresses');
+    }
+  }
+
+  Future<Map<String, dynamic>> createAddress(String token, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('addresses',
+        data: data,
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      debugPrint('API Error (createAddress): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to create address');
+    } catch (e) {
+      debugPrint('General Error (createAddress): $e');
+      throw Exception('Failed to create address');
+    }
+  }
+
+  Future<Map<String, dynamic>> updateAddress(String token, int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put('addresses/$id',
+        data: data,
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      debugPrint('API Error (updateAddress): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to update address');
+    } catch (e) {
+      debugPrint('General Error (updateAddress): $e');
+      throw Exception('Failed to update address');
+    }
+  }
+
+  Future<void> deleteAddress(String token, int id) async {
+    try {
+      await _dio.delete('addresses/$id',
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+    } on DioException catch (e) {
+      debugPrint('API Error (deleteAddress): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to delete address');
+    } catch (e) {
+      debugPrint('General Error (deleteAddress): $e');
+      throw Exception('Failed to delete address');
+    }
+  }
+
+  Future<void> makeDefaultAddress(String token, int id) async {
+    try {
+      await _dio.post('addresses/$id/default',
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+    } on DioException catch (e) {
+      debugPrint('API Error (makeDefaultAddress): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to set default address');
+    } catch (e) {
+      debugPrint('General Error (makeDefaultAddress): $e');
+      throw Exception('Failed to set default address');
+    }
+  }
+
   Future<Map<String, dynamic>> getSettings() async {
     try {
       final response = await _dio.get('settings');

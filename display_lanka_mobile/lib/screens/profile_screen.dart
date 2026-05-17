@@ -6,6 +6,7 @@ import 'login_screen.dart';
 import 'web_admin_screen.dart';
 import 'orders_screen.dart';
 import 'wishlist_screen.dart';
+import 'addresses_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -149,7 +150,11 @@ class ProfileScreen extends StatelessWidget {
             'ADDRESSES',
             auth.isAuthenticated ? 'Manage delivery locations' : 'Sign in to add addresses',
             auth.isAuthenticated,
-            onTap: () {},
+            onTap: () {
+              if (auth.isAuthenticated) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddressesScreen()));
+              }
+            },
           ),
           if (auth.isAuthenticated && auth.user?['is_admin'] == true) ...[
             const SizedBox(height: 12),
