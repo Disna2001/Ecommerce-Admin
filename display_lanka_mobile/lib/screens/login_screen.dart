@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import 'otp_verification_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +12,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final ApiService _api = ApiService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -26,53 +27,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final result = await _api.login(
-        _emailController.text,
+      await Provider.of<AuthProvider>(context, listen: false).login(
+        _emailController.text.trim(),
         _passwordController.text,
       );
       
-      // For now, just show success and go back
       if (mounted) {
-        final userName = result?['user']?['name'] ?? 'User';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Welcome back, $userName!')),
+          const SnackBar(content: Text('Successfully authenticated! Welcome back!')),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${e.toString()}')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleForgotPassword() async {
-    if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email first')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      await _api.forgotPassword(_emailController.text);
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OtpVerificationScreen(email: _emailController.text),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text('Authentication failed: ${e.toString()}')),
         );
       }
     } finally {
@@ -82,14 +51,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+            colors: [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.85)],
           ),
         ),
         child: SafeArea(
@@ -165,21 +135,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: Icons.lock_outline,
                           isPassword: true,
                         ),
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _isLoading ? null : _handleForgotPassword,
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                color: Color(0xFF64748B),
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
@@ -187,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0F172A),
+                              backgroundColor: theme.colorScheme.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(18),
                               ),
@@ -215,11 +170,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(color: Color(0xFF64748B)),
                             ),
                             TextButton(
-                              onPressed: () {},
-                              child: const Text(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                              ),
+                              child: Text(
                                 'Sign Up',
                                 style: TextStyle(
-                                  color: Color(0xFF0F172A),
+                                  color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

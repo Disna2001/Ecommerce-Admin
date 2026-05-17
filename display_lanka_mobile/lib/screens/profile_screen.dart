@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -8,13 +10,17 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(context),
-          _buildProfileHeader(),
-          _buildMenuSection(context),
-          _buildLogoutSection(),
-        ],
+      body: Consumer<AuthProvider>(
+        builder: (context, auth, child) {
+          return CustomScrollView(
+            slivers: [
+              _buildAppBar(context),
+              _buildProfileHeader(context, auth),
+              _buildMenuSection(context, auth),
+              if (auth.isAuthenticated) _buildLogoutSection(context, auth),
+            ],
+          );
+        },
       ),
     );
   }
@@ -30,16 +36,11 @@ class ProfileScreen extends StatelessWidget {
         ).textTheme.titleLarge?.copyWith(letterSpacing: 2),
       ),
       centerTitle: true,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.settings_outlined, color: Color(0xFF0F172A)),
-          onPressed: () {},
-        ),
-      ],
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(BuildContext context, AuthProvider auth) {
+    final theme = Theme.of(context);
     return SliverToBoxAdapter(
       child: Container(
         color: Colors.white,
@@ -52,54 +53,59 @@ class ProfileScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF6366F1), width: 3),
+                border: Border.all(color: theme.colorScheme.primary, width: 3),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person_outline_rounded,
                 size: 50,
-                color: Color(0xFF0F172A),
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'GUEST USER',
-              style: TextStyle(
+            Text(
+              auth.isAuthenticated ? (auth.user?['name'] ?? 'User').toUpperCase() : 'GUEST USER',
+              style: const TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 20,
                 letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Sign in to sync your wishlist',
-              style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            Text(
+              auth.isAuthenticated ? (auth.user?['email'] ?? '') : 'Sign in to access your registry & sync orders',
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 12,
+            if (!auth.isAuthenticated)
+              ElevatedButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'SIGN IN TO SYSTEM',
+                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 12),
                 ),
               ),
-              child: const Text(
-                'EDIT PROFILE',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMenuSection(BuildContext context) {
+  Widget _buildMenuSection(BuildContext context, AuthProvider auth) {
     return SliverPadding(
       padding: const EdgeInsets.all(24),
       sliver: SliverList(
@@ -107,103 +113,112 @@ class ProfileScreen extends StatelessWidget {
           _buildMenuItem(
             Icons.shopping_bag_outlined,
             'MY ORDERS',
-            'Track your shipments',
+            auth.isAuthenticated ? 'Track your shipments' : 'Sign in to track orders',
+            auth.isAuthenticated,
           ),
           const SizedBox(height: 16),
           _buildMenuItem(
             Icons.favorite_outline_rounded,
             'WISHLIST',
             'Items you saved',
+            true,
           ),
           const SizedBox(height: 16),
           _buildMenuItem(
             Icons.location_on_outlined,
             'ADDRESSES',
-            'Manage delivery locations',
-          ),
-          const SizedBox(height: 16),
-          _buildMenuItem(
-            Icons.payment_rounded,
-            'PAYMENTS',
-            'Secure checkout methods',
+            auth.isAuthenticated ? 'Manage delivery locations' : 'Sign in to add addresses',
+            auth.isAuthenticated,
           ),
         ]),
       ),
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, String subtitle) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
+  Widget _buildMenuItem(IconData icon, String title, String subtitle, bool enabled) {
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
-            child: Icon(icon, color: const Color(0xFF0F172A), size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    letterSpacing: 1,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFF0F172A), size: 20),
             ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 14,
-            color: Color(0xFFCBD5E1),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                cross         : CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Color(0xFFCBD5E1),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildLogoutSection() {
+  Widget _buildLogoutSection(BuildContext context, AuthProvider auth) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: TextButton(
-          onPressed: () {},
-          child: const Text(
-            'LOG OUT',
-            style: TextStyle(
-              color: Color(0xFFF43F5E),
-              fontWeight: FontWeight.w900,
-              letterSpacing: 2,
-            ),
-          ),
-        ),
+        child: auth.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : TextButton(
+                onPressed: () async {
+                  await auth.logout();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Logged out successfully.')),
+                    );
+                  }
+                },
+                child: const Text(
+                  'LOG OUT',
+                  style: TextStyle(
+                    color: Color(0xFFF43F5E),
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
       ),
     );
   }

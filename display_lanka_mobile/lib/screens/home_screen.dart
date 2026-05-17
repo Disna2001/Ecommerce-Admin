@@ -5,6 +5,7 @@ import '../models/store_models.dart';
 import '../services/api_service.dart';
 import '../widgets/product_card.dart';
 import '../providers/cart_provider.dart';
+import '../providers/settings_provider.dart';
 import 'product_details_screen.dart';
 import 'cart_screen.dart';
 
@@ -69,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAppBar() {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
     return SliverAppBar(
       floating: true,
       backgroundColor: Colors.white,
@@ -78,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'DISPLAY LANKA',
+            settings.siteName.toUpperCase(),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   letterSpacing: 2,
                   fontSize: 18,

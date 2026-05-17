@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 import 'onboarding_screen.dart';
 import 'main_screen.dart';
 
@@ -38,24 +40,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _checkOnboardingStatus() async {
+    // Load dynamic brand settings from live site database backend API!
+    try {
+      await Provider.of<SettingsProvider>(context, listen: false).fetchSettings();
+    } catch (e) {
+      debugPrint('Failed to load settings: $e');
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final bool isComplete = prefs.getBool('onboarding_complete') ?? false;
 
-    Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => 
-                isComplete ? const MainScreen() : const OnboardingScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-        );
-      }
-    });
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => 
+              isComplete ? const MainScreen() : const OnboardingScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 800),
+        ),
+      );
+    }
   }
 
   @override

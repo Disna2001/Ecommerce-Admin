@@ -9,13 +9,13 @@ class AppTheme {
   static const textPrimary = Color(0xFF0F172A);
   static const textSecondary = Color(0xFF64748B);
 
-  static ThemeData get lightTheme {
+  static ThemeData dynamicTheme(Color primary, Color accent) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        primary: primaryColor,
-        secondary: accentColor,
+        seedColor: primary,
+        primary: primary,
+        secondary: accent,
         surface: surfaceColor,
       ),
       scaffoldBackgroundColor: backgroundColor,
@@ -50,5 +50,9 @@ class AppTheme {
         iconTheme: IconThemeData(color: textPrimary),
       ),
     );
+  }
+
+  static ThemeData get lightTheme {
+    return dynamicTheme(primaryColor, accentColor);
   }
 }

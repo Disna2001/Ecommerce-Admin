@@ -58,6 +58,35 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> register(String name, String email, String password) async {
+    try {
+      final response = await _dio.post('register', data: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'device_name': 'flutter_mobile',
+      });
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint('Register Error: ${e.response?.data['message'] ?? e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Register General Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getMe(String token) async {
+    try {
+      final response = await _dio.get('me', 
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to load profile: $e');
+    }
+  }
+
   Future<void> logout(String token) async {
     try {
       await _dio.post('logout', 
