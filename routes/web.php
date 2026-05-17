@@ -22,6 +22,18 @@ Route::get('/terms-and-conditions', [StorefrontController::class, 'termsConditio
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify'])->name('whatsapp.webhook.verify');
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive'])->name('whatsapp.webhook.receive');
 
+// Secure Dynamic Session Bridge for Mobile App Checkout
+Route::get('/auth/checkout-login', function (\Illuminate\Http\Request $request) {
+    $tokenString = $request->query('token');
+    $token = \Laravel\Sanctum\PersonalAccessToken::findToken($tokenString);
+    if (!$token) {
+        return redirect()->route('home');
+    }
+    $user = $token->tokenable;
+    auth()->login($user);
+    return redirect()->route('checkout.index');
+})->name('auth.checkout-login');
+
 // Auth pages
 Route::get('/dashboard', function () {
     $user = auth()->user();

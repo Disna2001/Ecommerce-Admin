@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'login_screen.dart';
+import 'web_checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -151,6 +154,9 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _buildCheckoutSection(BuildContext context, CartProvider cart, NumberFormat format) {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final theme = Theme.of(context);
+    
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -177,9 +183,29 @@ class CartScreen extends StatelessWidget {
             width: double.infinity,
             height: 64,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                if (!auth.isAuthenticated) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please sign in first to complete secure checkout!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WebCheckoutScreen(token: auth.token!),
+                    ),
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 elevation: 0,
