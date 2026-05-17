@@ -7,6 +7,8 @@ import 'web_admin_screen.dart';
 import 'orders_screen.dart';
 import 'wishlist_screen.dart';
 import 'addresses_screen.dart';
+import 'help_hub_screen.dart';
+import 'policies_hub_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -186,6 +188,30 @@ class ProfileScreen extends StatelessWidget {
               accentColor: Colors.indigo,
             ),
           ],
+          const SizedBox(height: 24),
+          _buildSectionHeader('SUPPORT & INFO'),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            Icons.help_outline_rounded,
+            'INTELLIGENCE HUB',
+            'FAQs & direct operational channels',
+            true,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HelpHubScreen()),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            Icons.info_outline_rounded,
+            'LEGAL REGISTRY',
+            'Privacy, terms & refund protocols',
+            true,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PoliciesHubScreen()),
+            ),
+          ),
           const SizedBox(height: 24),
           _buildSectionHeader('APP SETTINGS'),
           const SizedBox(height: 12),
