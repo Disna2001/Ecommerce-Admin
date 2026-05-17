@@ -13,6 +13,13 @@
     $safeText = (string) ($textColor ?? '#111827');
     $safeBg = (string) ($bgColor ?? '#f8fafc');
     $safeNavBg = (string) ($navBgColor ?? '#ffffff');
+
+    // Load Footer and Contact Site Settings
+    $footerTagline = \App\Models\SiteSetting::get('footer_tagline', 'Your one-stop shop for everything trendy.');
+    $footerCopyright = \App\Models\SiteSetting::get('footer_copyright', '© {year} '.($safeSiteName ?? 'Shop').'. All rights reserved.');
+    $footerCopyright = str_replace('{year}', date('Y'), $footerCopyright);
+    $supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', ''));
+    $supportPhone = \App\Models\SiteSetting::get('support_phone', '');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeStore()" x-init="init()" :class="{ dark: dark }">
@@ -82,35 +89,41 @@
             <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
                 <div>
                     @if(!empty($safeLogo))
-                        <img src="{{ Storage::url($safeLogo) }}" alt="{{ $safeSiteName }}" class="h-12 w-auto object-contain brightness-0 invert">
+                        <div class="inline-flex h-12 items-center rounded-2xl bg-white/95 px-4">
+                            <img src="{{ Storage::url($safeLogo) }}" alt="{{ $safeSiteName }}" class="h-8 w-auto object-contain">
+                        </div>
                     @else
                         <div class="text-3xl font-black lowercase">{{ strtolower($safeSiteName) }}</div>
                     @endif
-                    <p class="mt-4 max-w-sm text-sm leading-7 text-white/70">{{ $footerTagline ?? '' }}</p>
+                    <p class="mt-4 max-w-sm text-sm leading-7 text-white/70">{{ $footerTagline }}</p>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Quick Links</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block" href="{{ url('/products') }}">{{ $navProductsLabel ?? 'Products' }}</a>
-                        <a wire:navigate class="block" href="{{ route('track-order') }}">Track Order</a>
+                        <a wire:navigate class="block hover:text-white transition-colors" href="{{ url('/products') }}">Products</a>
+                        <a wire:navigate class="block hover:text-white transition-colors" href="{{ route('track-order') }}">Track Order</a>
                     </div>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Legal</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        <a wire:navigate class="block" href="{{ route('privacy-policy') }}">Privacy Policy</a>
-                        <a wire:navigate class="block" href="{{ route('terms-and-conditions') }}">Terms & Conditions</a>
+                        <a wire:navigate class="block hover:text-white transition-colors" href="{{ route('privacy-policy') }}">Privacy Policy</a>
+                        <a wire:navigate class="block hover:text-white transition-colors" href="{{ route('terms-and-conditions') }}">Terms & Conditions</a>
                     </div>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Contact</h3>
                     <div class="mt-4 space-y-3 text-sm text-white/75">
-                        @if(!empty($supportEmail))<div>{{ $supportEmail }}</div>@endif
-                        @if(!empty($supportPhone))<div>{{ $supportPhone }}</div>@endif
+                        @if(!empty($supportEmail))
+                            <a href="mailto:{{ $supportEmail }}" class="block hover:text-white transition-colors">{{ $supportEmail }}</a>
+                        @endif
+                        @if(!empty($supportPhone))
+                            <a href="tel:{{ preg_replace('/\s+/', '', $supportPhone) }}" class="block hover:text-white transition-colors">{{ $supportPhone }}</a>
+                        @endif
                     </div>
                 </div>
             </div>
-            <div class="mt-10 border-t border-white/10 pt-5 text-xs text-white/50">{{ $footerCopy ?? '' }}</div>
+            <div class="mt-10 border-t border-white/10 pt-5 text-xs text-white/50">{{ $footerCopyright }}</div>
         </div>
     </footer>
 </div>
