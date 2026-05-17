@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Http\Controllers\Api\v1;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class OrderController extends Controller
+{
+    /**
+     * Retrieve the authenticated user's order history natively.
+     */
+    public function index(Request $request)
+    {
+        $orders = $request->user()->orders()
+            ->with(['items.product'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'reference_number' => $order->reference_number,
+                    'total_amount' => $order->total_amount,
+                    'status' => $order->status,
+                    'payment_status' => $order->payment_status,
+                    'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'product_name' => $item->product ? $item->product->name : 'Unknown Product',
+                            'quantity' => $item->quantity,
+                            'unit_price' => $item->unit_price,
+                            'subtotal' => $item->subtotal,
+                            'image' => $item->product && $item->product->images ? $item->product->images[0] ?? null : null,
+                        ];
+                    }),
+                ];
+            });
+
+        return response()->json($orders);
+    }
+}

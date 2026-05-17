@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import 'login_screen.dart';
 import 'web_admin_screen.dart';
+import 'orders_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -121,7 +122,11 @@ class ProfileScreen extends StatelessWidget {
             'MY ORDERS',
             auth.isAuthenticated ? 'Track your shipments' : 'Sign in to track orders',
             auth.isAuthenticated,
-            onTap: () {},
+            onTap: () {
+              if (auth.isAuthenticated) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen()));
+              }
+            },
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
@@ -304,7 +309,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
-                  cross: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,

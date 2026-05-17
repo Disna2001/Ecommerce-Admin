@@ -97,6 +97,21 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> getOrders(String token) async {
+    try {
+      final response = await _dio.get('orders', 
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data as List<dynamic>;
+    } on DioException catch (e) {
+      debugPrint('API Error (getOrders): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to load orders');
+    } catch (e) {
+      debugPrint('General Error (getOrders): $e');
+      throw Exception('Failed to load orders');
+    }
+  }
+
   Future<Map<String, dynamic>> getSettings() async {
     try {
       final response = await _dio.get('settings');

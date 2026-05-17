@@ -19,5 +19,6 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
+        Route::get('orders', [\App\Http\Controllers\Api\v1\OrderController::class, 'index']);
     });
 });

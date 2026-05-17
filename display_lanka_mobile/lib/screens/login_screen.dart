@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'otp_verification_screen.dart';
+import '../providers/settings_provider.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -52,146 +53,220 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final settings = Provider.of<SettingsProvider>(context);
+    final isDark = settings.isDark;
+
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.85)],
-          ),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios, color: isDark ? Colors.white : Colors.black87, size: 20),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Welcome back',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Access your registry and track orders',
-                      style: TextStyle(
-                        color: Colors.white60,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+      ),
+      body: Stack(
+        children: [
+          // Background Base
+          Container(
+            color: isDark ? const Color(0xFF020617) : const Color(0xFFF8FAFC),
+          ),
+          // Animated Blobs (Static representation of mesh gradient)
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isDark ? const Color(0xFF7C3AED).withOpacity(0.3) : const Color(0xFF8B5CF6).withOpacity(0.2),
               ),
-              const SizedBox(height: 40),
-              // Form
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(32),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+            ),
+          ),
+          Positioned(
+            bottom: -150,
+            left: -100,
+            child: Container(
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isDark ? const Color(0xFFC026D3).withOpacity(0.3) : const Color(0xFFD946EF).withOpacity(0.2),
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.3,
+            left: MediaQuery.of(context).size.width * 0.1,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isDark ? const Color(0xFF2563EB).withOpacity(0.2) : const Color(0xFF3B82F6).withOpacity(0.1),
+              ),
+            ),
+          ),
+          // Backdrop blur for Mesh Gradient effect
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+          
+          // Main Content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    'Welcome back to\n${settings.siteName}.',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                      letterSpacing: -1,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
                   ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Authentication',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2,
-                            color: Color(0xFF94A3B8),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sign in to continue managing your products, orders, and account.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isDark ? Colors.white70 : const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  
+                  // Glassmorphic Form Container
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(32),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.4),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        _buildTextField(
-                          label: 'EMAIL ADDRESS',
-                          controller: _emailController,
-                          hint: 'your@email.com',
-                          icon: Icons.alternate_email,
-                        ),
-                        const SizedBox(height: 20),
-                        _buildTextField(
-                          label: 'PASSWORD',
-                          controller: _passwordController,
-                          hint: '••••••••',
-                          icon: Icons.lock_outline,
-                          isPassword: true,
-                        ),
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 60,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              elevation: 0,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 40,
+                              offset: const Offset(0, 20),
                             ),
-                            child: _isLoading
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text(
-                                    'LOGIN TO MATRIX',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 1.5,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Don't have an account?",
-                              style: TextStyle(color: Color(0xFF64748B)),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                            Text(
+                              'Sign in',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                               ),
-                              child: Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
+                            ),
+                            const SizedBox(height: 24),
+                            _buildTextField(
+                              label: 'Email Address',
+                              controller: _emailController,
+                              hint: 'name@example.com',
+                              icon: Icons.alternate_email,
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildTextField(
+                              label: 'Password',
+                              controller: _passwordController,
+                              hint: '••••••••',
+                              icon: Icons.lock_outline,
+                              isPassword: true,
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: 32),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.primary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  elevation: 10,
+                                  shadowColor: theme.colorScheme.primary.withOpacity(0.5),
                                 ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      )
+                                    : const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Sign In Securely',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                                        ],
+                                      ),
                               ),
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account? ",
+                        style: TextStyle(color: isDark ? Colors.white60 : const Color(0xFF64748B)),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                        ),
+                        child: Text(
+                          'Sign up',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -202,38 +277,39 @@ class _LoginScreenState extends State<LoginScreen> {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    required bool isDark,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
+          style: TextStyle(
+            fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF64748B),
-            letterSpacing: 1,
+            color: isDark ? Colors.white70 : const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
+            color: isDark ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.8),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : const Color(0xFFE2E8F0)),
           ),
           child: TextField(
             controller: controller,
             obscureText: isPassword && _obscurePassword,
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 14),
-              prefixIcon: Icon(icon, color: const Color(0xFF94A3B8), size: 20),
+              hintStyle: TextStyle(color: isDark ? Colors.white30 : const Color(0xFF94A3B8), fontSize: 14),
+              prefixIcon: Icon(icon, color: isDark ? Colors.white50 : const Color(0xFF94A3B8), size: 20),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF94A3B8),
+                        color: isDark ? Colors.white50 : const Color(0xFF94A3B8),
                         size: 20,
                       ),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),

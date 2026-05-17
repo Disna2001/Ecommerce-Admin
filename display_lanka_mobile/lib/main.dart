@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
@@ -41,7 +40,7 @@ class DisplayLankaApp extends StatelessWidget {
         return MaterialApp(
           title: settings.siteName,
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.dynamicTheme(settings.primaryColor, settings.accentColor),
+          theme: settings.themeData,
           home: const SplashScreen(),
         );
       },
