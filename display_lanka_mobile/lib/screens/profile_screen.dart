@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import 'login_screen.dart';
+import 'web_admin_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -138,6 +139,22 @@ class ProfileScreen extends StatelessWidget {
             auth.isAuthenticated,
             onTap: () {},
           ),
+          if (auth.isAuthenticated && auth.user?['is_admin'] == true) ...[
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              Icons.admin_panel_settings_rounded,
+              'ADMIN CONTROL PANEL',
+              'Manage stocks, orders & health',
+              true,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WebAdminScreen(token: auth.token!),
+                ),
+              ),
+              accentColor: Colors.deepOrange,
+            ),
+          ],
           if (!auth.isAuthenticated) ...[
             const SizedBox(height: 12),
             _buildMenuItem(

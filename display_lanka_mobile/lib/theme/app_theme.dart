@@ -9,16 +9,23 @@ class AppTheme {
   static const textPrimary = Color(0xFF0F172A);
   static const textSecondary = Color(0xFF64748B);
 
-  static ThemeData dynamicTheme(Color primary, Color accent) {
+  static ThemeData dynamicTheme(Color primary, Color accent, bool isDark) {
+    final scaffoldBg = isDark ? const Color(0xFF0B0F19) : const Color(0xFFF8FAFC);
+    final surfaceColor = isDark ? const Color(0xFF161E2E) : Colors.white;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return ThemeData(
       useMaterial3: true,
+      brightness: isDark ? Brightness.dark : Brightness.light,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primary,
         primary: primary,
         secondary: accent,
         surface: surfaceColor,
+        brightness: isDark ? Brightness.dark : Brightness.light,
       ),
-      scaffoldBackgroundColor: backgroundColor,
+      scaffoldBackgroundColor: scaffoldBg,
       textTheme: GoogleFonts.outfitTextTheme().copyWith(
         displayLarge: GoogleFonts.outfit(
           fontSize: 32,
@@ -43,7 +50,7 @@ class AppTheme {
           letterSpacing: 1.5,
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
@@ -53,6 +60,6 @@ class AppTheme {
   }
 
   static ThemeData get lightTheme {
-    return dynamicTheme(primaryColor, accentColor);
+    return dynamicTheme(primaryColor, accentColor, false);
   }
 }

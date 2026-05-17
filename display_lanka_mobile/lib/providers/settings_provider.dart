@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
@@ -11,6 +12,7 @@ class SettingsProvider extends ChangeNotifier {
   String? _supportEmail;
   String? _supportPhone;
   bool _isLoading = true;
+  bool _isDark = false;
 
   String get siteName => _siteName;
   String? get logoUrl => _logoUrl;
@@ -19,6 +21,14 @@ class SettingsProvider extends ChangeNotifier {
   String? get supportEmail => _supportEmail;
   String? get supportPhone => _supportPhone;
   bool get isLoading => _isLoading;
+  bool get isDark => _isDark;
+
+  ThemeData get themeData => AppTheme.dynamicTheme(_primaryColor, _accentColor, _isDark);
+
+  void toggleTheme() {
+    _isDark = !_isDark;
+    notifyListeners();
+  }
 
   Future<void> fetchSettings() async {
     _isLoading = true;

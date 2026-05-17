@@ -34,6 +34,18 @@ Route::get('/auth/checkout-login', function (\Illuminate\Http\Request $request) 
     return redirect()->route('checkout.index');
 })->name('auth.checkout-login');
 
+// Secure Dynamic Session Bridge for Mobile App Administration
+Route::get('/auth/admin-login', function (\Illuminate\Http\Request $request) {
+    $tokenString = $request->query('token');
+    $token = \Laravel\Sanctum\PersonalAccessToken::findToken($tokenString);
+    if (!$token || !$token->tokenable->can('view dashboard')) {
+        return redirect()->route('home');
+    }
+    $user = $token->tokenable;
+    auth()->login($user);
+    return redirect()->route('admin.dashboard');
+})->name('auth.admin-login');
+
 // Auth pages
 Route::get('/dashboard', function () {
     $user = auth()->user();
