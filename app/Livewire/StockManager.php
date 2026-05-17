@@ -103,7 +103,6 @@ class StockManager extends Component
 
     // For file uploads
     public $tempImages = []; // Input bridge
-    public $images = [];     // Persistent gallery store
     public $currentImages = [];
     
     public $tempVideos = []; // Input bridge
@@ -295,38 +294,6 @@ class StockManager extends Component
             'tempVideosList' => 'nullable|array',
             'tempVideosList.*' => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
         ]);
-    }
-
-    public function removeTempImage($index)
-    {
-        if (isset($this->images[$index])) {
-            unset($this->images[$index]);
-            $this->images = array_values($this->images);
-        }
-    }
-
-    public function removeTempVideo($index)
-    {
-        if (isset($this->tempVideosList[$index])) {
-            unset($this->tempVideosList[$index]);
-            $this->tempVideosList = array_values($this->tempVideosList);
-        }
-    }
-
-    public function removeCurrentImage($index)
-    {
-        if (isset($this->currentImages[$index])) {
-            unset($this->currentImages[$index]);
-            $this->currentImages = array_values($this->currentImages);
-        }
-    }
-
-    public function removeCurrentVideo($index)
-    {
-        if (isset($this->currentVideos[$index])) {
-            unset($this->currentVideos[$index]);
-            $this->currentVideos = array_values($this->currentVideos);
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -786,7 +753,7 @@ class StockManager extends Component
                 ->latest()
                 ->take(5)
                 ->get(),
-        ])->layout('layouts.admin');
+        ]);
     }
 
     // -------------------------------------------------------------------------

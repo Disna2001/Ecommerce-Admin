@@ -50,7 +50,7 @@ class ItemQualityLevelManager extends Component
 
         return view('livewire.item-quality-level-manager', [
             'qualities' => $qualities
-        ])->layout('layouts.admin');
+        ]);
     }
 
     public function openModal()

@@ -180,19 +180,23 @@ class ProductDetail extends Component
 
         $imageUrls = collect($this->product->images ?? [])
             ->map(fn($path) => $storefrontImageService->urlForPath($path, 'detail'))
-            ->values();
+            ->values()
+            ->all();
 
         $thumbnailUrls = collect($this->product->images ?? [])
             ->map(fn($path) => $storefrontImageService->urlForPath($path, 'thumb'))
-            ->values();
+            ->values()
+            ->all();
 
         $imageSourceSets = collect($this->product->images ?? [])
             ->map(fn($path) => $storefrontImageService->pictureSourcesForPath($path, 'detail'))
-            ->values();
+            ->values()
+            ->all();
 
         $thumbnailSourceSets = collect($this->product->images ?? [])
             ->map(fn($path) => $storefrontImageService->pictureSourcesForPath($path, 'thumb'))
-            ->values();
+            ->values()
+            ->all();
 
         $videoUrls = collect($this->product->videos ?? [])
             ->map(fn($path) => $path ? Storage::url($path) : null)

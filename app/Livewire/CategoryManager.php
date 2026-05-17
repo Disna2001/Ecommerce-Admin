@@ -29,8 +29,7 @@ class CategoryManager extends Component
             ->orderBy('name')
             ->paginate(10);
 
-        return view('livewire.settings.category-manager')
-            ->layout('layouts.admin');
+        return view('livewire.settings.category-manager');
     }
 
     public function openModal()

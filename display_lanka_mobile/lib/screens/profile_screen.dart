@@ -23,7 +23,12 @@ class ProfileScreen extends StatelessWidget {
     return SliverAppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      title: Text('MY PROFILE', style: Theme.of(context).textTheme.titleLarge?.copyWith(letterSpacing: 2)),
+      title: Text(
+        'MY PROFILE',
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(letterSpacing: 2),
+      ),
       centerTitle: true,
       actions: [
         IconButton(
@@ -49,7 +54,11 @@ class ProfileScreen extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: const Color(0xFF6366F1), width: 3),
               ),
-              child: const Icon(Icons.person_outline_rounded, size: 50, color: Color(0xFF0F172A)),
+              child: const Icon(
+                Icons.person_outline_rounded,
+                size: 50,
+                color: Color(0xFF0F172A),
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -71,10 +80,18 @@ class ProfileScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0F172A),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('EDIT PROFILE', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'EDIT PROFILE',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -87,13 +104,29 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       sliver: SliverList(
         delegate: SliverChildListDelegate([
-          _buildMenuItem(Icons.shopping_bag_outlined, 'MY ORDERS', 'Track your shipments'),
+          _buildMenuItem(
+            Icons.shopping_bag_outlined,
+            'MY ORDERS',
+            'Track your shipments',
+          ),
           const SizedBox(height: 16),
-          _buildMenuItem(Icons.favorite_outline_rounded, 'WISHLIST', 'Items you saved'),
+          _buildMenuItem(
+            Icons.favorite_outline_rounded,
+            'WISHLIST',
+            'Items you saved',
+          ),
           const SizedBox(height: 16),
-          _buildMenuItem(Icons.location_on_outlined, 'ADDRESSES', 'Manage delivery locations'),
+          _buildMenuItem(
+            Icons.location_on_outlined,
+            'ADDRESSES',
+            'Manage delivery locations',
+          ),
           const SizedBox(height: 16),
-          _buildMenuItem(Icons.payment_rounded, 'PAYMENTS', 'Secure checkout methods'),
+          _buildMenuItem(
+            Icons.payment_rounded,
+            'PAYMENTS',
+            'Secure checkout methods',
+          ),
         ]),
       ),
     );
@@ -130,16 +163,27 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 1,
+                  ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                  style: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFFCBD5E1)),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: Color(0xFFCBD5E1),
+          ),
         ],
       ),
     );
@@ -154,7 +198,7 @@ class ProfileScreen extends StatelessWidget {
           child: const Text(
             'LOG OUT',
             style: TextStyle(
-              color: const Color(0xFFF43F5E),
+              color: Color(0xFFF43F5E),
               fontWeight: FontWeight.w900,
               letterSpacing: 2,
             ),

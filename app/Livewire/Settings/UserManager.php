@@ -47,7 +47,7 @@ class UserManager extends Component
             'roles' => Role::all(),
             'totalUsers' => User::count(),
             'activeUsers' => User::where('email_verified_at', '!=', null)->count(),
-        ])->layout('layouts.admin');
+        ]);
     }
 
     public function sortBy($field)

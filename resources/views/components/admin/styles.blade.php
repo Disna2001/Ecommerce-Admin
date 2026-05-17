@@ -317,7 +317,6 @@
 
     .admin-main {
         position: relative;
-        z-index: 1;
         min-height: 100vh;
         padding-top: 6.8rem;
         transition: padding-left 0.3s ease;

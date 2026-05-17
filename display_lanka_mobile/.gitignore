@@ -1,6 +1,7 @@
 # Miscellaneous
 *.class
 *.log
+build_log*.txt
 *.pyc
 *.swp
 .DS_Store
@@ -43,3 +44,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/build/
+/android/app/build/

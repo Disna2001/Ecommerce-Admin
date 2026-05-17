@@ -48,7 +48,7 @@ class MakeManager extends Component
 
         return view('livewire.make-manager', [
             'makes' => $makes
-        ])->layout('layouts.admin');
+        ]);
     }
 
     public function openModal()

@@ -185,7 +185,7 @@ class InvoiceManager extends Component
             'viewingInvoice' => $this->viewingInvoiceId
                 ? Invoice::with(['user', 'supplier', 'items.stock'])->find($this->viewingInvoiceId)
                 : null,
-        ])->layout('layouts.admin');
+        ]);
     }
 
     public function openInvoice(int $id): void
