@@ -22,5 +22,12 @@ Route::prefix('v1')->group(function () {
         Route::get('orders', [\App\Http\Controllers\Api\v1\OrderController::class, 'index']);
         Route::get('wishlists', [\App\Http\Controllers\Api\v1\WishlistController::class, 'index']);
         Route::post('wishlists/toggle', [\App\Http\Controllers\Api\v1\WishlistController::class, 'toggle']);
+        
+        // Address routes
+        Route::get('addresses', [\App\Http\Controllers\Api\v1\AddressController::class, 'index']);
+        Route::post('addresses', [\App\Http\Controllers\Api\v1\AddressController::class, 'store']);
+        Route::put('addresses/{id}', [\App\Http\Controllers\Api\v1\AddressController::class, 'update']);
+        Route::delete('addresses/{id}', [\App\Http\Controllers\Api\v1\AddressController::class, 'destroy']);
+        Route::post('addresses/{id}/default', [\App\Http\Controllers\Api\v1\AddressController::class, 'makeDefault']);
     });
 });
