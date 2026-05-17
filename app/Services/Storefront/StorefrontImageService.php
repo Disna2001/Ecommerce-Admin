@@ -152,7 +152,7 @@ class StorefrontImageService
         $assetHost = rtrim((string) SiteSetting::get('asset_cdn_url', ''), '/');
 
         if (!$assetHost) {
-            return $storageUrl;
+            return url($storageUrl);
         }
 
         return $assetHost.'/'.ltrim($storageUrl, '/');

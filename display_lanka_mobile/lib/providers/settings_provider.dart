@@ -29,6 +29,9 @@ class SettingsProvider extends ChangeNotifier {
       
       _siteName = settings['site_name'] ?? 'Display Lanka';
       _logoUrl = settings['logo_url'];
+      if (_logoUrl != null && !_logoUrl!.startsWith('http')) {
+        _logoUrl = 'https://client1.displaylanka.shop${_logoUrl!.startsWith('/') ? '' : '/'}$_logoUrl';
+      }
       
       if (settings['primary_color'] != null) {
         _primaryColor = _parseHexColor(settings['primary_color']) ?? const Color(0xFF0F172A);
