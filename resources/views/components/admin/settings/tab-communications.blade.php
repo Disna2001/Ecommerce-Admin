@@ -9,7 +9,6 @@
         </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-2">
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
             <div class="flex items-center justify-between px-2">
