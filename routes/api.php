@@ -10,7 +10,7 @@ Route::prefix('v1')->group(function () {
     // Public routes
     Route::post('login', [AuthController::class, 'login']);
     Route::get('products', [ProductController::class, 'index']);
-    Route::get('products/{product:slug}', [ProductController::class, 'show']);
+    Route::get('products/{product}', [ProductController::class, 'show']);
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('settings', [SiteSettingController::class, 'index']);
 

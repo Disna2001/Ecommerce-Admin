@@ -10,10 +10,17 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::where('is_active', true)
-            ->withCount('products')
-            ->get();
+        $categories = Category::withCount('stocks')->get();
+
+        $categories->transform(function ($category) {
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+                'products_count' => $category->stocks_count,
+            ];
+        });
 
         return response()->json($categories);
     }
 }
+
