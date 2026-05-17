@@ -5,6 +5,7 @@ import '../providers/settings_provider.dart';
 import 'login_screen.dart';
 import 'web_admin_screen.dart';
 import 'orders_screen.dart';
+import 'wishlist_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -134,7 +135,13 @@ class ProfileScreen extends StatelessWidget {
             'WISHLIST',
             'Items you saved',
             true,
-            onTap: () {},
+            onTap: () {
+              if (auth.isAuthenticated) {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistScreen()));
+              } else {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+              }
+            },
           ),
           const SizedBox(height: 12),
           _buildMenuItem(

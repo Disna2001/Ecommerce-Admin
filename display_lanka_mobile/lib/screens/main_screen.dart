@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'home_screen.dart';
 import 'category_screen.dart';
 import 'search_screen.dart';
 import 'profile_screen.dart';
+import '../providers/auth_provider.dart';
+import '../providers/wishlist_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -20,6 +23,18 @@ class _MainScreenState extends State<MainScreen> {
     const SearchScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.isAuthenticated && auth.token != null) {
+        Provider.of<WishlistProvider>(context, listen: false)
+            .fetchWishlists(auth.token!);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

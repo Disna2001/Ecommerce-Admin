@@ -1,21 +1,66 @@
 import 'package:flutter/material.dart';
-import '../models/store_models.dart';
+import '../services/api_service.dart';
 
-class WishlistProvider with ChangeNotifier {
-  final Set<int> _wishlistIds = {};
-  final List<Product> _items = [];
+class WishlistProvider extends ChangeNotifier {
+  final ApiService _api = ApiService();
+  
+  Set<int> _wishedStockIds = {};
+  bool _isLoading = false;
 
-  List<Product> get items => [..._items];
-  bool isFavorite(int productId) => _wishlistIds.contains(productId);
+  bool get isLoading => _isLoading;
+  Set<int> get wishedStockIds => _wishedStockIds;
 
-  void toggleFavorite(Product product) {
-    if (_wishlistIds.contains(product.id)) {
-      _wishlistIds.remove(product.id);
-      _items.removeWhere((p) => p.id == product.id);
-    } else {
-      _wishlistIds.add(product.id);
-      _items.add(product);
+  bool isWished(int stockId) {
+    return _wishedStockIds.contains(stockId);
+  }
+
+  Future<void> fetchWishlists(String token) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final wishlists = await _api.getWishlists(token);
+      _wishedStockIds = wishlists.map((w) => int.parse(w['id'].toString())).toSet();
+    } catch (e) {
+      debugPrint('Failed to fetch wishlists: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> toggleWishlist(String token, int stockId) async {
+    // Optimistic UI Update
+    final wasWished = _wishedStockIds.contains(stockId);
+    if (wasWished) {
+      _wishedStockIds.remove(stockId);
+    } else {
+      _wishedStockIds.add(stockId);
+    }
+    notifyListeners();
+
+    try {
+      final isWished = await _api.toggleWishlist(token, stockId);
+      if (isWished) {
+        _wishedStockIds.add(stockId);
+      } else {
+        _wishedStockIds.remove(stockId);
+      }
+    } catch (e) {
+      // Revert Optimistic Update on failure
+      if (wasWished) {
+        _wishedStockIds.add(stockId);
+      } else {
+        _wishedStockIds.remove(stockId);
+      }
+      debugPrint('Failed to toggle wishlist: $e');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  void clear() {
+    _wishedStockIds.clear();
     notifyListeners();
   }
 }

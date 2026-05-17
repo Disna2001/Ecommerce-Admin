@@ -13,7 +13,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $orders = $request->user()->orders()
-            ->with(['items.product'])
+            ->with(['items.stock'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($order) {
@@ -27,11 +27,11 @@ class OrderController extends Controller
                     'items' => $order->items->map(function ($item) {
                         return [
                             'id' => $item->id,
-                            'product_name' => $item->product ? $item->product->name : 'Unknown Product',
+                            'product_name' => $item->stock ? $item->stock->name : 'Unknown Product',
                             'quantity' => $item->quantity,
                             'unit_price' => $item->unit_price,
                             'subtotal' => $item->subtotal,
-                            'image' => $item->product && $item->product->images ? $item->product->images[0] ?? null : null,
+                            'image' => $item->stock && $item->stock->images ? $item->stock->images[0] ?? null : null,
                         ];
                     }),
                 ];

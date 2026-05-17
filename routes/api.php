@@ -20,5 +20,7 @@ Route::prefix('v1')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('orders', [\App\Http\Controllers\Api\v1\OrderController::class, 'index']);
+        Route::get('wishlists', [\App\Http\Controllers\Api\v1\WishlistController::class, 'index']);
+        Route::post('wishlists/toggle', [\App\Http\Controllers\Api\v1\WishlistController::class, 'toggle']);
     });
 });

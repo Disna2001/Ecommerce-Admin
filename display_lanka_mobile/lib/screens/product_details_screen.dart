@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../models/store_models.dart';
 import '../providers/cart_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wishlist_provider.dart';
+import '../providers/auth_provider.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
@@ -156,14 +158,33 @@ class ProductDetailsScreen extends StatelessWidget {
         child: SafeArea(
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: sheetColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.transparent),
-                ),
-                child: Icon(Icons.favorite_border, color: textPrimary),
+              Consumer2<AuthProvider, WishlistProvider>(
+                builder: (context, auth, wishlist, child) {
+                  final isWished = wishlist.isWished(product.id);
+                  return GestureDetector(
+                    onTap: () {
+                      if (auth.isAuthenticated) {
+                        wishlist.toggleWishlist(auth.token!, product.id);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please sign in to add to wishlist')),
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isWished ? Colors.red.withOpacity(0.1) : sheetColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.transparent),
+                      ),
+                      child: Icon(
+                        isWished ? Icons.favorite : Icons.favorite_border,
+                        color: isWished ? Colors.red : textPrimary,
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 16),
               Expanded(

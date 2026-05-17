@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wishlist_provider.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -34,22 +35,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await Provider.of<AuthProvider>(context, listen: false).register(
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      await auth.register(
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully! Welcome!')),
-        );
-        Navigator.pop(context); // Go back to login or previous screen
+      if (mounted && auth.token != null) {
+        // Fetch wishlists immediately after successful registration
+        await Provider.of<WishlistProvider>(context, listen: false)
+            .fetchWishlists(auth.token!);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Account created successfully! Welcome!')),
+          );
+          Navigator.pop(context); // Go back to login or previous screen
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -350,12 +362,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: isDark ? Colors.white30 : const Color(0xFF94A3B8), fontSize: 14),
-              prefixIcon: Icon(icon, color: isDark ? Colors.white50 : const Color(0xFF94A3B8), size: 20),
+              prefixIcon: Icon(icon, color: isDark ? Colors.white54 : const Color(0xFF94A3B8), size: 20),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
                         obscure ? Icons.visibility_off : Icons.visibility,
-                        color: isDark ? Colors.white50 : const Color(0xFF94A3B8),
+                        color: isDark ? Colors.white54 : const Color(0xFF94A3B8),
                         size: 20,
                       ),
                       onPressed: toggleObscure,

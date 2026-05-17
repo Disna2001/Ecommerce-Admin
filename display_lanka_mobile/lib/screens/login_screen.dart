@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wishlist_provider.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,21 +29,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await Provider.of<AuthProvider>(context, listen: false).login(
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      await auth.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Successfully authenticated! Welcome back!')),
-        );
-        Navigator.pop(context);
+      if (mounted && auth.token != null) {
+        // Fetch wishlists immediately after logging in
+        await Provider.of<WishlistProvider>(context, listen: false)
+            .fetchWishlists(auth.token!);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Successfully authenticated! Welcome back!')),
+          );
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Authentication failed: ${e.toString()}')),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -304,12 +316,12 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: isDark ? Colors.white30 : const Color(0xFF94A3B8), fontSize: 14),
-              prefixIcon: Icon(icon, color: isDark ? Colors.white50 : const Color(0xFF94A3B8), size: 20),
+              prefixIcon: Icon(icon, color: isDark ? Colors.white54 : const Color(0xFF94A3B8), size: 20),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: isDark ? Colors.white50 : const Color(0xFF94A3B8),
+                        color: isDark ? Colors.white54 : const Color(0xFF94A3B8),
                         size: 20,
                       ),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),

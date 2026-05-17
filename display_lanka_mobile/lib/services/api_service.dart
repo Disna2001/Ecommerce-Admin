@@ -7,6 +7,10 @@ class ApiService {
     baseUrl: 'https://client1.displaylanka.shop/api/v1/',
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
   ));
 
   Future<List<Product>> getProducts({int? categoryId}) async {
@@ -50,11 +54,21 @@ class ApiService {
       });
       return response.data;
     } on DioException catch (e) {
-      debugPrint('Login Error: ${e.response?.data['message'] ?? e.message}');
-      rethrow;
+      String errorMessage = e.message ?? 'Unknown error';
+      if (e.response?.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        if (data.containsKey('errors')) {
+          final errors = data['errors'] as Map<String, dynamic>;
+          errorMessage = errors.values.first[0].toString();
+        } else if (data.containsKey('message')) {
+          errorMessage = data['message'].toString();
+        }
+      }
+      debugPrint('Login Error: $errorMessage');
+      throw Exception(errorMessage);
     } catch (e) {
       debugPrint('Login General Error: $e');
-      rethrow;
+      throw Exception(e.toString());
     }
   }
 
@@ -68,11 +82,21 @@ class ApiService {
       });
       return response.data;
     } on DioException catch (e) {
-      debugPrint('Register Error: ${e.response?.data['message'] ?? e.message}');
-      rethrow;
+      String errorMessage = e.message ?? 'Unknown error';
+      if (e.response?.data is Map<String, dynamic>) {
+        final data = e.response!.data as Map<String, dynamic>;
+        if (data.containsKey('errors')) {
+          final errors = data['errors'] as Map<String, dynamic>;
+          errorMessage = errors.values.first[0].toString();
+        } else if (data.containsKey('message')) {
+          errorMessage = data['message'].toString();
+        }
+      }
+      debugPrint('Register Error: $errorMessage');
+      throw Exception(errorMessage);
     } catch (e) {
       debugPrint('Register General Error: $e');
-      rethrow;
+      throw Exception(e.toString());
     }
   }
 
@@ -109,6 +133,37 @@ class ApiService {
     } catch (e) {
       debugPrint('General Error (getOrders): $e');
       throw Exception('Failed to load orders');
+    }
+  }
+
+  Future<List<dynamic>> getWishlists(String token) async {
+    try {
+      final response = await _dio.get('wishlists', 
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data as List<dynamic>;
+    } on DioException catch (e) {
+      debugPrint('API Error (getWishlists): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to load wishlists');
+    } catch (e) {
+      debugPrint('General Error (getWishlists): $e');
+      throw Exception('Failed to load wishlists');
+    }
+  }
+
+  Future<bool> toggleWishlist(String token, int stockId) async {
+    try {
+      final response = await _dio.post('wishlists/toggle',
+        data: {'stock_id': stockId},
+        options: Options(headers: {'Authorization': 'Bearer $token'})
+      );
+      return response.data['is_wished'] ?? false;
+    } on DioException catch (e) {
+      debugPrint('API Error (toggleWishlist): ${e.message}');
+      throw Exception(e.response?.data['message'] ?? 'Failed to toggle wishlist');
+    } catch (e) {
+      debugPrint('General Error (toggleWishlist): $e');
+      throw Exception('Failed to toggle wishlist');
     }
   }
 
