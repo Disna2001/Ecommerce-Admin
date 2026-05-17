@@ -207,7 +207,7 @@
 
             @if($activeTab === 'specs')
                 <div class="p-8">
-                    <div class="grid grid-cols-1 gap-0 md:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-x-12 gap-y-0 md:grid-cols-2">
                         @foreach(array_filter(['SKU'=>$product->sku,'Item Code'=>$product->item_code,'Brand'=>$product->brand?->name,'Make'=>$product->make?->name,'Model'=>$product->model_name,'Model #'=>$product->model_number,'Color'=>$product->color,'Size'=>$product->size,'Weight'=>$product->weight?$product->weight.'kg':null,'Category'=>$product->category?->name,'Item Type'=>$product->itemType?->name,'Warranty'=>$product->warranty?->name,'Barcode'=>$product->barcode]) as $label=>$val)
                             <div class="flex justify-between border-b border-slate-100 py-3 dark:border-white/5">
                                 <span class="text-sm text-soft">{{ $label }}</span>
