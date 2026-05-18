@@ -74,7 +74,7 @@
                 @endforeach
             </div>
 
-            <div class="grid gap-6 mt-8 sm:grid-cols-2">
+            <div class="grid gap-6 mt-8 {{ ($mail_mailer !== 'smtp' && $mail_mailer !== 'log') ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2' }}">
 
                 @if($mail_mailer !== 'smtp' && $mail_mailer !== 'log')
                     <div class="space-y-1.5 animate-in fade-in slide-in-from-top-2">
@@ -87,15 +87,15 @@
                         </div>
                     </div>
                 @endif
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div class="space-y-1.5">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name</label>
-                        <input type="text" wire:model="mail_from_name" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Address</label>
-                        <input type="email" wire:model="mail_from_address" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
-                    </div>
+
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name</label>
+                    <input type="text" wire:model="mail_from_name" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Address</label>
+                    <input type="email" wire:model="mail_from_address" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
                 </div>
             </div>
         </div>
