@@ -275,7 +275,7 @@ class SystemSettingsManager extends Component
                 'mail.from.name' => $this->mail_from_name ?: config('app.name'),
                 'mail.mailers.smtp.host' => 'smtp-relay.brevo.com',
                 'mail.mailers.smtp.port' => '2525',
-                'mail.mailers.smtp.username' => $this->mail_from_address,
+                'mail.mailers.smtp.username' => $this->mail_smtp_username ?: $this->mail_from_address,
                 'mail.mailers.smtp.password' => $this->mail_api_key,
                 'mail.mailers.smtp.encryption' => 'tls',
             ]);

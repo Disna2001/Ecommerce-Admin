@@ -114,7 +114,7 @@ class AppServiceProvider extends ServiceProvider
                     config(['mail.mailers.smtp.host' => 'smtp-relay.brevo.com']);
                     config(['mail.mailers.smtp.port' => '2525']);
                     config(['mail.mailers.smtp.encryption' => 'tls']);
-                    config(['mail.mailers.smtp.username' => $mailFromAddress]);
+                    config(['mail.mailers.smtp.username' => $smtpUsername ?: $mailFromAddress]);
                     config(['mail.mailers.smtp.password' => SiteSetting::get('mail_api_key')]);
                 } else {
                     config(['mail.default' => $mailMailer]);
