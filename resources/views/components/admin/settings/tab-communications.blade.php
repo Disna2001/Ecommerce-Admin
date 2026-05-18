@@ -19,12 +19,13 @@
                 </div>
             </div>
             
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
                 @foreach([
                     'resend' => ['Resend', 'fa-bolt', 'indigo'],
                     'smtp' => ['Standard SMTP', 'fa-server', 'slate'],
                     'sendgrid' => ['SendGrid', 'fa-paper-plane', 'sky'],
                     'mailgun' => ['Mailgun API', 'fa-fire', 'rose'],
+                    'brevo' => ['Brevo SMTP', 'fa-envelope', 'orange'],
                 ] as $key => [$name, $icon, $color])
                     <button type="button" wire:click="$set('mail_mailer', '{{ $key }}')" 
                         class="group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all {{ $mail_mailer === $key ? 'border-'.$color.'-500 bg-'.$color.'-50/50 ring-4 ring-'.$color.'-500/10' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">

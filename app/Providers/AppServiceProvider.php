@@ -109,7 +109,16 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if ($mailMailer) {
-                config(['mail.default' => $mailMailer]);
+                if ($mailMailer === 'brevo') {
+                    config(['mail.default' => 'smtp']);
+                    config(['mail.mailers.smtp.host' => 'smtp-relay.brevo.com']);
+                    config(['mail.mailers.smtp.port' => '587']);
+                    config(['mail.mailers.smtp.encryption' => 'tls']);
+                    config(['mail.mailers.smtp.username' => $mailFromAddress]);
+                    config(['mail.mailers.smtp.password' => SiteSetting::get('mail_api_key')]);
+                } else {
+                    config(['mail.default' => $mailMailer]);
+                }
             }
 
             if ($mail_api_key = SiteSetting::get('mail_api_key')) {
