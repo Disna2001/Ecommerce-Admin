@@ -79,7 +79,19 @@
             <div class="rounded-[2.5rem] border border-slate-200 bg-white p-2 shadow-sm">
                 <div class="rounded-[2rem] bg-slate-50/50 p-8 min-h-[600px]">
                     @if($activeTab === 'communications')
-                        <x-admin.settings.tab-communications />
+                        <x-admin.settings.tab-communications 
+                            :mail_mailer="$mail_mailer"
+                            :mail_from_name="$mail_from_name"
+                            :mail_from_address="$mail_from_address"
+                            :order_notification_email="$order_notification_email"
+                            :support_notification_email="$support_notification_email"
+                            :mail_smtp_host="$mail_smtp_host"
+                            :mail_smtp_port="$mail_smtp_port"
+                            :mail_smtp_encryption="$mail_smtp_encryption"
+                            :mail_smtp_username="$mail_smtp_username"
+                            :mail_smtp_password="$mail_smtp_password"
+                            :test_email_recipient="$test_email_recipient"
+                        />
                     @elseif($activeTab === 'hosting')
                         <x-admin.settings.tab-hosting />
                     @elseif($activeTab === 'billing')
