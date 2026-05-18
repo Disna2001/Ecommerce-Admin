@@ -1,5 +1,36 @@
 @props(['mail_mailer' => 'smtp', 'mail_from_name' => '', 'mail_from_address' => '', 'order_notification_email' => '', 'support_notification_email' => '', 'mail_smtp_host' => '', 'mail_smtp_port' => '', 'mail_smtp_encryption' => '', 'mail_smtp_username' => '', 'mail_smtp_password' => '', 'test_email_recipient' => ''])
 
+@php
+    $selectedClasses = [
+        'resend' => 'border-indigo-500 bg-indigo-50/50 ring-4 ring-indigo-500/10',
+        'smtp' => 'border-slate-500 bg-slate-50/50 ring-4 ring-slate-500/10',
+        'sendgrid' => 'border-sky-500 bg-sky-50/50 ring-4 ring-sky-500/10',
+        'mailgun' => 'border-rose-500 bg-rose-50/50 ring-4 ring-rose-500/10',
+        'brevo' => 'border-amber-500 bg-amber-50/50 ring-4 ring-amber-500/10',
+    ];
+    $iconSelectedClasses = [
+        'resend' => 'bg-indigo-500 text-white',
+        'smtp' => 'bg-slate-500 text-white',
+        'sendgrid' => 'bg-sky-500 text-white',
+        'mailgun' => 'bg-rose-500 text-white',
+        'brevo' => 'bg-amber-500 text-white',
+    ];
+    $iconUnselectedClasses = [
+        'resend' => 'bg-white text-slate-400 group-hover:text-indigo-500',
+        'smtp' => 'bg-white text-slate-400 group-hover:text-slate-500',
+        'sendgrid' => 'bg-white text-slate-400 group-hover:text-sky-500',
+        'mailgun' => 'bg-white text-slate-400 group-hover:text-rose-500',
+        'brevo' => 'bg-white text-slate-400 group-hover:text-amber-500',
+    ];
+    $checkBadgeClasses = [
+        'resend' => 'bg-indigo-500',
+        'smtp' => 'bg-slate-500',
+        'sendgrid' => 'bg-sky-500',
+        'mailgun' => 'bg-rose-500',
+        'brevo' => 'bg-amber-500',
+    ];
+@endphp
+
 <div class="space-y-8">
     <div class="flex items-center gap-4">
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner"><i class="fas fa-envelope-open-text text-lg"></i></div>
@@ -21,15 +52,15 @@
             
             <div class="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
                 @foreach([
-                    'resend' => ['Resend', 'fa-bolt', 'indigo'],
-                    'smtp' => ['Standard SMTP', 'fa-server', 'slate'],
-                    'sendgrid' => ['SendGrid', 'fa-paper-plane', 'sky'],
-                    'mailgun' => ['Mailgun API', 'fa-fire', 'rose'],
-                    'brevo' => ['Brevo SMTP', 'fa-envelope', 'orange'],
-                ] as $key => [$name, $icon, $color])
+                    'resend' => ['Resend', 'fa-bolt'],
+                    'smtp' => ['Standard SMTP', 'fa-server'],
+                    'sendgrid' => ['SendGrid', 'fa-paper-plane'],
+                    'mailgun' => ['Mailgun API', 'fa-fire'],
+                    'brevo' => ['Brevo SMTP', 'fa-envelope'],
+                ] as $key => [$name, $icon])
                     <button type="button" wire:click="$set('mail_mailer', '{{ $key }}')" 
-                        class="group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all {{ $mail_mailer === $key ? 'border-'.$color.'-500 bg-'.$color.'-50/50 ring-4 ring-'.$color.'-500/10' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $mail_mailer === $key ? 'bg-'.$color.'-500 text-white' : 'bg-white text-slate-400 group-hover:text-'.$color.'-500' }} transition-colors shadow-sm">
+                        class="group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all {{ $mail_mailer === $key ? $selectedClasses[$key] : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $mail_mailer === $key ? $iconSelectedClasses[$key] : $iconUnselectedClasses[$key] }} transition-colors shadow-sm">
                             <i class="fas {{ $icon }} text-sm"></i>
                         </div>
                         <div>
@@ -37,7 +68,7 @@
                             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">{{ $mail_mailer === $key ? 'SELECTED' : 'AVAILABLE' }}</p>
                         </div>
                         @if($mail_mailer === $key)
-                            <div class="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full bg-{{ $color }}-500 text-white text-[8px]"><i class="fas fa-check"></i></div>
+                            <div class="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full text-white text-[8px] {{ $checkBadgeClasses[$key] }}"><i class="fas fa-check"></i></div>
                         @endif
                     </button>
                 @endforeach
@@ -84,6 +115,7 @@
             </div>
         </div>
 
+        @if($mail_mailer === 'smtp')
         <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
             <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SMTP Gateway Authentication</p>
             <div class="grid gap-6 md:grid-cols-3">
@@ -126,6 +158,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     <div class="rounded-[2.5rem] bg-indigo-600 p-8 text-white shadow-2xl shadow-indigo-100 overflow-hidden relative group">
