@@ -134,24 +134,26 @@ class AppServiceProvider extends ServiceProvider
                 config(['mail.from.name' => $mailFromName]);
             }
 
-            if ($smtpHost) {
-                config(['mail.mailers.smtp.host' => $smtpHost]);
-            }
+            if ($mailMailer === 'smtp') {
+                if ($smtpHost) {
+                    config(['mail.mailers.smtp.host' => $smtpHost]);
+                }
 
-            if ($smtpPort) {
-                config(['mail.mailers.smtp.port' => $smtpPort]);
-            }
+                if ($smtpPort) {
+                    config(['mail.mailers.smtp.port' => $smtpPort]);
+                }
 
-            if ($smtpUsername) {
-                config(['mail.mailers.smtp.username' => $smtpUsername]);
-            }
+                if ($smtpUsername) {
+                    config(['mail.mailers.smtp.username' => $smtpUsername]);
+                }
 
-            if ($smtpPassword) {
-                config(['mail.mailers.smtp.password' => $smtpPassword]);
-            }
+                if ($smtpPassword) {
+                    config(['mail.mailers.smtp.password' => $smtpPassword]);
+                }
 
-            if ($smtpEncryption) {
-                config(['mail.mailers.smtp.encryption' => $smtpEncryption]);
+                if ($smtpEncryption) {
+                    config(['mail.mailers.smtp.encryption' => $smtpEncryption]);
+                }
             }
         }
 
