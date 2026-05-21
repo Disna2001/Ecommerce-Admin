@@ -25,9 +25,9 @@
         $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
     @endphp
 
-    <div class="mx-auto max-w-7xl px-4 py-12">
-        <section class="overflow-hidden rounded-[3.5rem] border border-white/60 bg-white/80 shadow-[0_40px_120px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-            <div class="border-b border-slate-100 px-8 py-10 dark:border-white/5 lg:px-12 lg:py-12">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:py-12">
+        <section class="overflow-hidden rounded-[2.5rem] sm:rounded-[3.5rem] border border-white/60 bg-white/80 shadow-[0_40px_120px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+            <div class="border-b border-slate-100 px-4 sm:px-8 py-6 sm:py-10 dark:border-white/5 lg:px-12 lg:py-12">
                 <div class="grid gap-12 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-center">
                     <div class="flex flex-col gap-8 sm:flex-row sm:items-center">
                         <div class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-[3rem] border-4 border-white shadow-2xl dark:border-slate-800">
@@ -74,11 +74,11 @@
                 </div>
             </div>
 
-            <div class="border-b border-slate-50 px-8 py-4 dark:border-white/5 lg:px-12">
-                <div class="flex flex-wrap gap-4">
+            <div class="border-b border-slate-50 px-4 sm:px-8 py-3 sm:py-4 dark:border-white/5 lg:px-12">
+                <div class="flex flex-wrap gap-2 sm:gap-4">
                     @foreach($tabs as $key => $tab)
                         <button type="button" wire:click="setTab('{{ $key }}')"
-                                class="inline-flex items-center gap-3 rounded-full px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all {{ $activeTab === $key ? 'bg-slate-900 text-white shadow-2xl scale-105' : 'text-slate-400 hover:text-slate-900' }}">
+                                class="inline-flex items-center gap-2 sm:gap-3 rounded-full px-4 sm:px-8 py-2.5 sm:py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all {{ $activeTab === $key ? 'bg-slate-900 text-white shadow-2xl scale-105' : 'text-slate-400 hover:text-slate-900' }}">
                             <i class="fas {{ $tab['icon'] }} text-xs"></i>
                             <span>{{ $tab['label'] }}</span>
                         </button>
@@ -86,7 +86,7 @@
                 </div>
             </div>
 
-            <div class="px-8 py-10 lg:px-12 lg:py-12">
+            <div class="px-4 sm:px-8 py-6 sm:py-10 lg:px-12 lg:py-12">
                 @if($activeTab === 'overview')
                     <div class="space-y-12">
                         <div class="grid gap-8 lg:grid-cols-3">

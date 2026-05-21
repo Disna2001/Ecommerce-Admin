@@ -17,14 +17,14 @@
         </div>
     @endif
 
-    <header class="sticky top-0 z-50 px-4 py-4 sm:py-6" x-data="{ mobileMenuOpen: false, searchOpen: false }">
-        <div class="glass mx-auto flex max-w-7xl flex-col gap-4 rounded-[2.5rem] px-6 py-4 shadow-[0_25px_80px_rgba(0,0,0,0.06)]">
-            <div class="flex items-center justify-between gap-8">
+    <header class="sticky top-0 z-50 px-2 sm:px-4 py-4 sm:py-6" x-data="{ mobileMenuOpen: false, searchOpen: false }">
+        <div class="glass mx-auto flex max-w-7xl flex-col gap-4 rounded-[2.5rem] px-3 sm:px-6 py-3 sm:py-4 shadow-[0_25px_80px_rgba(0,0,0,0.06)]">
+            <div class="flex items-center justify-between gap-1 sm:gap-8">
                 <!-- Branding Protocol -->
                 <a href="/" class="flex shrink-0 items-center gap-3">
                     @if($layout['logoPath'])
-                        <div class="flex h-12 items-center rounded-2xl bg-white/80 px-4 dark:bg-slate-900/80">
-                            <img src="{{ Storage::url($layout['logoPath']) }}" alt="{{ $layout['siteName'] }}" class="h-8 w-auto">
+                        <div class="flex h-10 sm:h-12 items-center rounded-xl sm:rounded-2xl bg-white/80 px-2 sm:px-4 dark:bg-slate-900/80">
+                            <img src="{{ Storage::url($layout['logoPath']) }}" alt="{{ $layout['siteName'] }}" class="h-6 sm:h-8 w-auto max-w-[100px] sm:max-w-none">
                         </div>
                         <span class="hidden text-xs font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white lg:inline">{{ $layout['siteName'] }}</span>
                     @else
@@ -40,24 +40,24 @@
                 </form>
 
                 <!-- Action Hub -->
-                <div class="flex shrink-0 items-center gap-1 sm:gap-3">
+                <div class="flex shrink-0 items-center gap-0.5 sm:gap-3">
                     <!-- Mobile Search Toggle -->
-                    <button @click="searchOpen = !searchOpen" type="button" class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors md:hidden">
+                    <button @click="searchOpen = !searchOpen" type="button" class="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors md:hidden">
                         <i class="fas" :class="searchOpen ? 'fa-times' : 'fa-search'"></i>
                     </button>
 
-                    <button @click="toggle()" type="button" class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <button @click="toggle()" type="button" class="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i class="fas" :class="dark ? 'fa-sun' : 'fa-moon'"></i>
                     </button>
 
                     <div class="relative" x-data="{ open:false }">
-                        <button @click="open=!open" type="button" class="relative flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <button @click="open=!open" type="button" class="relative flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             <i class="far fa-bell"></i>
                             @if($unreadNotifications > 0)
                                 <span class="absolute right-0 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white ring-4 ring-white dark:ring-slate-900">{{ $unreadNotifications }}</span>
                             @endif
                         </button>
-                        <div x-show="open" @click.away="open=false" x-transition class="absolute right-0 top-16 z-[60] w-[380px] overflow-hidden rounded-[2rem] border border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95" style="display:none">
+                        <div x-show="open" @click.away="open=false" x-transition class="fixed inset-x-4 top-20 sm:absolute sm:right-0 sm:top-16 sm:inset-x-auto sm:w-[380px] z-[60] overflow-hidden rounded-[2rem] border border-white/20 bg-white/95 p-4 sm:p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95" style="display:none">
                             <div class="flex items-center justify-between mb-6">
                                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Intelligence</p>
                                 <button type="button" wire:click="markNotificationsSeen" class="text-[9px] font-black uppercase tracking-widest text-emerald-500 hover:underline">Flush All</button>
@@ -75,7 +75,7 @@
                         </div>
                     </div>
 
-                    <a wire:navigate href="{{ url('/cart') }}" class="relative flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <a wire:navigate href="{{ url('/cart') }}" class="relative flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i class="fas fa-shopping-bag"></i>
                         @if($cartCount > 0)
                             <span class="absolute right-0 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-900 text-[9px] font-black text-white ring-4 ring-white dark:ring-slate-900" style="background:var(--primary)">{{ $cartCount }}</span>
@@ -88,11 +88,11 @@
                             <a wire:navigate href="{{ route('register') }}" class="rounded-full px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl hover:scale-105 transition-all" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">Sign Up</a>
                         </div>
                     @else
-                        <div class="relative ml-2" x-data="{ open:false }">
-                            <button @click="open=!open" type="button" class="flex items-center gap-3 rounded-full bg-slate-100/50 p-1 pr-4 dark:bg-slate-800/50 transition-all hover:bg-white dark:hover:bg-slate-800">
-                                <div class="h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-black text-white" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">{{ auth()->user()->initials }}</div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">{{ explode(' ', auth()->user()->name ?? 'User')[0] }}</span>
-                                <i class="fas fa-chevron-down text-[8px] text-slate-400"></i>
+                        <div class="relative ml-1 sm:ml-2" x-data="{ open:false }">
+                            <button @click="open=!open" type="button" class="flex items-center gap-1 sm:gap-3 rounded-full bg-slate-100/50 p-1 sm:pr-4 dark:bg-slate-800/50 transition-all hover:bg-white dark:hover:bg-slate-800">
+                                <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-black text-white shrink-0" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">{{ auth()->user()->initials }}</div>
+                                <span class="hidden sm:inline text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">{{ explode(' ', auth()->user()->name ?? 'User')[0] }}</span>
+                                <i class="hidden sm:inline fas fa-chevron-down text-[8px] text-slate-400"></i>
                             </button>
                             <div x-show="open" @click.away="open=false" x-transition class="absolute right-0 top-14 z-[60] w-64 overflow-hidden rounded-[1.5rem] border border-white/20 bg-white p-2 shadow-2xl dark:border-white/5 dark:bg-slate-950" style="display:none">
                                 <a wire:navigate href="{{ route('profile.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-900">
@@ -117,7 +117,7 @@
                     @endguest
 
                     <!-- Mobile Menu Toggle -->
-                    <button @click="mobileMenuOpen = true" type="button" class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors lg:hidden">
+                    <button @click="mobileMenuOpen = true" type="button" class="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors lg:hidden">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
