@@ -148,9 +148,11 @@ class ProductDetail extends Component
 
         $discount = $productPricingService->resolveDiscountForProduct($this->product);
 
-        $finalPrice = $discount
-            ? max(0, $this->product->selling_price - $discount->calculateDiscount($this->product->selling_price))
-            : null;
+        $finalPrice = $productPricingService->finalPriceForProduct($this->product);
+
+        if ($finalPrice === (float) $this->product->selling_price && !$discount) {
+            $finalPrice = null;
+        }
 
         $reviews = collect();
         if (class_exists(Review::class)) {

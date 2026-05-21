@@ -33,6 +33,12 @@ class ProductPricingService
 
     public function finalPriceForProduct(Stock $product): float
     {
+        if (auth()->check() && auth()->user()->hasRole('Merchant')) {
+            return (float) (filled($product->wholesale_price) && (float) $product->wholesale_price > 0
+                ? $product->wholesale_price
+                : $product->selling_price);
+        }
+
         $basePrice = (float) $product->selling_price;
         
         // Check for Automated Daily Discount
@@ -46,6 +52,25 @@ class ProductPricingService
         return $manualDiscount
             ? max(0, $basePrice - $manualDiscount->calculateDiscount($basePrice))
             : $basePrice;
+    }
+
+    public function refreshCartPrices(array $cart): array
+    {
+        if (empty($cart)) {
+            return [];
+        }
+
+        $stockIds = array_keys($cart);
+        $stocks = Stock::whereIn('id', $stockIds)->get()->keyBy('id');
+
+        foreach ($cart as $id => &$item) {
+            if (isset($stocks[$id])) {
+                $item['price'] = $this->finalPriceForProduct($stocks[$id]);
+                $item['original_price'] = (float) $stocks[$id]->selling_price;
+            }
+        }
+
+        return $cart;
     }
 
     public function toCartItem(Stock $product, int $quantity): array

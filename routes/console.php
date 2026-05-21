@@ -27,17 +27,17 @@ Artisan::command('system:health-check {--json : Output machine-readable JSON}', 
     })->all();
 
     $metrics = [
-        'queued_notifications' => $report['metrics']['queued'],
-        'stale_queued_notifications' => $report['metrics']['stale_queued'],
-        'failed_notifications' => $report['metrics']['failed'],
-        'retried_notifications' => $report['metrics']['retried'],
-        'low_stock_items' => $report['metrics']['low_stock'],
+        'queued_notifications' => $report['raw_metrics']['queued'],
+        'stale_queued_notifications' => $report['raw_metrics']['stale_queued'],
+        'failed_notifications' => $report['raw_metrics']['failed'],
+        'retried_notifications' => $report['raw_metrics']['retried'],
+        'low_stock_items' => $report['raw_metrics']['low_stock'],
         'hosting_score' => $report['score'],
     ];
 
     $hasWarning = collect($checks)->contains(fn ($check) => $check['status'] === 'warning')
-        || $report['metrics']['stale_queued'] > 0
-        || $report['metrics']['failed'] > 0;
+        || $report['raw_metrics']['stale_queued'] > 0
+        || $report['raw_metrics']['failed'] > 0;
 
     $payload = [
         'status' => $hasWarning ? 'warning' : 'ok',

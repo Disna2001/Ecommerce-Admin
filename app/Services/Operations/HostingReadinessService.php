@@ -298,6 +298,13 @@ class HostingReadinessService
             'attention' => $attention,
             'recentSignals' => $recentSignals,
             'metrics' => $metrics,
+            'raw_metrics' => [
+                'queued' => $queued,
+                'stale_queued' => $staleQueued,
+                'failed' => $failedNotifications,
+                'retried' => $retriedNotifications,
+                'low_stock' => $lowStockCount,
+            ],
             'score' => $score,
             'scoreTone' => $scoreTone,
             'checklist' => $checklist,

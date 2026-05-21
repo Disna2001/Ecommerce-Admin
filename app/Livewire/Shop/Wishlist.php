@@ -22,18 +22,23 @@ class Wishlist extends Component
                 ->whereIn('id',$ids)
                 ->get()
                 ->map(function (Stock $product) use ($productPricingService) {
-                    $discount = $productPricingService->resolveDiscountForProduct($product);
                     $product->setAttribute('final_price', $productPricingService->finalPriceForProduct($product));
                     $product->setAttribute('primary_image_url', $productPricingService->imageUrlForProduct($product, 'card'));
                     $product->setAttribute('primary_image_sources', $productPricingService->imageSourcesForProduct($product, 'card'));
-                    $product->setAttribute(
-                        'discount_badge',
-                        $discount
-                            ? ($discount->type === 'percentage'
-                                ? '-'.$discount->value.'%'
-                                : '-Rs '.number_format((float) $discount->value, 0))
-                            : null
-                    );
+                    
+                    if (auth()->check() && auth()->user()->hasRole('Merchant') && filled($product->wholesale_price) && (float)$product->wholesale_price > 0) {
+                        $product->setAttribute('discount_badge', 'Wholesale');
+                    } else {
+                        $discount = $productPricingService->resolveDiscountForProduct($product);
+                        $product->setAttribute(
+                            'discount_badge',
+                            $discount
+                                ? ($discount->type === 'percentage'
+                                    ? '-'.$discount->value.'%'
+                                    : '-Rs '.number_format((float) $discount->value, 0))
+                                : null
+                        );
+                    }
 
                     return $product;
                 });

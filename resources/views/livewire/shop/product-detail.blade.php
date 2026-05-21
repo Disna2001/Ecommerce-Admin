@@ -98,7 +98,13 @@
                     </div>
 
                     <div class="mb-6 flex items-end gap-4 rounded-[1.5rem] bg-white/70 p-4 dark:bg-slate-900/70">
-                        @if($finalPrice !== null)
+                        @if(auth()->check() && auth()->user()->hasRole('Merchant') && filled($product->wholesale_price) && (float)$product->wholesale_price > 0)
+                            <span class="text-4xl font-extrabold text-adapt">Rs {{ number_format($product->wholesale_price,2) }}</span>
+                            <span class="text-xl text-soft line-through">Rs {{ number_format($product->selling_price,2) }}</span>
+                            <span class="rounded-lg bg-blue-100 px-2 py-1 text-sm font-bold text-blue-600">
+                                Wholesale Price
+                            </span>
+                        @elseif($finalPrice !== null)
                             <span class="text-4xl font-extrabold text-adapt">Rs {{ number_format($finalPrice,2) }}</span>
                             <span class="text-xl text-soft line-through">Rs {{ number_format($product->selling_price,2) }}</span>
                             <span class="rounded-lg bg-green-100 px-2 py-1 text-sm font-bold text-green-600">

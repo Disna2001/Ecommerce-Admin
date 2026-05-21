@@ -60,7 +60,7 @@ Route::get('/dashboard', function () {
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::view('/profile/edit', 'profile.edit')->name('profile.edit');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 });
 
 Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])->name('auth.social.redirect');

@@ -12,7 +12,12 @@ class CartController extends Controller
 {
     private function getCart(): array
     {
-        return session('cart', []);
+        $cart = session('cart', []);
+        $refreshed = app(ProductPricingService::class)->refreshCartPrices($cart);
+        if ($cart !== $refreshed) {
+            session(['cart' => $refreshed]);
+        }
+        return $refreshed;
     }
  
     private function saveCart(array $cart): void

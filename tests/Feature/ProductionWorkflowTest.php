@@ -387,6 +387,49 @@ class ProductionWorkflowTest extends TestCase
         $this->assertNotNull($invoice->fresh()->email_sent_at);
     }
 
+    public function test_merchant_receives_wholesale_pricing(): void
+    {
+        $merchantUser = User::factory()->create(['user_type' => 'merchant']);
+        $retailUser = User::factory()->create(['user_type' => 'regular']);
+        
+        $merchantRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Merchant', 'guard_name' => 'web']);
+        $merchantUser->assignRole($merchantRole);
+
+        $product = $this->createStock(quantity: 10, price: 1500); // wholesale_price is 1200 (1500 * 0.8)
+
+        // 1. Verify standard customer pricing
+        $this->actingAs($retailUser);
+        $retailPrice = app(\App\Services\Storefront\ProductPricingService::class)->finalPriceForProduct($product);
+        $this->assertEquals(1500, $retailPrice);
+
+        // 2. Verify merchant pricing
+        $this->actingAs($merchantUser);
+        $merchantPrice = app(\App\Services\Storefront\ProductPricingService::class)->finalPriceForProduct($product);
+        $this->assertEquals(1200, $merchantPrice);
+
+        // 3. Verify cart price refresh helper
+        $cart = [
+            $product->id => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'sku' => $product->sku,
+                'price' => 1500,
+                'original_price' => 1500,
+                'quantity' => 2,
+            ],
+        ];
+
+        // For retail user, prices should remain at selling_price (1500)
+        $this->actingAs($retailUser);
+        $refreshedRetailCart = app(\App\Services\Storefront\ProductPricingService::class)->refreshCartPrices($cart);
+        $this->assertEquals(1500, $refreshedRetailCart[$product->id]['price']);
+
+        // For merchant user, prices should refresh to wholesale_price (1200)
+        $this->actingAs($merchantUser);
+        $refreshedMerchantCart = app(\App\Services\Storefront\ProductPricingService::class)->refreshCartPrices($cart);
+        $this->assertEquals(1200, $refreshedMerchantCart[$product->id]['price']);
+    }
+
     protected function createStock(int $quantity = 5, int $price = 1000): Stock
     {
         $category = Category::create([
@@ -410,6 +453,9 @@ class ProductionWorkflowTest extends TestCase
             'reorder_level' => 1,
             'unit_price' => $price,
             'selling_price' => $price,
+            'wholesale_price' => $price * 0.8, // 80% of selling price for wholesale testing
+            'storefront_enabled' => true,
+            'storefront_quantity' => $quantity,
             'status' => 'active',
         ]);
     }

@@ -207,7 +207,12 @@ class Checkout extends Component
 
     public function getCartProperty(): array
     {
-        return session('cart', []);
+        $cart = session('cart', []);
+        $refreshed = app(\App\Services\Storefront\ProductPricingService::class)->refreshCartPrices($cart);
+        if ($cart !== $refreshed) {
+            session(['cart' => $refreshed]);
+        }
+        return $refreshed;
     }
 
     public function getSavedAddressesProperty(): Collection

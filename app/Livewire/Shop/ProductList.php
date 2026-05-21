@@ -97,6 +97,7 @@ class ProductList extends Component
             'max_price' => $this->max_price,
             'per_page' => $this->perPage,
             'page' => request()->query('page', 1),
+            'is_merchant' => auth()->check() && auth()->user()->hasRole('Merchant'),
         ])));
 
         $query = Stock::with(['category','brand'])
@@ -122,18 +123,23 @@ class ProductList extends Component
         $products = Cache::remember($cacheKey, 120, fn() => $query->paginate($this->perPage));
 
         $products->getCollection()->transform(function (Stock $product) use ($productPricingService) {
-            $discount = $productPricingService->resolveDiscountForProduct($product);
             $product->setAttribute('final_price', $productPricingService->finalPriceForProduct($product));
             $product->setAttribute('primary_image_url', $productPricingService->imageUrlForProduct($product, 'card'));
             $product->setAttribute('primary_image_sources', $productPricingService->imageSourcesForProduct($product, 'card'));
-            $product->setAttribute(
-                'discount_badge',
-                $discount
-                    ? ($discount->type === 'percentage'
-                        ? '-'.$discount->value.'%'
-                        : '-Rs '.number_format((float) $discount->value, 0))
-                    : null
-            );
+            
+            if (auth()->check() && auth()->user()->hasRole('Merchant') && filled($product->wholesale_price) && (float)$product->wholesale_price > 0) {
+                $product->setAttribute('discount_badge', 'Wholesale');
+            } else {
+                $discount = $productPricingService->resolveDiscountForProduct($product);
+                $product->setAttribute(
+                    'discount_badge',
+                    $discount
+                        ? ($discount->type === 'percentage'
+                            ? '-'.$discount->value.'%'
+                            : '-Rs '.number_format((float) $discount->value, 0))
+                        : null
+                );
+            }
 
             return $product;
         });

@@ -157,7 +157,11 @@ class StorefrontDataService
 
     protected function rememberOrCompute(string $key, int $seconds, callable $callback): mixed
     {
-        $scopedKey = app(TenantManager::class)->scopedCacheKey($key);
+        $userSuffix = '';
+        if (auth()->check() && auth()->user()->hasRole('Merchant')) {
+            $userSuffix = '_merchant';
+        }
+        $scopedKey = app(TenantManager::class)->scopedCacheKey($key . $userSuffix);
 
         try {
             return Cache::remember($scopedKey, $seconds, $callback);
@@ -169,19 +173,23 @@ class StorefrontDataService
     protected function enrichProducts(Collection $products): Collection
     {
         return $products->map(function (Stock $product) {
-            $discount = $this->productPricingService->resolveDiscountForProduct($product);
-
             $product->setAttribute('final_price', $this->productPricingService->finalPriceForProduct($product));
             $product->setAttribute('primary_image_url', $this->productPricingService->imageUrlForProduct($product, 'card'));
             $product->setAttribute('primary_image_sources', $this->productPricingService->imageSourcesForProduct($product, 'card'));
-            $product->setAttribute(
-                'discount_badge',
-                $discount
-                    ? ($discount->type === 'percentage'
-                        ? '-'.$discount->value.'%'
-                        : '-Rs '.number_format((float) $discount->value, 0))
-                    : null
-            );
+            
+            if (auth()->check() && auth()->user()->hasRole('Merchant') && filled($product->wholesale_price) && (float)$product->wholesale_price > 0) {
+                $product->setAttribute('discount_badge', 'Wholesale');
+            } else {
+                $discount = $this->productPricingService->resolveDiscountForProduct($product);
+                $product->setAttribute(
+                    'discount_badge',
+                    $discount
+                        ? ($discount->type === 'percentage'
+                            ? '-'.$discount->value.'%'
+                            : '-Rs '.number_format((float) $discount->value, 0))
+                        : null
+                );
+            }
 
             return $product;
         });
