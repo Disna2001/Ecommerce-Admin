@@ -19,7 +19,7 @@
         <div class="grid grid-cols-1 gap-8 mb-8 md:grid-cols-4">
             <div>
                 @if(!empty($logoPath))
-                    <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName ?? '' }}" class="h-9 mb-3 object-contain brightness-0 invert">
+                    <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName ?? '' }}" class="h-9 mb-3 object-contain">
                 @else
                     <span class="text-xl font-bold">{{ $siteName ?? 'Shop' }}</span>
                 @endif

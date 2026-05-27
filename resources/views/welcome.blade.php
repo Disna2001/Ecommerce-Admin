@@ -302,7 +302,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div>
                     <div class="flex items-center gap-3 mb-8">
                         @if($logoPath)
-                            <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto brightness-0 invert">
+                            <img src="{{ Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain">
                         @else
                             <div class="text-2xl font-black lowercase tracking-tighter" style="color:var(--primary)">{{ strtolower($siteName) }}</div>
                         @endif

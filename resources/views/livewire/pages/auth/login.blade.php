@@ -59,7 +59,7 @@ new #[Layout('layouts.guest')] class extends Component
                     <div class="relative z-10 flex h-full flex-col justify-between">
                         <div>
                             @if (!empty($logoPath))
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain drop-shadow-md brightness-0 invert">
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($logoPath) }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain drop-shadow-md">
                             @else
                                 <a href="/" wire:navigate class="inline-block text-2xl font-black lowercase tracking-tight text-white drop-shadow-md hover:opacity-90 transition-opacity">{{ strtolower($siteName) }}</a>
                             @endif
