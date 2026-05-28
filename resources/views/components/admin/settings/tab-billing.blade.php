@@ -215,7 +215,14 @@
                         <div class="rounded-2xl bg-white shadow-2xl p-6 min-h-[300px] relative overflow-hidden text-[10px] text-slate-600">
                             <!-- Watermark Simulation -->
                             <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] rotate-[30deg] pointer-events-none">
-                                <p class="text-4xl font-black tracking-[1em] text-slate-900 uppercase">{{ $preview['status'] ?? 'DRAFT' }}</p>
+                                @if(filled($billingPreviewCompany['logo_url'] ?? ''))
+                                    <div class="flex flex-col items-center justify-center gap-4">
+                                        <img src="{{ $billingPreviewCompany['logo_url'] }}" class="w-48 h-auto object-contain select-none pointer-events-none opacity-40">
+                                        <p class="text-xs font-black tracking-[0.5em] text-slate-900 uppercase">{{ $preview['status'] ?? 'DRAFT' }}</p>
+                                    </div>
+                                @else
+                                    <p class="text-4xl font-black tracking-[1em] text-slate-900 uppercase">{{ $preview['status'] ?? 'DRAFT' }}</p>
+                                @endif
                             </div>
 
                             <div class="relative z-10 space-y-4">

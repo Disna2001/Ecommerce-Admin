@@ -138,13 +138,32 @@
             font-size: {{ $isThermal ? 34 : 92 }}px;
             font-weight: 800;
             letter-spacing: 0.18em;
-            color: {{ $invoice->isPaid() ? 'rgba(16,185,129,0.10)' : 'rgba(245,158,11,0.11)' }};
+            color: {{ $invoice->isPaid() ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.09)' }};
             transform: rotate(-24deg);
             z-index: -1;
+        }
+        .watermark-image {
+            position: fixed;
+            top: 35%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: -2;
+            transform: rotate(-12deg);
+        }
+        .watermark-image img {
+            width: {{ $isThermal ? 160 : 340 }}px;
+            height: auto;
+            opacity: 0.04;
         }
     </style>
 </head>
 <body>
+    @if(filled($company['logo_data_uri'] ?? ''))
+        <div class="watermark-image">
+            <img src="{{ $company['logo_data_uri'] }}" alt="Watermark Logo">
+        </div>
+    @endif
     <div class="watermark">{{ $invoice->isPaid() ? 'PAID' : 'UNPAID' }}</div>
     <div class="page">
         <div class="header">
