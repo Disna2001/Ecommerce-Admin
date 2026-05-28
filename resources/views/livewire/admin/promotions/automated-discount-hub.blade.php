@@ -202,5 +202,5 @@
             </div>
         </div>
     </div>
-    @include('components.admin.notifications')
+    @include('components.admin.ui.notifications')
 </div>

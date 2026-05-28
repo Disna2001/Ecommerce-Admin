@@ -27,12 +27,17 @@ class SiteManagementController extends Controller
         return view('admin.site-management.discounts');
     }
 
+    public function automatedDiscounts()
+    {
+        return view('admin.site-management.automated-discounts');
+    }
+
     public function displayItems()
     {
         return view('admin.site-management.display-items');
     }
 
-        public function reviews()
+    public function reviews()
     {
         return view('admin.site-management.reviews');
     }

@@ -7,6 +7,7 @@ use App\Models\DailyDiscount;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Services\Promotions\DiscountOrchestrator;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
