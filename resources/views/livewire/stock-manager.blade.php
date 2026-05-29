@@ -55,7 +55,7 @@
                     <x-admin.stock.intake :scanMode="$scanMode" />
                 @elseif($stockWorkspaceTab === 'import')
                     <x-admin.stock.import />
-                @elseif(in_array($stockWorkspaceTab, ['categories', 'brands', 'makes', 'suppliers', 'item_types', 'warranties']))
+                @elseif(in_array($stockWorkspaceTab, ['categories', 'brands', 'makes', 'suppliers', 'item_types', 'warranties', 'quality_levels']))
                     <x-admin.stock.registries 
                         :stock-workspace-tab="$stockWorkspaceTab" 
                         :categories="$categories" 
@@ -64,6 +64,7 @@
                         :suppliers="$suppliers" 
                         :item-types="$itemTypes" 
                         :warranties="$warranties"
+                        :quality-levels="$qualityLevels"
                     />
                 @endif
             </div>

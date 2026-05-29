@@ -130,6 +130,8 @@ class StockManager extends Component
     public string $quickItemTypeName = '';
     public string $quickWarrantyName = '';
     public string $quickWarrantyDuration = '12';
+    public string $quickQualityLevelName = '';
+    public string $quickQualityLevelCode = '';
     public ?string $aiDemandInsight = null;
     public bool $isRegistryEditModalOpen = false;
     public string $editingRegistryType = '';
@@ -875,6 +877,8 @@ class StockManager extends Component
         $this->quickBrandName         = '';
         $this->quickSupplierName      = '';
         $this->quickItemTypeName      = '';
+        $this->quickQualityLevelName  = '';
+        $this->quickQualityLevelCode  = '';
         $this->aiDemandInsight        = null;
 
         $this->generateSku();
@@ -1039,7 +1043,7 @@ class StockManager extends Component
     {
         $allowed = [
             'inventory', 'intake', 'import', 
-            'categories', 'brands', 'makes', 'suppliers', 'item_types'
+            'categories', 'brands', 'makes', 'suppliers', 'item_types', 'warranties', 'quality_levels'
         ];
         $this->stockWorkspaceTab = in_array($tab, $allowed, true) ? $tab : 'inventory';
     }
@@ -1240,6 +1244,39 @@ class StockManager extends Component
         $this->warranty_id = $this->quickCreateLookup(Warranty::class, $this->quickWarrantyName, 'quickWarrantyName');
     }
 
+    public function quickCreateQualityLevel(): void
+    {
+        $name = trim($this->quickQualityLevelName);
+        $code = trim($this->quickQualityLevelCode);
+
+        if ($name === '' || $code === '') {
+            $this->dispatch('notify', ['type' => 'warning', 'message' => 'Enter a name and code first before creating a quality tier.']);
+            return;
+        }
+
+        try {
+            $record = ItemQualityLevel::firstOrCreate(
+                ['code' => strtoupper($code)],
+                [
+                    'name' => $name,
+                    'level_order' => ItemQualityLevel::count() + 1,
+                    'is_active' => true,
+                    'color' => 'slate',
+                    'icon' => 'fa-award',
+                ]
+            );
+
+            $this->quickQualityLevelName = '';
+            $this->quickQualityLevelCode = '';
+            $this->dispatch('notify', ['type' => 'success', 'message' => $record->name.' registered successfully.']);
+            $this->quality_level = $record->code;
+            $this->loadQualityLevels();
+        } catch (\Throwable $e) {
+            Log::warning('Quick quality level creation failed: '.$e->getMessage());
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to create quality level.']);
+        }
+    }
+
     protected function quickCreateLookup(string $modelClass, string $name, string $property): ?int
     {
         $name = trim($name);
@@ -1350,6 +1387,7 @@ class StockManager extends Component
             'suppliers' => Supplier::class,
             'item_types' => ItemType::class,
             'warranties' => Warranty::class,
+            'quality_levels' => ItemQualityLevel::class,
         ][$type];
     }
 

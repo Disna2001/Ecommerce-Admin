@@ -32,7 +32,8 @@
             ['makes', 'Makes', 'fa-car'],
             ['suppliers', 'Suppliers', 'fa-truck-moving'],
             ['item_types', 'Item Types', 'fa-boxes-packing'],
-            ['warranties', 'Warranties', 'fa-shield-halved']
+            ['warranties', 'Warranties', 'fa-shield-halved'],
+            ['quality_levels', 'Quality Tiers', 'fa-award']
         ] as [$tab, $label, $icon])
             <button 
                 type="button" 

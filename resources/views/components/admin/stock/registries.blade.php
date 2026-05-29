@@ -6,6 +6,7 @@
         'brands' => ['title' => 'Commercial Brands', 'label' => 'Brand', 'model' => 'quickBrandName', 'action' => 'quickCreateBrand', 'items' => $brands, 'icon' => 'fa-copyright', 'color' => 'amber'],
         'suppliers' => ['title' => 'Supplier Registry', 'label' => 'Supplier', 'model' => 'quickSupplierName', 'action' => 'quickCreateSupplier', 'items' => $suppliers, 'icon' => 'fa-truck-moving', 'color' => 'rose'],
         'warranties' => ['title' => 'Warranty Protocols', 'label' => 'Warranty', 'model' => 'quickWarrantyName', 'action' => 'quickCreateWarranty', 'items' => $warranties, 'icon' => 'fa-shield-halved', 'color' => 'indigo'],
+        'quality_levels' => ['title' => 'Quality Tiers', 'label' => 'Quality Level', 'model' => 'quickQualityLevelName', 'action' => 'quickCreateQualityLevel', 'items' => $qualityLevels, 'icon' => 'fa-award', 'color' => 'violet'],
     ][$stockWorkspaceTab];
 @endphp
 
@@ -48,6 +49,11 @@
                             <div class="space-y-2">
                                 <label class="px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Duration (Months)</label>
                                 <input type="number" wire:model.defer="quickWarrantyDuration" class="w-full rounded-2xl border-slate-100 bg-white px-6 py-4 text-sm font-black text-slate-900 shadow-sm focus:border-slate-900 focus:ring-0">
+                            </div>
+                        @elseif($stockWorkspaceTab === 'quality_levels')
+                            <div class="space-y-2">
+                                <label class="px-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Unique Code (e.g. USED, BRND)</label>
+                                <input type="text" wire:model.defer="quickQualityLevelCode" class="w-full rounded-2xl border-slate-100 bg-white px-6 py-4 text-sm font-black text-slate-900 shadow-sm focus:border-slate-900 focus:ring-0">
                             </div>
                         @endif
 
@@ -96,6 +102,10 @@
                                             @if($stockWorkspaceTab === 'warranties')
                                                 <span class="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-[10px] font-black text-indigo-600 uppercase tracking-tighter">
                                                     {{ $item->duration }} Months
+                                                </span>
+                                            @elseif($stockWorkspaceTab === 'quality_levels')
+                                                <span class="inline-flex items-center rounded-lg bg-violet-50 px-2.5 py-1 text-[10px] font-black text-violet-600 uppercase tracking-tighter">
+                                                    Code: {{ $item->code }}
                                                 </span>
                                             @elseif(isset($item->stocks_count))
                                                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
