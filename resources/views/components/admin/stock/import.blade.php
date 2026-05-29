@@ -1,3 +1,4 @@
+@props(['importFile' => null])
 <div class="rounded-[3rem] border border-slate-200 bg-white p-10 shadow-sm relative overflow-hidden">
     <div class="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-slate-50 opacity-50"></div>
 

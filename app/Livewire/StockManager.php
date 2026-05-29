@@ -108,6 +108,7 @@ class StockManager extends Component
     public $tempVideos = []; // Input bridge
     public $tempVideosList = []; // Persistent video store
     public $currentVideos = [];
+    public $importFile;
 
     // Restock Workspace
     public $isRestockOpen = false;
@@ -846,6 +847,7 @@ class StockManager extends Component
         $this->tempVideos   = [];
         $this->tempVideosList = [];
         $this->currentVideos = [];
+        $this->importFile   = null;
         $this->aiSuggestion = null;
         $this->seoKeywords  = [];
         $this->suggestedModelNumbers  = [];
@@ -1840,6 +1842,189 @@ class StockManager extends Component
             ->when($this->selectedSupplier, fn($q) => $q->where('supplier_id', $this->selectedSupplier))
             ->when($this->showLowStockOnly, fn($q) => $q->whereColumn('quantity', '<=', 'reorder_level'))
             ->orderBy($this->sortField, $this->sortDirection);
+    }
+
+    public function importCsv()
+    {
+        $this->validate([
+            'importFile' => 'required|file|mimes:csv,txt|max:10240',
+        ]);
+
+        try {
+            $path = $this->importFile->getRealPath();
+            $file = fopen($path, 'r');
+            
+            // Read header
+            $header = fgetcsv($file);
+            if (!$header) {
+                $this->dispatch('notify', ['type' => 'error', 'message' => 'The uploaded CSV file is empty.']);
+                fclose($file);
+                return;
+            }
+
+            // Normalize header columns to lowercase
+            $header = array_map(fn($col) => strtolower(trim($col)), $header);
+
+            $rowCount = 0;
+            $successCount = 0;
+
+            while (($row = fgetcsv($file)) !== false) {
+                $rowCount++;
+                $data = array_combine($header, array_slice(array_pad($row, count($header), ''), 0, count($header)));
+                
+                // Required fields: name, SKU or item code, selling_price, unit_price
+                $name = trim($data['name'] ?? '');
+                if ($name === '') {
+                    continue;
+                }
+
+                // Match or generate SKU
+                $sku = trim($data['sku'] ?? '');
+                if ($sku === '') {
+                    $sku = 'SKU-' . strtoupper(Str::random(8));
+                }
+
+                // Match or generate Item Code
+                $itemCode = trim($data['item code'] ?? $data['item_code'] ?? '');
+                if ($itemCode === '') {
+                    $itemCode = 'ITM-' . date('Ym') . '-' . strtoupper(Str::random(4));
+                }
+
+                // Find or create Category
+                $categoryName = trim($data['category'] ?? '');
+                $categoryId = null;
+                if ($categoryName !== '') {
+                    $category = Category::firstOrCreate(['name' => $categoryName], ['slug' => Str::slug($categoryName)]);
+                    $categoryId = $category->id;
+                }
+
+                // Find or create Brand
+                $brandName = trim($data['brand'] ?? '');
+                $brandId = null;
+                if ($brandName !== '') {
+                    $brand = Brand::firstOrCreate(['name' => $brandName], ['slug' => Str::slug($brandName), 'status' => 'active']);
+                    $brandId = $brand->id;
+                }
+
+                // Find or create Make
+                $makeName = trim($data['make'] ?? '');
+                $makeId = null;
+                if ($makeName !== '') {
+                    $make = Make::firstOrCreate(
+                        ['name' => $makeName],
+                        [
+                            'code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $makeName), 0, 4)),
+                            'is_active' => true
+                        ]
+                    );
+                    $makeId = $make->id;
+                }
+
+                // Find or create Supplier
+                $supplierName = trim($data['supplier'] ?? '');
+                $supplierId = null;
+                if ($supplierName !== '') {
+                    $supplier = Supplier::firstOrCreate(
+                        ['name' => $supplierName],
+                        [
+                            'email' => Str::slug($supplierName) . '@placeholder.stock-ai.local',
+                            'company' => $supplierName,
+                            'contact_person' => $supplierName,
+                            'status' => 'active'
+                        ]
+                    );
+                    $supplierId = $supplier->id;
+                }
+
+                // Find or create Quality Level
+                $qualityLevelName = trim($data['quality level'] ?? $data['quality_level'] ?? '');
+                $qualityLevelCode = null;
+                if ($qualityLevelName !== '') {
+                    $qualityLevel = ItemQualityLevel::firstOrCreate(
+                        ['name' => $qualityLevelName],
+                        [
+                            'code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $qualityLevelName), 0, 4)),
+                            'level_order' => ItemQualityLevel::count() + 1,
+                            'is_active' => true,
+                            'color' => 'slate',
+                            'icon' => 'fa-award'
+                        ]
+                    );
+                    $qualityLevelCode = $qualityLevel->code;
+                }
+
+                // Category fallback
+                if (!$categoryId) {
+                    $defaultCategory = Category::first() ?: Category::create(['name' => 'General', 'slug' => 'general']);
+                    $categoryId = $defaultCategory->id;
+                }
+
+                // Brand fallback
+                if (!$brandId) {
+                    $defaultBrand = Brand::first() ?: Brand::create(['name' => 'Generic', 'slug' => 'generic', 'status' => 'active']);
+                    $brandId = $defaultBrand->id;
+                }
+
+                // Make fallback
+                if (!$makeId) {
+                    $defaultMake = Make::first() ?: Make::create(['name' => 'Generic', 'code' => 'GENR', 'is_active' => true]);
+                    $makeId = $defaultMake->id;
+                }
+
+                // Supplier fallback
+                if (!$supplierId) {
+                    $defaultSupplier = Supplier::first() ?: Supplier::create([
+                        'name' => 'Default Supplier',
+                        'email' => 'default@placeholder.stock-ai.local',
+                        'company' => 'Default Company',
+                        'contact_person' => 'Default Contact',
+                        'status' => 'active'
+                    ]);
+                    $supplierId = $defaultSupplier->id;
+                }
+
+                // Status
+                $status = trim($data['status'] ?? 'active');
+                if (!in_array($status, ['active', 'inactive', 'discontinued'])) {
+                    $status = 'active';
+                }
+
+                // Update or Create Stock
+                Stock::updateOrCreate(
+                    ['sku' => $sku],
+                    [
+                        'item_code' => $itemCode,
+                        'name' => $name,
+                        'description' => trim($data['description'] ?? ''),
+                        'category_id' => $categoryId,
+                        'make_id' => $makeId,
+                        'brand_id' => $brandId,
+                        'supplier_id' => $supplierId ?: 1,
+                        'quantity' => (int)($data['quantity'] ?? 0),
+                        'unit_price' => (float)($data['unit price'] ?? $data['unit_price'] ?? 0),
+                        'selling_price' => (float)($data['selling price'] ?? $data['selling_price'] ?? 0),
+                        'wholesale_price' => isset($data['wholesale price']) || isset($data['wholesale_price']) ? (float)($data['wholesale price'] ?? $data['wholesale_price']) : null,
+                        'status' => $status,
+                        'color' => trim($data['color'] ?? ''),
+                        'size' => trim($data['size'] ?? ''),
+                        'weight' => isset($data['weight']) ? (float)$data['weight'] : null,
+                        'tags' => trim($data['tags'] ?? ''),
+                        'quality_level' => $qualityLevelCode,
+                        'location' => trim($data['location'] ?? 'Main Warehouse')
+                    ]
+                );
+
+                $successCount++;
+            }
+
+            fclose($file);
+            $this->importFile = null;
+            $this->dispatch('notify', ['type' => 'success', 'message' => "Successfully imported {$successCount} of {$rowCount} records from CSV."]);
+            $this->resetPage();
+        } catch (\Throwable $e) {
+            Log::error('CSV Bulk Import failed: ' . $e->getMessage());
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to import CSV: ' . $e->getMessage()]);
+        }
     }
 
     public function exportCsv()
