@@ -39,55 +39,133 @@ $cartCount = collect(session('cart', []))->sum('quantity');
 
     <main class="px-4 pb-16 space-y-12">
         <!-- Hero Protocol -->
-        <section class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative" style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(135deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
-            @if($heroSurface !== 'minimal')
-                <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"1\" fill-rule=\"evenodd\"%3E%3Ccircle cx=\"3\" cy=\"3\" r=\"3\"/%3E%3Ccircle cx=\"13\" cy=\"13\" r=\"3\"/%3E%3C/g%3E%3C/svg%3E');"></div>
-            @endif
-            
-            <div class="relative z-10 px-6 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24">
-                <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : 'grid gap-10 sm:gap-16 lg:grid-cols-2 lg:items-center' }}">
-                    <div class="{{ $heroLayout === 'centered' ? '' : 'text-left' }}">
-                        <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 {{ $heroSurface !== 'minimal' ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 text-slate-500' }}">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            {{ $siteTagline }}
-                        </div>
-                        
-                        <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] text-slate-900 {{ $heroSurface !== 'minimal' ? 'text-white' : '' }} tracking-tight">
-                            {{ $heroTitle }}
-                            <span class="block mt-2 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">{{ $heroHighlight }}</span>
-                        </h1>
-                        
-                        <p class="mt-8 text-lg leading-relaxed {{ $heroSurface !== 'minimal' ? 'text-white/80' : 'text-slate-600' }} max-w-xl {{ $heroLayout === 'centered' ? 'mx-auto' : '' }}">
-                            {{ $heroSubtitle }} <span class="font-bold {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-900' }}">{{ $heroMicrocopy }}</span>
-                        </p>
-                        
-                        <div class="mt-10 flex flex-col sm:flex-row flex-wrap items-center gap-4 sm:gap-6 {{ $heroLayout === 'centered' ? 'justify-center' : '' }}">
-                            <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-4 rounded-full px-10 py-4 sm:py-5 text-xs font-black text-white uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-indigo-500/40 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
-                                <span>{{ $heroBtnText }}</span>
-                                <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
-                            </a>
-                            @guest
-                                <a wire:navigate href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border px-10 py-4 sm:py-5 text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm hover:shadow-lg' }}">
-                                    Onboard Now
-                                </a>
-                            @endguest
-                        </div>
-                    </div>
+        @if(($heroBanners ?? collect())->isNotEmpty())
+            <section x-data="{ activeSlide: 0, slidesCount: {{ $heroBanners->count() }} }" 
+                     x-init="setInterval(() => { activeSlide = (activeSlide + 1) % slidesCount }, 7000)"
+                     class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative shadow-2xl">
+                
+                @foreach($heroBanners as $index => $banner)
+                    <div x-show="activeSlide === {{ $index }}" 
+                         x-transition:enter="transition ease-out duration-1000"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-500"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-105"
+                         class="relative z-10 px-6 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24"
+                         style="background: {{ $banner->bg_color ?: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}; color: {{ $banner->text_color ?: '#ffffff' }}">
+                         
+                         <div class="absolute inset-0 opacity-15" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;1&quot; fill-rule=&quot;evenodd&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;3&quot;/%3E%3Ccircle cx=&quot;13&quot; cy=&quot;13&quot; r=&quot;3&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+                         
+                         <div class="relative z-10 grid gap-10 sm:gap-16 lg:grid-cols-2 lg:items-center">
+                             <div class="text-left">
+                                 @if($banner->subtitle)
+                                     <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-white/20">
+                                         <span class="relative flex h-2 w-2">
+                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                         </span>
+                                         {{ $banner->subtitle }}
+                                     </div>
+                                 @endif
+                                 
+                                 <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+                                     {{ $banner->title }}
+                                 </h1>
+                                 
+                                 @if($banner->caption)
+                                     <p class="mt-8 text-lg leading-relaxed opacity-90 max-w-xl">
+                                         {{ $banner->caption }}
+                                     </p>
+                                 @endif
+                                 
+                                 @if($banner->button_text)
+                                     <div class="mt-10">
+                                         <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
+                                            class="inline-flex items-center justify-center gap-4 rounded-full bg-white px-10 py-4 sm:py-5 text-xs font-black uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-white/25 group"
+                                            style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
+                                             <span>{{ $banner->button_text }}</span>
+                                             <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                                         </a>
+                                     </div>
+                                 @endif
+                             </div>
 
-                    @if($heroImagePath && $heroLayout !== 'centered')
-                        <div class="relative group">
-                            <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
-                            <div class="relative overflow-hidden rounded-[2.5rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-2xl' : 'border-slate-200 bg-white shadow-xl' }} p-2 sm:p-4">
-                                <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[250px] sm:h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
+                             @if($banner->image_path)
+                                 <div class="relative group">
+                                     <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
+                                     <div class="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/10 shadow-2xl p-2 sm:p-4">
+                                         <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title }}" class="h-[250px] sm:h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
+                                     </div>
+                                 </div>
+                             @endif
+                         </div>
+                    </div>
+                @endforeach
+
+                <!-- Slide indicators -->
+                @if($heroBanners->count() > 1)
+                    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-2.5">
+                        @foreach($heroBanners as $index => $banner)
+                            <button @click="activeSlide = {{ $index }}" 
+                                    class="h-2 rounded-full transition-all duration-300"
+                                    :class="activeSlide === {{ $index }} ? 'w-8 bg-white' : 'w-2 bg-white/40'"></button>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+        @else
+            <!-- Static Hero Fallback -->
+            <section class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative" style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(135deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
+                @if($heroSurface !== 'minimal')
+                    <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;1&quot; fill-rule=&quot;evenodd&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;3&quot;/%3E%3Ccircle cx=&quot;13&quot; cy=&quot;13&quot; r=&quot;3&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+                @endif
+                
+                <div class="relative z-10 px-6 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24">
+                    <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : 'grid gap-10 sm:gap-16 lg:grid-cols-2 lg:items-center' }}">
+                        <div class="{{ $heroLayout === 'centered' ? '' : 'text-left' }}">
+                            <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 {{ $heroSurface !== 'minimal' ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 text-slate-500' }}">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                {{ $siteTagline }}
+                            </div>
+                            
+                            <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] text-slate-900 {{ $heroSurface !== 'minimal' ? 'text-white' : '' }} tracking-tight">
+                                {{ $heroTitle }}
+                                <span class="block mt-2 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">{{ $heroHighlight }}</span>
+                            </h1>
+                            
+                            <p class="mt-8 text-lg leading-relaxed {{ $heroSurface !== 'minimal' ? 'text-white/80' : 'text-slate-600' }} max-w-xl {{ $heroLayout === 'centered' ? 'mx-auto' : '' }}">
+                                {{ $heroSubtitle }} <span class="font-bold {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-900' }}">{{ $heroMicrocopy }}</span>
+                            </p>
+                            
+                            <div class="mt-10 flex flex-col sm:flex-row flex-wrap items-center gap-4 sm:gap-6 {{ $heroLayout === 'centered' ? 'justify-center' : '' }}">
+                                <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-4 rounded-full px-10 py-4 sm:py-5 text-xs font-black text-white uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-indigo-500/40 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                                    <span>{{ $heroBtnText }}</span>
+                                    <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                                </a>
+                                @guest
+                                    <a wire:navigate href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border px-10 py-4 sm:py-5 text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm hover:shadow-lg' }}">
+                                        Onboard Now
+                                    </a>
+                                @endguest
                             </div>
                         </div>
-                    @endif
+
+                        @if($heroImagePath && $heroLayout !== 'centered')
+                            <div class="relative group">
+                                <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
+                                <div class="relative overflow-hidden rounded-[2.5rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-2xl' : 'border-slate-200 bg-white shadow-xl' }} p-2 sm:p-4">
+                                    <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[250px] sm:h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
+                                </div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        @endif
 
         <!-- Category Pulse -->
         <section id="categories" class="mx-auto max-w-7xl px-4">
@@ -120,7 +198,36 @@ $cartCount = collect(session('cart', []))->sum('quantity');
             </div>
         </section>
 
-        @if($promoStripEnabled)
+        <!-- Promo Strip Protocol -->
+        @if(($promoBanners ?? collect())->isNotEmpty())
+            @foreach($promoBanners as $banner)
+                <section class="mx-auto mt-8 max-w-7xl">
+                    <div class="card rounded-[2rem] px-6 py-6 sm:px-8 shadow-xl transition-all hover:scale-[1.01]" 
+                         style="background: {{ $banner->bg_color ?: 'linear-gradient(120deg, var(--primary), var(--secondary))' }}; color: {{ $banner->text_color ?: '#ffffff' }}">
+                        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                            <div class="max-w-3xl">
+                                @if($banner->subtitle)
+                                    <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em]">{{ $banner->subtitle }}</span>
+                                @endif
+                                <h2 class="mt-4 text-2xl font-black sm:text-3xl" style="color: {{ $banner->text_color ?: '#ffffff' }}">{{ $banner->title }}</h2>
+                                @if($banner->caption)
+                                    <p class="mt-3 max-w-2xl text-sm leading-7 opacity-80">{{ $banner->caption }}</p>
+                                @endif
+                            </div>
+                            @if($banner->button_text)
+                                <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
+                                   class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold shadow-lg hover:scale-105 transition-transform"
+                                   style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
+                                    {{ $banner->button_text }}
+                                    <i class="fas fa-arrow-right text-xs"></i>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </section>
+            @endforeach
+        @elseif($promoStripEnabled)
+            <!-- Static Promo Strip Fallback -->
             <section class="mx-auto mt-8 max-w-7xl">
                 <div class="card rounded-[2rem] px-6 py-6 text-white sm:px-8" style="background:linear-gradient(120deg, {{ $promoStripFrom }}, {{ $promoStripTo }})">
                     <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
