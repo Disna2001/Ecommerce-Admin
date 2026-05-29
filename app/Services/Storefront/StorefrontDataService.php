@@ -43,7 +43,7 @@ class StorefrontDataService
                 'utilityCenter' => SiteSetting::get('utility_center_text', '24/7 Support'),
                 'searchPlaceholder' => SiteSetting::get('home_search_placeholder', 'Search products...'),
                 'footerTagline' => SiteSetting::get('footer_tagline', 'Premium digital subscriptions at unbeatable prices.'),
-                'footerCopy' => SiteSetting::get('footer_copyright', '© '.date('Y').' '.SiteSetting::get('site_name', 'DISPLAY LANKA.LK').'. All rights reserved.'),
+                'footerCopy' => preg_replace('/\b20\d{2}\b/', date('Y'), SiteSetting::get('footer_copyright', '© '.date('Y').' '.SiteSetting::get('site_name', 'DISPLAY LANKA.LK').'. All rights reserved.')),
                 'fbUrl' => SiteSetting::get('facebook_url', '#'),
                 'twUrl' => SiteSetting::get('twitter_url', '#'),
                 'igUrl' => SiteSetting::get('instagram_url', '#'),
