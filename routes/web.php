@@ -19,6 +19,65 @@ Route::get('/track-order', [StorefrontController::class, 'trackOrder'])->name('t
 Route::get('/refund-policy', [StorefrontController::class, 'refundPolicy'])->name('refund-policy');
 Route::get('/privacy-policy', [StorefrontController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-and-conditions', [StorefrontController::class, 'termsConditions'])->name('terms-and-conditions');
+
+// Dynamic XML Sitemap for SEO
+Route::get('/sitemap.xml', function () {
+    $stocks = \App\Models\Stock::visibleOnStorefront()->get();
+    
+    // Resolve dynamic request host bypassing Laravel's URL overrides
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ($_SERVER['SERVER_PORT'] ?? 80) == 443
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.displaylanka.shop');
+    $host = rtrim($host, '/');
+    
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    
+    // Add homepage
+    $xml .= '<url>';
+    $xml .= '<loc>' . $host . '</loc>';
+    $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
+    $xml .= '<changefreq>daily</changefreq>';
+    $xml .= '<priority>1.0</priority>';
+    $xml .= '</url>';
+    
+    // Add products index page
+    $xml .= '<url>';
+    $xml .= '<loc>' . $host . '/products' . '</loc>';
+    $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
+    $xml .= '<changefreq>daily</changefreq>';
+    $xml .= '<priority>0.9</priority>';
+    $xml .= '</url>';
+
+    // Add general pages
+    $pages = ['help-center', 'track-order', 'refund-policy', 'privacy-policy', 'terms-and-conditions'];
+    foreach ($pages as $page) {
+        $xml .= '<url>';
+        $xml .= '<loc>' . $host . '/' . $page . '</loc>';
+        $xml .= '<lastmod>' . now()->subDays(2)->toAtomString() . '</lastmod>';
+        $xml .= '<changefreq>monthly</changefreq>';
+        $xml .= '<priority>0.5</priority>';
+        $xml .= '</url>';
+    }
+    
+    // Add active products
+    foreach ($stocks as $stock) {
+        $xml .= '<url>';
+        $xml .= '<loc>' . $host . '/products/' . $stock->getRouteKey() . '</loc>';
+        $xml .= '<lastmod>' . ($stock->updated_at?->toAtomString() ?: now()->toAtomString()) . '</lastmod>';
+        $xml .= '<changefreq>weekly</changefreq>';
+        $xml .= '<priority>0.8</priority>';
+        $xml .= '</url>';
+    }
+    
+    $xml .= '</urlset>';
+    
+    return response($xml, 200, [
+        'Content-Type' => 'application/xml',
+    ]);
+});
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify'])->name('whatsapp.webhook.verify');
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive'])->name('whatsapp.webhook.receive');
 
