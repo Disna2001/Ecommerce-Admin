@@ -1,3 +1,5 @@
+@props(['returnAction' => 'approve'])
+
 <div class="fixed inset-0 z-[95] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
     <div class="w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
         <div class="border-b border-slate-200 px-6 py-5">

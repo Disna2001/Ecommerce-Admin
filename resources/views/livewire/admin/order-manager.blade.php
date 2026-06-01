@@ -29,10 +29,10 @@
     @endif
 
     @if($showPaymentModal)
-        <x-admin.orders.payment-modal :payment-review-order="$paymentReviewOrder" />
+        <x-admin.orders.payment-modal :payment-review-order="$paymentReviewOrder" :payment-decision="$paymentDecision" />
     @endif
 
     @if($showReturnModal)
-        <x-admin.orders.return-modal />
+        <x-admin.orders.return-modal :return-action="$returnAction" />
     @endif
 </div>
