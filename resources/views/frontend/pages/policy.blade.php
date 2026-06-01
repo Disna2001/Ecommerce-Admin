@@ -1,9 +1,9 @@
 @extends('layouts.shop')
 @section('title', $title)
 @section('content')
-@php($supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', '')))
-@php($supportPhone = \App\Models\SiteSetting::get('support_phone', ''))
 @php
+    $supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', ''));
+    $supportPhone = \App\Models\SiteSetting::get('support_phone', '');
     $panel = "premium-card !p-8 !rounded-[2.5rem]";
     $muted = "text-[10px] font-black uppercase tracking-[0.2em] text-slate-400";
 @endphp
