@@ -95,7 +95,7 @@ class PosInvoice extends Component
 
     public $showCustomerCreateModal = false;
 
-    public $createdInvoice = null;
+    public $createdInvoiceId = null;
 
     public $heldInvoiceId = null;
 
@@ -471,6 +471,11 @@ class PosInvoice extends Component
             'today_paid' => Invoice::whereDate('created_at', today())->where('status', 'paid')->count(),
             'today_partial' => Invoice::whereDate('created_at', today())->where('balance_due', '>', 0)->count(),
         ];
+    }
+
+    public function getCreatedInvoiceProperty()
+    {
+        return $this->createdInvoiceId ? Invoice::with('items')->find($this->createdInvoiceId) : null;
     }
 
     public function applyQuickTender($mode)
@@ -1073,7 +1078,7 @@ class PosInvoice extends Component
                 $this->sendInvoiceEmail($invoice, $customerNotificationService);
             }
 
-            $this->createdInvoice = $invoice;
+            $this->createdInvoiceId = $invoice->id;
             $this->showPaymentModal = false;
             $this->showSuccessModal = true;
 
@@ -1091,7 +1096,7 @@ class PosInvoice extends Component
      */
     public function resendInvoiceEmail($invoiceId = null)
     {
-        $invoiceId = $invoiceId ?? ($this->createdInvoice->id ?? null);
+        $invoiceId = $invoiceId ?? $this->createdInvoiceId;
 
         if (! $invoiceId) {
             $this->dispatch('show-error', message: 'No invoice found to resend.');
@@ -1130,14 +1135,14 @@ class PosInvoice extends Component
 
     public function printReceipt()
     {
-        $this->dispatch('print-receipt', invoiceId: $this->createdInvoice->id);
+        $this->dispatch('print-receipt', invoiceId: $this->createdInvoiceId);
     }
 
     public function newSale()
     {
         $this->clearCart();
         $this->showSuccessModal = false;
-        $this->createdInvoice = null;
+        $this->createdInvoiceId = null;
         $this->sendInvoiceEmail = true; // Reset the checkbox
     }
 
@@ -1156,6 +1161,7 @@ class PosInvoice extends Component
         ]);
 
         return view('livewire.pos-invoice', [
+            'createdInvoice' => $this->createdInvoice,
             'held_sales' => Invoice::with('items')
                 ->where('status', 'draft')
                 ->latest('updated_at')
