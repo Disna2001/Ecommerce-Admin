@@ -159,17 +159,17 @@
     </style>
 </head>
 <body>
-    @if(filled($company['logo_data_uri'] ?? ''))
+    @if(filled($company['logo_full_path'] ?? '') || filled($company['logo_data_uri'] ?? ''))
         <div class="watermark-image">
-            <img src="{{ $company['logo_data_uri'] }}" alt="Watermark Logo">
+            <img src="{{ $company['logo_full_path'] ?: $company['logo_data_uri'] }}" alt="Watermark Logo">
         </div>
     @endif
     <div class="watermark">{{ $invoice->isPaid() ? 'PAID' : 'UNPAID' }}</div>
     <div class="page">
         <div class="header">
-            @if(filled($company['logo_data_uri'] ?? ''))
+            @if(filled($company['logo_full_path'] ?? '') || filled($company['logo_data_uri'] ?? ''))
                 <div class="header-brand">
-                    <img src="{{ $company['logo_data_uri'] }}" alt="{{ $company['name'] }} logo">
+                    <img src="{{ $company['logo_full_path'] ?: $company['logo_data_uri'] }}" alt="{{ $company['name'] }} logo">
                 </div>
             @endif
             <h1>{{ $company['name'] }}</h1>

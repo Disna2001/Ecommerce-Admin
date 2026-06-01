@@ -1077,8 +1077,10 @@ class PosInvoice extends Component
             $this->showPaymentModal = false;
             $this->showSuccessModal = true;
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             Log::error('Payment processing error: '.$e->getMessage());
             $this->dispatch('show-error', message: 'Error processing payment. Please try again.');
         }

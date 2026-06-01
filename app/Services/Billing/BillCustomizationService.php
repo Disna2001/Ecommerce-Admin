@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Storage;
 
 class BillCustomizationService
 {
+    protected ?array $companyPayloadCache = null;
+
     public function defaultPrinterCatalog(): array
     {
         return [
@@ -193,6 +195,10 @@ class BillCustomizationService
 
     public function companyPayload(): array
     {
+        if ($this->companyPayloadCache !== null) {
+            return $this->companyPayloadCache;
+        }
+
         $logoPath = SiteSetting::get('logo_path', '');
         $logoFullPath = '';
         $logoDataUri = '';
@@ -211,7 +217,7 @@ class BillCustomizationService
             }
         }
 
-        return [
+        $this->companyPayloadCache = [
             'name' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
             'email' => SiteSetting::get('support_email', config('mail.from.address', 'company@example.com')),
             'phone' => SiteSetting::get('support_phone', '+94 11 234 5678'),
@@ -223,6 +229,8 @@ class BillCustomizationService
             'logo_full_path' => $logoFullPath,
             'logo_data_uri' => $logoDataUri,
         ];
+
+        return $this->companyPayloadCache;
     }
 
     public function invoiceViewData(Invoice $invoice, array $context = []): array
