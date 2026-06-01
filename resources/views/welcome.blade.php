@@ -39,9 +39,11 @@ $cartCount = collect(session('cart', []))->sum('quantity');
 
     <main class="px-4 pb-16 space-y-12">
         <!-- Hero Protocol -->
-        @if(($heroBanners ?? collect())->isNotEmpty())
+        @if(($heroSlideshowEnabled ?? true) && ($heroBanners ?? collect())->isNotEmpty())
             <section x-data="{ activeSlide: 0, slidesCount: {{ $heroBanners->count() }} }" 
+                     @if($heroSlideshowAutoplay ?? true)
                      x-init="setInterval(() => { activeSlide = (activeSlide + 1) % slidesCount }, 7000)"
+                     @endif
                      class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative shadow-2xl">
                 
                 @foreach($heroBanners as $index => $banner)

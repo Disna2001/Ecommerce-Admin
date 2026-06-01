@@ -79,6 +79,43 @@
             </div>
         </div>
 
+        <!-- Slideshow Intelligence -->
+        <div class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Campaign Slideshow Intelligence</p>
+            <div class="grid gap-6 md:grid-cols-2">
+                <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <button 
+                            type="button"
+                            wire:click="$set('hero_slideshow_enabled', {{ !$hero_slideshow_enabled ? 'true' : 'false' }})"
+                            class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none {{ $hero_slideshow_enabled ? 'bg-sky-500' : 'bg-slate-200' }}"
+                        >
+                            <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $hero_slideshow_enabled ? 'translate-x-8' : 'translate-x-1' }}"></span>
+                        </button>
+                        <div>
+                            <span class="text-xs font-black text-slate-900 uppercase tracking-widest block">Enable Slideshow</span>
+                            <span class="text-[9px] font-bold text-slate-400 leading-relaxed block">Toggle dynamic banner carousel on the storefront</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <button 
+                            type="button"
+                            wire:click="$set('hero_slideshow_autoplay', {{ !$hero_slideshow_autoplay ? 'true' : 'false' }})"
+                            class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none {{ $hero_slideshow_autoplay ? 'bg-sky-500' : 'bg-slate-200' }}"
+                        >
+                            <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $hero_slideshow_autoplay ? 'translate-x-8' : 'translate-x-1' }}"></span>
+                        </button>
+                        <div>
+                            <span class="text-xs font-black text-slate-900 uppercase tracking-widest block">Slideshow Autoplay</span>
+                            <span class="text-[9px] font-bold text-slate-400 leading-relaxed block">Auto-rotate campaign banners every 7 seconds</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Structural Layout -->
         <div class="lg:col-span-2 grid gap-6 md:grid-cols-3">
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

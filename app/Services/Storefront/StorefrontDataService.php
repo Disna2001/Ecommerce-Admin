@@ -92,6 +92,8 @@ class StorefrontDataService
             'heroImagePath' => SiteSetting::get('hero_image_path', ''),
             'heroBtnText' => SiteSetting::get('hero_button_text', 'Shop Now'),
             'heroBtnLink' => SiteSetting::get('hero_button_link', '/products'),
+            'heroSlideshowEnabled' => (bool) SiteSetting::get('hero_slideshow_enabled', true),
+            'heroSlideshowAutoplay' => (bool) SiteSetting::get('hero_slideshow_autoplay', true),
             'featureOne' => SiteSetting::get('feature_one_text', 'Instant Delivery'),
             'featureTwo' => SiteSetting::get('feature_two_text', 'Secure Payment'),
             'featureThree' => SiteSetting::get('feature_three_text', '24/7 Available'),

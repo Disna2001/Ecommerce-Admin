@@ -72,9 +72,10 @@
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Related Section Title</label>
                         <input type="text" wire:model="detail_related_title" class="mt-2 w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 shadow-inner">
                     </div>
-                    <div class="grid gap-4 md:grid-cols-2">
+                    <div class="grid gap-4 md:grid-cols-3">
                         <div class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <button 
+                                type="button"
                                 wire:click="$set('detail_show_reviews', {{ !$detail_show_reviews ? 'true' : 'false' }})"
                                 class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none {{ $detail_show_reviews ? 'bg-violet-500' : 'bg-slate-200' }}"
                             >
@@ -84,12 +85,23 @@
                         </div>
                         <div class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <button 
+                                type="button"
                                 wire:click="$set('detail_show_related', {{ !$detail_show_related ? 'true' : 'false' }})"
                                 class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none {{ $detail_show_related ? 'bg-violet-500' : 'bg-slate-200' }}"
                             >
                                 <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $detail_show_related ? 'translate-x-8' : 'translate-x-1' }}"></span>
                             </button>
                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Related Grid</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <button 
+                                type="button"
+                                wire:click="$set('detail_image_magnifier_enabled', {{ !$detail_image_magnifier_enabled ? 'true' : 'false' }})"
+                                class="relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none {{ $detail_image_magnifier_enabled ? 'bg-violet-500' : 'bg-slate-200' }}"
+                            >
+                                <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {{ $detail_image_magnifier_enabled ? 'translate-x-8' : 'translate-x-1' }}"></span>
+                            </button>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Image Magnifier</span>
                         </div>
                     </div>
                 </div>

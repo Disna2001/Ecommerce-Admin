@@ -221,6 +221,7 @@ class ProductDetail extends Component
                 'related_title' => SiteSetting::get('detail_related_title', 'Related Products'),
                 'show_reviews' => SiteSetting::get('detail_show_reviews', true),
                 'show_related' => SiteSetting::get('detail_show_related', true),
+                'image_magnifier_enabled' => SiteSetting::get('detail_image_magnifier_enabled', true),
             ]);
     }
 }

@@ -19,9 +19,26 @@
         </nav>
         <div class="grid gap-12 lg:grid-cols-[1fr_0.8fr]">
             <div class="space-y-8">
-                <div class="premium-card !p-0 !rounded-[3.5rem] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-white/5 h-[400px] sm:h-[600px] border border-slate-100 dark:border-white/5">
+                <div class="premium-card !p-0 !rounded-[3.5rem] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-white/5 h-[400px] sm:h-[600px] border border-slate-100 dark:border-white/5 relative"
+                     @if($detailSettings['image_magnifier_enabled'] ?? true)
+                     x-data="{ zoomed: false, bgX: 50, bgY: 50 }"
+                     @mouseenter="zoomed = true"
+                     @mouseleave="zoomed = false; bgX = 50; bgY = 50;"
+                     @mousemove="
+                        const rect = $el.getBoundingClientRect();
+                        bgX = (($event.clientX - rect.left) / rect.width) * 100;
+                        bgY = (($event.clientY - rect.top) / rect.height) * 100;
+                     "
+                     :class="zoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'"
+                     @endif
+                >
                     @if(!empty($imageUrls) && isset($imageUrls[$activeImage]))
-                        <picture class="h-full w-full">
+                        <picture class="h-full w-full transition-transform duration-200 ease-out"
+                                 @if($detailSettings['image_magnifier_enabled'] ?? true)
+                                 :class="zoomed ? 'scale-[2.2]' : 'scale-100'"
+                                 :style="zoomed ? `transform-origin: ${bgX}% ${bgY}%` : ''"
+                                 @endif
+                        >
                             @if(isset($imageSourceSets[$activeImage]['webp']) && $imageSourceSets[$activeImage]['webp'])
                                 <source srcset="{{ $imageSourceSets[$activeImage]['webp'] }}" type="image/webp">
                             @endif

@@ -41,6 +41,8 @@ class AppearanceManager extends Component
     public $hero_surface     = 'soft';
     public $hero_image;
     public $hero_image_path  = '';
+    public $hero_slideshow_enabled = true;
+    public $hero_slideshow_autoplay = true;
 
     // Homepage content
     public $utility_badge_text = 'Instant Delivery';
@@ -100,6 +102,7 @@ class AppearanceManager extends Component
     public $detail_related_title = 'Related Products';
     public $detail_show_reviews = true;
     public $detail_show_related = true;
+    public $detail_image_magnifier_enabled = true;
 
     // ── Footer ────────────────────────────────────────────────
     public $footer_tagline   = 'Your one-stop shop for everything trendy and affordable.';
@@ -230,6 +233,7 @@ class AppearanceManager extends Component
             'primary_color', 'secondary_color', 'accent_color', 'text_color', 'bg_color', 'nav_bg_color',
             'hero_title', 'hero_subtitle', 'hero_button_text', 'hero_button_link',
             'hero_highlight_text', 'hero_microcopy', 'hero_bg_from', 'hero_bg_to', 'hero_layout', 'hero_alignment', 'hero_surface', 'hero_image_path',
+            'hero_slideshow_enabled', 'hero_slideshow_autoplay',
             'utility_badge_text', 'utility_left_text', 'utility_center_text', 'home_search_placeholder',
             'feature_one_text', 'feature_two_text', 'feature_three_text', 'feature_four_text',
             'featured_section_title', 'new_arrivals_section_title', 'deals_section_title',
@@ -243,7 +247,7 @@ class AppearanceManager extends Component
             'detail_trust_one_title', 'detail_trust_one_text', 'detail_trust_two_title', 'detail_trust_two_text',
             'detail_trust_three_title', 'detail_trust_three_text', 'detail_value_title', 'detail_value_text',
             'detail_value_cta', 'detail_in_stock_label', 'detail_low_stock_template', 'detail_out_of_stock_label',
-            'detail_related_title', 'detail_show_reviews', 'detail_show_related',
+            'detail_related_title', 'detail_show_reviews', 'detail_show_related', 'detail_image_magnifier_enabled',
             'footer_tagline', 'footer_copyright',
             'facebook_url', 'twitter_url', 'instagram_url', 'pinterest_url',
             'enable_cod', 'enable_bank_transfer', 'enable_card_payment',
@@ -337,6 +341,9 @@ class AppearanceManager extends Component
         SiteSetting::set('category_show_icons',    $this->category_show_icons    ? '1' : '0', 'boolean', 'appearance');
         SiteSetting::set('detail_show_reviews',    $this->detail_show_reviews    ? '1' : '0', 'boolean', 'appearance');
         SiteSetting::set('detail_show_related',    $this->detail_show_related    ? '1' : '0', 'boolean', 'appearance');
+        SiteSetting::set('hero_slideshow_enabled', $this->hero_slideshow_enabled ? '1' : '0', 'boolean', 'hero');
+        SiteSetting::set('hero_slideshow_autoplay', $this->hero_slideshow_autoplay ? '1' : '0', 'boolean', 'hero');
+        SiteSetting::set('detail_image_magnifier_enabled', $this->detail_image_magnifier_enabled ? '1' : '0', 'boolean', 'appearance');
         SiteSetting::set('enable_cod', $this->enable_cod ? '1' : '0', 'boolean', 'payment');
         SiteSetting::set('enable_bank_transfer', $this->enable_bank_transfer ? '1' : '0', 'boolean', 'payment');
         SiteSetting::set('enable_card_payment', $this->enable_card_payment ? '1' : '0', 'boolean', 'payment');
