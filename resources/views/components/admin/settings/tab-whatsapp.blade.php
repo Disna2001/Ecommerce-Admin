@@ -1,4 +1,4 @@
-@props(['app_public_url' => ''])
+@props(['app_public_url' => '', 'whatsapp_enabled' => false, 'whatsapp_provider' => 'meta_cloud'])
 <div class="space-y-8">
     <div class="flex items-center gap-4">
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-inner"><i class="fas fa-comment-dots text-lg"></i></div>
@@ -25,7 +25,6 @@
         </a>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-2">
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
             <div class="flex items-center justify-between px-2">
@@ -97,7 +96,7 @@
             </div>
         </div>
 
-        <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="lg:col-span-3 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
             <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Automation Blueprints</p>
             <div class="grid gap-6 md:grid-cols-2">
                 <div class="space-y-1.5">

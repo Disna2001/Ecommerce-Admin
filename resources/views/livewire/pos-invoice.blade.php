@@ -988,18 +988,16 @@
         .pos-panel,
         .pos-statbar {
             border: 1px solid rgba(226, 232, 240, 0.9);
-            background: rgba(255, 255, 255, 0.84);
+            background: #ffffff;
             border-radius: 1.15rem;
             box-shadow: 0 8px 24px -24px rgba(15, 23, 42, 0.22);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .dark .pos-toolbar,
         .dark .pos-panel,
         .dark .pos-statbar {
             border-color: rgba(51, 65, 85, 0.95);
-            background: rgba(15, 23, 42, 0.72);
+            background: #1e293b;
         }
 
         .pos-toolbar {
@@ -1649,10 +1647,12 @@
                 overflow: auto;
             }
 
-            .pos-rail > .pos-panel:nth-child(2) {
-                position: sticky;
-                top: 0;
-                z-index: 3;
+            @media (min-height: 850px) {
+                .pos-rail > .pos-panel:nth-child(2) {
+                    position: sticky;
+                    top: 0;
+                    z-index: 3;
+                }
             }
         }
 
