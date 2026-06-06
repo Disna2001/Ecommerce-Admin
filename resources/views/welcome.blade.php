@@ -258,21 +258,21 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                 <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
                     @foreach($personalizedRecommendations as $product)
                         <article class="premium-card group overflow-hidden flex flex-col h-full">
-                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-3 pb-0">
-                                <div class="absolute left-6 top-6 z-10 rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">For You</div>
-                                <div class="flex h-64 items-center justify-center rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-8 overflow-hidden">
+                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">
+                                <div class="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 rounded-full px-2.5 sm:px-3 py-1 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">For You</div>
+                                <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1.5rem] sm:rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
                                     @if($product->primary_image_url)
                                         <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
                                     @endif
                                 </div>
                             </a>
-                            <div class="p-6 pt-5 flex flex-col flex-1">
-                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">{{ $product->brand->name ?? 'Premium Item' }}</p>
-                                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight mb-4 group-hover:text-[var(--primary)] transition-colors">{{ $product->name }}</h3>
-                                <div class="mt-auto flex items-center justify-between gap-4">
-                                    <p class="text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price ?? $product->selling_price, 2) }}</p>
-                                    <button type="button" class="shop-cart-btn h-10 w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
-                                        <i class="fas fa-plus text-xs"></i>
+                            <div class="p-4 sm:p-6 pt-3 sm:pt-5 flex flex-col flex-1">
+                                <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 sm:mb-2">{{ $product->brand->name ?? 'Premium Item' }}</p>
+                                <h3 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight mb-2 sm:mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
+                                <div class="mt-auto flex items-center justify-between gap-2 sm:gap-4">
+                                    <p class="text-sm sm:text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price ?? $product->selling_price, 2) }}</p>
+                                    <button type="button" class="shop-cart-btn h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110 shrink-0" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
+                                        <i class="fas fa-plus text-[10px] sm:text-xs"></i>
                                     </button>
                                 </div>
                             </div>
@@ -308,33 +308,33 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                     <div class="{{ $railGridClass }}">
                         @foreach($items as $product)
                             <article class="premium-card group overflow-hidden flex flex-col h-full">
-                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-3 pb-0">
-                                    <div class="absolute left-6 top-6 z-10 flex flex-col gap-2">
-                                        <div class="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, #f97316, #ef4444)">{{ $badge }}</div>
+                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">
+                                    <div class="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 flex flex-col gap-1.5 sm:gap-2">
+                                        <div class="rounded-full px-2.5 sm:px-3 py-1 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, #f97316, #ef4444)">{{ $badge }}</div>
                                         @if($showRailStockStatus)
-                                            <div class="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] shadow-sm {{ $product->quantity <= 0 ? 'bg-slate-900 text-white' : 'bg-white text-slate-900' }}">
+                                            <div class="rounded-full px-2.5 sm:px-3 py-1 text-[7px] sm:text-[8px] font-black uppercase tracking-[0.2em] shadow-sm {{ $product->quantity <= 0 ? 'bg-slate-900 text-white' : 'bg-white text-slate-900' }}">
                                                 {{ $product->quantity <= 0 ? 'Exhausted' : 'In Registry' }}
                                             </div>
                                         @endif
                                     </div>
-                                    <div class="flex h-64 items-center justify-center rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-8 overflow-hidden">
+                                    <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1.5rem] sm:rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
                                         @if($product->primary_image_url)
                                             <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
                                         @else
-                                            <i class="fas fa-box-open text-4xl text-slate-200"></i>
+                                            <i class="fas fa-box-open text-2xl sm:text-4xl text-slate-200"></i>
                                         @endif
                                     </div>
                                 </a>
-                                <div class="p-6 pt-5 flex flex-col flex-1">
-                                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">{{ $product->brand->name ?? 'Registry Item' }}</p>
-                                    <h3 class="text-base font-black text-slate-900 leading-tight mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
-                                    <div class="mt-auto flex items-center justify-between gap-4">
+                                <div class="p-4 sm:p-6 pt-3 sm:pt-5 flex flex-col flex-1">
+                                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 sm:mb-2">{{ $product->brand->name ?? 'Registry Item' }}</p>
+                                    <h3 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight mb-2 sm:mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
+                                    <div class="mt-auto flex items-center justify-between gap-2 sm:gap-4">
                                         <div>
-                                            <p class="text-xl font-black text-slate-900">Rs {{ number_format($product->final_price, 2) }}</p>
-                                            @if($product->discount_badge)<p class="text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
+                                            <p class="text-sm sm:text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price, 2) }}</p>
+                                            @if($product->discount_badge)<p class="text-[8px] sm:text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
                                         </div>
-                                        <button type="button" class="shop-cart-btn h-10 w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
-                                            <i class="fas fa-shopping-cart text-xs"></i>
+                                        <button type="button" class="shop-cart-btn h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110 shrink-0" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
+                                            <i class="fas fa-shopping-cart text-[10px] sm:text-xs"></i>
                                         </button>
                                     </div>
                                 </div>

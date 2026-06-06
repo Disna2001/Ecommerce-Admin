@@ -148,7 +148,7 @@ class StorefrontImageService
 
     protected function assetUrl(string $path): string
     {
-        $storageUrl = Storage::url($path);
+        $storageUrl = Storage::disk('public')->url($path);
         $assetHost = rtrim((string) SiteSetting::get('asset_cdn_url', ''), '/');
 
         if (!$assetHost) {

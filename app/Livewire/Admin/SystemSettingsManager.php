@@ -447,7 +447,7 @@ class SystemSettingsManager extends Component
             'address' => $this->company_address ?: 'Colombo, Sri Lanka',
             'tax_id' => $this->company_tax_id ?: 'Pending',
             'currency_symbol' => $this->currency_symbol ?: 'Rs',
-            'logo_url' => ($logoPath = SiteSetting::get('logo_path', '')) ? \Storage::url($logoPath) : '',
+            'logo_url' => ($logoPath = SiteSetting::get('logo_path', '')) ? \Storage::disk('public')->url($logoPath) : '',
         ];
 
         $billingPreviewDocuments = [

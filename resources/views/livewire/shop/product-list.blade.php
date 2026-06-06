@@ -125,42 +125,42 @@
                         @forelse($products as $product)
                             @php($inWishlist = in_array($product->id, $wishlist))
                             <article wire:key="product-card-{{ $product->id }}" class="premium-card group overflow-hidden flex flex-col h-full">
-                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-3 pb-0">
-                                    <div class="absolute left-6 top-6 z-10 flex flex-col gap-2">
+                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">
+                                    <div class="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 flex flex-col gap-1.5 sm:gap-2">
                                         @if($product->discount_badge)
-                                            <div class="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background: linear-gradient(90deg, #f97316, #ef4444)">{{ $product->discount_badge }}</div>
+                                            <div class="rounded-full px-2.5 sm:px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background: linear-gradient(90deg, #f97316, #ef4444)">{{ $product->discount_badge }}</div>
                                         @endif
-                                        <div class="rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] {{ $product->isLowStock() ? 'bg-amber-400 text-slate-900' : 'bg-white text-slate-900' }} shadow-sm">
+                                        <div class="rounded-full px-2.5 sm:px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] {{ $product->isLowStock() ? 'bg-amber-400 text-slate-900' : 'bg-white text-slate-900' }} shadow-sm">
                                             {{ $product->isLowStock() ? 'Limited' : 'In Stock' }}
                                         </div>
                                     </div>
-                                    <div class="flex h-64 items-center justify-center rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-8 overflow-hidden">
+                                    <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1.5rem] sm:rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
                                         @if($product->primary_image_url)
                                             <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
                                         @else
-                                            <i class="fas fa-box-open text-4xl text-slate-200"></i>
+                                            <i class="fas fa-box-open text-2xl sm:text-4xl text-slate-200"></i>
                                         @endif
                                     </div>
                                 </a>
 
-                                <div class="p-6 pt-5 flex flex-col flex-1">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{{ $product->brand?->name ?? 'Premium Registry' }}</p>
+                                <div class="p-4 sm:p-6 pt-3 sm:pt-5 flex flex-col flex-1">
+                                    <div class="flex items-center justify-between mb-1 sm:mb-2">
+                                        <p class="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{{ $product->brand?->name ?? 'Premium Registry' }}</p>
                                         <button wire:click="toggleWishlist({{ $product->id }})" class="text-slate-300 hover:text-rose-500 transition-colors">
-                                            <i class="{{ $inWishlist ? 'fas fa-heart text-rose-500' : 'far fa-heart' }} text-xs"></i>
+                                            <i class="{{ $inWishlist ? 'fas fa-heart text-rose-500' : 'far fa-heart' }} text-[10px] sm:text-xs"></i>
                                         </button>
                                     </div>
-                                    <h3 class="text-base font-black text-slate-900 leading-tight mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
+                                    <h3 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight mb-2 sm:mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
                                     
-                                    <div class="mt-auto flex items-end justify-between gap-4">
+                                    <div class="mt-auto flex items-end justify-between gap-2 sm:gap-4">
                                         <div>
-                                            <p class="text-xl font-black text-slate-900">Rs {{ number_format($product->final_price, 2) }}</p>
-                                            @if($product->discount_badge)<p class="text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
+                                            <p class="text-sm sm:text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price, 2) }}</p>
+                                            @if($product->discount_badge)<p class="text-[8px] sm:text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
                                         </div>
-                                        <div class="flex gap-2">
-                                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="h-10 px-4 flex items-center justify-center rounded-full bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-200 transition-all">Record</a>
-                                            <button wire:click="addToCart({{ $product->id }})" class="h-10 w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
-                                                <i class="fas fa-shopping-bag text-xs"></i>
+                                        <div class="flex gap-1.5 sm:gap-2">
+                                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="hidden sm:flex h-10 px-4 items-center justify-center rounded-full bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-900 hover:bg-slate-200 transition-all">Record</a>
+                                            <button wire:click="addToCart({{ $product->id }})" class="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110 shrink-0" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                                                <i class="fas fa-shopping-bag text-[10px] sm:text-xs"></i>
                                             </button>
                                         </div>
                                     </div>

@@ -201,7 +201,7 @@ class ProductDetail extends Component
             ->all();
 
         $videoUrls = collect($this->product->videos ?? [])
-            ->map(fn($path) => $path ? Storage::url($path) : null)
+            ->map(fn($path) => $path ? Storage::disk('public')->url($path) : null)
             ->filter()
             ->values();
 
