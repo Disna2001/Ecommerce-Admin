@@ -1086,8 +1086,14 @@ class PosInvoice extends Component
             if (DB::transactionLevel() > 0) {
                 DB::rollBack();
             }
-            Log::error('Payment processing error: '.$e->getMessage());
-            $this->dispatch('show-error', message: 'Error processing payment. Please try again.');
+            Log::error('POS_CHECKOUT_500 | ' . get_class($e) . ': ' . $e->getMessage(), [
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+                'payment' => $this->payment_method,
+                'total'   => $this->cartTotal,
+            ]);
+            $this->dispatch('show-error', message: 'Checkout error: ' . $e->getMessage());
         }
     }
 
@@ -1136,6 +1142,75 @@ class PosInvoice extends Component
     public function printReceipt()
     {
         $this->dispatch('print-receipt', invoiceId: $this->createdInvoiceId);
+    }
+
+    public function printRawReceipt($profileId = null, $printerHint = null)
+    {
+        $invoiceId = $this->createdInvoiceId;
+
+        if (!$invoiceId) {
+            $this->dispatch('show-error', message: 'No invoice found to print.');
+            return;
+        }
+
+        $invoice = Invoice::with('items')->find($invoiceId);
+
+        if (!$invoice) {
+            $this->dispatch('show-error', message: 'Invoice not found.');
+            return;
+        }
+
+        $billCustomizationService = app(BillCustomizationService::class);
+        $profiles = $billCustomizationService->configuredProfiles();
+        
+        $profile = null;
+        if ($profileId) {
+            $profile = collect($profiles)->first(fn ($p) => $p['id'] === $profileId);
+        }
+
+        if (!$profile) {
+            $profile = $billCustomizationService->resolveProfile('pos_receipt', [
+                'device_type' => 'desktop',
+                'input_mode' => $this->input_mode,
+                'printer_hint' => $printerHint ?: 'Counter Thermal',
+            ]);
+        }
+
+        $printerCatalog = $billCustomizationService->configuredPrinterCatalog();
+        $printerMatch = $profile['printer_match'] ?? '';
+        
+        $printer = collect($printerCatalog)
+            ->first(fn ($p) => $p['alias'] === $printerMatch && ($p['enabled'] ?? true));
+
+        if (!$printer) {
+            $hint = strtolower(trim($printerHint ?: ''));
+            $printer = collect($printerCatalog)
+                ->first(function ($p) use ($hint) {
+                    if (!($p['enabled'] ?? true)) return false;
+                    $alias = strtolower(trim($p['alias']));
+                    $queue = strtolower(trim($p['queue_name']));
+                    return ($alias && str_contains($hint, $alias)) || ($queue && str_contains($hint, $queue));
+                });
+        }
+
+        if (!$printer) {
+            $this->dispatch('show-error', message: 'No enabled printer matching "' . ($printerMatch ?: $printerHint) . '" found in registry.');
+            return;
+        }
+
+        $company = $billCustomizationService->companyPayload();
+        $rawData = \App\Services\EscPosService::buildInvoiceReceipt($invoice, $profile, $company);
+        $result = \App\Services\EscPosService::sendToPort($rawData, $printer);
+
+        if ($result['success']) {
+            $target = $printer['connection_type'] === 'network' 
+                ? $printer['ip_address'] 
+                : ($printer['queue_name'] ?: $printer['alias']);
+            $this->dispatch('show-success', message: 'Receipt spooled successfully to ' . $target);
+        } else {
+            Log::error('POS_RAW_PRINT_FAILED | ' . $result['error']);
+            $this->dispatch('show-error', message: 'Print spool error: ' . $result['error']);
+        }
     }
 
     public function newSale()

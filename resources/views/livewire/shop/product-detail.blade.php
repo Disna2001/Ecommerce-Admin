@@ -175,21 +175,28 @@
                         </div>
                     </div>
 
-                    <div class="mb-2 flex items-center gap-3">
-                        <div class="flex items-center overflow-hidden rounded-xl border border-slate-200 dark:border-white/10">
-                            <button wire:click="decrementQty" class="flex h-12 w-10 items-center justify-center text-lg font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">-</button>
-                            <span class="flex h-12 w-12 items-center justify-center text-sm font-semibold">{{ $quantity }}</span>
-                            <button wire:click="incrementQty" class="flex h-12 w-10 items-center justify-center text-lg font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">+</button>
+                    <div class="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <div class="flex items-center overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 flex-1 sm:flex-initial">
+                                <button wire:click="decrementQty" class="flex h-12 w-10 items-center justify-center text-lg font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">-</button>
+                                <span class="flex h-12 w-12 items-center justify-center text-sm font-semibold flex-1 sm:flex-initial">{{ $quantity }}</span>
+                                <button wire:click="incrementQty" class="flex h-12 w-10 items-center justify-center text-lg font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">+</button>
+                            </div>
+                            <button wire:click="toggleWishlist" class="flex sm:hidden h-12 w-12 items-center justify-center rounded-2xl border transition" style="{{ $inWishlist ? 'border-color:#ef4444;color:#ef4444;background:#fef2f2' : 'border-color:#e5e7eb;color:#9ca3af' }}">
+                                <i class="{{ $inWishlist ? 'fas' : 'far' }} fa-heart"></i>
+                            </button>
                         </div>
-                        <button wire:click="addToCart" wire:loading.attr="disabled" wire:target="addToCart" class="btn-gradient flex-1 rounded-2xl py-3 font-bold" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
-                            <span wire:loading.remove wire:target="addToCart"><i class="fas fa-shopping-cart mr-2"></i>Add to Cart</span>
-                            <span wire:loading wire:target="addToCart"><i class="fas fa-spinner fa-spin mr-2"></i>Adding...</span>
-                        </button>
-                        <button wire:click="buyNow" wire:loading.attr="disabled" wire:target="buyNow" class="rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-100 dark:hover:bg-slate-800" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
-                            <span wire:loading.remove wire:target="buyNow">Buy Now</span>
-                            <span wire:loading wire:target="buyNow"><i class="fas fa-spinner fa-spin"></i></span>
-                        </button>
-                        <button wire:click="toggleWishlist" class="flex h-12 w-12 items-center justify-center rounded-2xl border transition" style="{{ $inWishlist ? 'border-color:#ef4444;color:#ef4444;background:#fef2f2' : 'border-color:#e5e7eb;color:#9ca3af' }}">
+                        <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-1">
+                            <button wire:click="addToCart" wire:loading.attr="disabled" wire:target="addToCart" class="btn-gradient flex-1 rounded-2xl py-3 font-bold" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                                <span wire:loading.remove wire:target="addToCart"><i class="fas fa-shopping-cart mr-2"></i>Add to Cart</span>
+                                <span wire:loading wire:target="addToCart"><i class="fas fa-spinner fa-spin mr-2"></i>Adding...</span>
+                            </button>
+                            <button wire:click="buyNow" wire:loading.attr="disabled" wire:target="buyNow" class="rounded-2xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-100 dark:hover:bg-slate-800 flex-1 sm:flex-initial" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                                <span wire:loading.remove wire:target="buyNow">Buy Now</span>
+                                <span wire:loading wire:target="buyNow"><i class="fas fa-spinner fa-spin"></i></span>
+                            </button>
+                        </div>
+                        <button wire:click="toggleWishlist" class="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl border transition" style="{{ $inWishlist ? 'border-color:#ef4444;color:#ef4444;background:#fef2f2' : 'border-color:#e5e7eb;color:#9ca3af' }}">
                             <i class="{{ $inWishlist ? 'fas' : 'far' }} fa-heart"></i>
                         </button>
                     </div>

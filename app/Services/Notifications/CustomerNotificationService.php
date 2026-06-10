@@ -2,6 +2,7 @@
 
 namespace App\Services\Notifications;
 
+use App\Jobs\SendInvoiceEmailJob;
 use App\Jobs\SendOrderStatusEmailJob;
 use App\Jobs\SendWhatsAppNotificationJob;
 use App\Mail\InvoiceMail;
@@ -11,6 +12,7 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Mail;
 
 class CustomerNotificationService
+
 {
     public function sendOrderUpdate(Order $order, string $stage, ?string $message = null): void
     {
@@ -73,27 +75,50 @@ class CustomerNotificationService
             'queued_at' => now(),
         ]);
 
-        try {
-            Mail::to($invoice->customer_email)->send(new InvoiceMail($invoice));
+        SendInvoiceEmailJob::dispatch($invoice->id, $outbox->id, $invoice->tenant_id);
 
-            $invoice->update(['email_sent_at' => now()]);
-            $outbox->update([
-                'status' => 'sent',
-                'sent_at' => now(),
-                'last_attempt_at' => now(),
-                'failed_at' => null,
-                'failure_message' => null,
-            ]);
+        return true;
+    }
 
-            return true;
-        } catch (\Throwable $e) {
-            $outbox->update([
-                'status' => 'failed',
-                'failed_at' => now(),
-                'failure_message' => $e->getMessage(),
-            ]);
+    public function sendAdminOrderNotification(Order $order): void
+    {
+        $adminEmail = \App\Models\SiteSetting::get('order_notification_email');
 
-            return false;
+        if (!$adminEmail) {
+            try {
+                $adminEmail = \App\Models\User::role('Admin')->first()?->email;
+            } catch (\Throwable $e) {
+                $adminEmail = null;
+            }
         }
+
+        if (!$adminEmail) {
+            $adminEmail = \App\Models\User::where('user_type', 'admin')->first()?->email
+                ?: config('mail.from.address');
+        }
+
+        if (!$adminEmail) {
+            return;
+        }
+
+        $outbox = NotificationOutbox::create([
+            'channel' => 'email',
+            'recipient' => $adminEmail,
+            'subject' => '[New Order Received] - ' . $order->order_number,
+            'status' => 'queued',
+            'provider' => config('mail.default'),
+            'related_type' => Order::class,
+            'related_id' => $order->id,
+            'payload' => ['admin_notification' => true],
+            'attempt_count' => 1,
+            'last_attempt_at' => now(),
+            'queued_at' => now(),
+        ]);
+
+        \App\Jobs\SendAdminOrderNotificationJob::dispatch(
+            $order->id,
+            $outbox->id,
+            $order->tenant_id
+        );
     }
 }

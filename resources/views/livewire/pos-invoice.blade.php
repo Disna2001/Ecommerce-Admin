@@ -108,9 +108,57 @@
             return;
         }
 
+        const defaultProfile = JSON.parse(printZone.dataset.defaultProfile || '{}');
+        const profiles = JSON.parse(printZone.dataset.profiles || '[]');
+        const context = {
+            deviceType: this.deviceType,
+            inputMode: this.inputMode,
+            printerHint: this.printerHint,
+        };
+        const profile = window.resolveProfile ? window.resolveProfile(profiles, defaultProfile, context) : defaultProfile;
+
+        if (profile && profile.output_mode === 'raw_printer') {
+            this.toastOpen = true;
+            this.toastMessage = 'Sending raw print job to spooler...';
+            this.toastTone = 'info';
+            setTimeout(() => this.toastOpen = false, 2500);
+
+            $wire.printRawReceipt(profile.id, this.printerHint);
+            return;
+        }
+
         window.dispatchEvent(new CustomEvent('print-receipt'));
+    },
+    init() {
+        this.initPrintRouting();
+        this.initFullscreen();
+        this.$watch('showSuccessModal', (value) => {
+            if (value) {
+                this.$nextTick(() => {
+                    const printZone = document.getElementById('pos-receipt-print-zone');
+                    if (printZone) {
+                        const defaultProfile = JSON.parse(printZone.dataset.defaultProfile || '{}');
+                        const profiles = JSON.parse(printZone.dataset.profiles || '[]');
+                        const context = {
+                            deviceType: this.deviceType,
+                            inputMode: this.inputMode,
+                            printerHint: this.printerHint,
+                        };
+                        const profile = window.resolveProfile ? window.resolveProfile(profiles, defaultProfile, context) : defaultProfile;
+                        if (profile && profile.auto_print) {
+                            setTimeout(() => this.printReceipt(), 500);
+                        }
+                    }
+                });
+            }
+        });
+        this.$nextTick(() => {
+            if (window.innerWidth >= 768) {
+                this.$refs.productSearch?.focus();
+            }
+        });
     }
-}" x-init="initPrintRouting(); initFullscreen(); $nextTick(() => { if (window.innerWidth >= 768) { $refs.productSearch?.focus(); } })"
+}"
     x-on:keydown.window="
         const tag = ($event.target.tagName || '').toUpperCase();
         const editing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
@@ -646,7 +694,7 @@
     <div x-show="showPaymentModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
         <div class="flex min-h-screen items-center justify-center px-4 py-8">
             <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
-            <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+            <div class="pos-modal-card relative z-10 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
                 <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
                     <div class="flex items-center justify-between gap-4">
                         <div>
@@ -739,7 +787,7 @@
     <div x-show="showStockModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
         <div class="flex min-h-screen items-center justify-center px-4 py-8">
             <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
-            <div class="relative z-10 w-full max-w-lg overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+            <div class="pos-modal-card relative z-10 w-full max-w-lg overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
                 <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
                     <div class="flex items-center justify-between gap-4">
                         <div>
@@ -787,7 +835,7 @@
     <div x-show="showCustomerCreateModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
         <div class="flex min-h-screen items-center justify-center px-4 py-8">
             <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
-            <div class="relative z-10 w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+            <div class="pos-modal-card relative z-10 w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
                 <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
                     <div class="flex items-center justify-between gap-4">
                         <div>
@@ -847,7 +895,7 @@
     <div x-show="showSuccessModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
         <div class="flex min-h-screen items-center justify-center px-4 py-8">
             <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
-            <div class="relative z-10 w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+            <div class="pos-modal-card relative z-10 w-full max-w-xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
                 <div class="px-6 py-8 text-center">
                     <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
                         <i class="fas fa-check text-2xl"></i>
@@ -979,6 +1027,92 @@
 
 @push('styles')
     <style>
+        /* =====================================================
+           POS MODAL CARD — dark-mode override
+           The global admin style turns .bg-white into a near-black
+           colour. These rules restore a proper card surface so the
+           checkout success modal, payment modal, stock modal and
+           customer-create modal are all readable in dark mode.
+           ===================================================== */
+        .dark .pos-modal-card,
+        .admin-theme-dark .pos-modal-card {
+            background: #1e293b !important;       /* slate-800  */
+            border-color: rgba(51, 65, 85, 0.9) !important; /* slate-700 */
+            color: #f8fafc !important;             /* slate-50   */
+        }
+
+        /* Header / footer bands inside POS modal cards */
+        .dark .pos-modal-card .bg-slate-50,
+        .admin-theme-dark .pos-modal-card .bg-slate-50 {
+            background: rgba(30, 41, 59, 0.85) !important; /* slate-800/85 */
+        }
+
+        /* Info row panels (the inner rounded boxes) */
+        .dark .pos-modal-card .rounded-\[1\.5rem\],
+        .admin-theme-dark .pos-modal-card .rounded-\[1\.5rem\] {
+            background: rgba(15, 23, 42, 0.7) !important;
+            border-color: rgba(51, 65, 85, 0.7) !important;
+        }
+
+        /* Text colours inside POS modal cards */
+        .dark .pos-modal-card .text-slate-900,
+        .admin-theme-dark .pos-modal-card .text-slate-900 {
+            color: #f1f5f9 !important;   /* slate-100 */
+        }
+
+        .dark .pos-modal-card .text-slate-500,
+        .admin-theme-dark .pos-modal-card .text-slate-500 {
+            color: #94a3b8 !important;   /* slate-400 */
+        }
+
+        .dark .pos-modal-card .text-slate-700,
+        .admin-theme-dark .pos-modal-card .text-slate-700 {
+            color: #cbd5e1 !important;   /* slate-300 */
+        }
+
+        /* Borders */
+        .dark .pos-modal-card .border-slate-200,
+        .admin-theme-dark .pos-modal-card .border-slate-200 {
+            border-color: rgba(51, 65, 85, 0.6) !important;
+        }
+
+        /* "Start New Sale" button — light border variant */
+        .dark .pos-modal-card button.bg-white,
+        .admin-theme-dark .pos-modal-card button.bg-white {
+            background: #1e293b !important;
+            border-color: rgba(99, 102, 241, 0.4) !important;
+            color: #e2e8f0 !important;
+        }
+        .dark .pos-modal-card button.bg-white:hover,
+        .admin-theme-dark .pos-modal-card button.bg-white:hover {
+            background: #334155 !important;
+        }
+
+        /* Success icon area */
+        .dark .pos-modal-card .bg-emerald-100,
+        .admin-theme-dark .pos-modal-card .bg-emerald-100 {
+            background: rgba(5, 150, 105, 0.22) !important;
+        }
+
+        /* Nested white panels (email status box) */
+        .dark .pos-modal-card .bg-white,
+        .admin-theme-dark .pos-modal-card .bg-white {
+            background: rgba(30, 41, 59, 0.75) !important;
+        }
+
+        /* Payment modal — emerald settlement box */
+        .dark .pos-modal-card .bg-emerald-50,
+        .admin-theme-dark .pos-modal-card .bg-emerald-50 {
+            background: rgba(6, 78, 59, 0.35) !important;
+            border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+
+        /* Payment modal — table rows */
+        .dark .pos-modal-card tbody.bg-white,
+        .admin-theme-dark .pos-modal-card tbody.bg-white {
+            background: transparent !important;
+        }
+
         .pos-shell {
             display: grid;
             gap: 0.75rem;
@@ -1683,6 +1817,32 @@
         }
 
         @media print {
+            @page {
+                margin: 0 !important;
+            }
+            body.pos-receipt-print-active {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                width: auto !important;
+                height: auto !important;
+            }
+            body.pos-receipt-print-active .admin-shell,
+            body.pos-receipt-print-active .admin-main,
+            body.pos-receipt-print-active .admin-content,
+            body.pos-receipt-print-active [x-data] {
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                display: block !important;
+            }
+            body.pos-receipt-print-active .admin-topbar,
+            body.pos-receipt-print-active .pos-shell {
+                display: none !important;
+            }
             body.pos-receipt-print-active * {
                 visibility: hidden !important;
             }
@@ -1694,9 +1854,18 @@
 
             body.pos-receipt-print-active #pos-receipt-print-zone {
                 display: block !important;
-                position: absolute;
-                inset: 0;
-                background: #fff;
+                position: static !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                background: #fff !important;
+            }
+            body.pos-receipt-print-active .receipt-paper {
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
             }
         }
     </style>
@@ -1744,6 +1913,7 @@
                     })
                     .sort((left, right) => right.score - left.score)[0]?.profile || defaultProfile;
             };
+            window.resolveProfile = resolveProfile;
 
             const toggleVisibility = (selector, visible) => {
                 document.querySelectorAll(selector).forEach((node) => {
@@ -1768,8 +1938,27 @@
                 };
                 const profile = resolveProfile(profiles, defaultProfile, context);
 
-                receiptSheet.dataset.paperSize = profile.paper_size || 'thermal_80';
+                const paperSize = profile.paper_size || 'thermal_80';
+                receiptSheet.dataset.paperSize = paperSize;
                 receiptSheet.style.fontSize = `${profile.font_scale || 1}rem`;
+
+                // Dynamically inject @page CSS to prevent continuous paper feeding on thermal printers
+                let printStyle = document.getElementById('pos-dynamic-print-style');
+                if (!printStyle) {
+                    printStyle = document.createElement('style');
+                    printStyle.id = 'pos-dynamic-print-style';
+                    document.head.appendChild(printStyle);
+                }
+                
+                let pageSize = '80mm auto';
+                if (paperSize === 'thermal_58') {
+                    pageSize = '58mm auto';
+                } else if (paperSize === 'a4') {
+                    pageSize = '210mm 297mm';
+                } else if (paperSize === 'letter') {
+                    pageSize = '8.5in 11in';
+                }
+                printStyle.innerHTML = `@media print { @page { size: ${pageSize}; margin: 0 !important; } }`;
 
                 toggleVisibility('[data-receipt-company-phone]', !!profile.show_company_phone);
                 toggleVisibility('[data-receipt-tax-id]', !!profile.show_tax_id);

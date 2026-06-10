@@ -157,37 +157,59 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        if ($this->safeHasTable('permissions') && $this->safeHasTable('roles')) {
-            // Only sync permissions if they aren't already cached as synced today.
-            // This prevents massive DB/Cache overhead on every single request.
-            Cache::remember('core_permissions_synced', 3600, function () {
-                $corePermissions = [
-                    'view dashboard', 'view orders', 'manage orders', 'verify payments',
-                    'view inventory', 'manage inventory', 'view supply chain', 'manage supply chain',
-                    'view invoices', 'view pos', 'view users', 'view tenants',
-                    'create users', 'edit users', 'delete users', 'view roles',
-                    'create roles', 'edit roles', 'delete roles', 'view settings',
-                    'edit settings', 'view activity logs', 'view notification outbox',
-                    'view stock movements', 'view system health', 'view site management',
-                    'manage site management',
-                ];
+        if ($this->safeHasTable('permissions') && $this->safeHasTable('roles') && $this->safeHasTable('role_has_permissions')) {
+            try {
+                Cache::remember('core_permissions_synced_v3', 3600, function () {
+                    $corePermissions = [
+                        'view dashboard', 'view orders', 'manage orders', 'verify payments',
+                        'view inventory', 'manage inventory', 'view supply chain', 'manage supply chain',
+                        'view invoices', 'view pos', 'view users', 'view tenants',
+                        'create users', 'edit users', 'delete users', 'view roles',
+                        'create roles', 'edit roles', 'delete roles', 'view settings',
+                        'edit settings', 'view activity logs', 'view notification outbox',
+                        'view stock movements', 'view system health', 'view site management',
+                        'manage site management',
+                    ];
 
-                foreach ($corePermissions as $permissionName) {
-                    Permission::firstOrCreate([
-                        'name' => $permissionName,
-                        'guard_name' => 'web',
-                    ]);
-                }
-
-                foreach (['Admin', 'Super Admin'] as $roleName) {
-                    $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
-                    if ($role) {
-                        $role->syncPermissions($corePermissions);
+                    // Ensure all permissions exist
+                    foreach ($corePermissions as $permissionName) {
+                        try {
+                            Permission::firstOrCreate([
+                                'name'       => $permissionName,
+                                'guard_name' => 'web',
+                            ]);
+                        } catch (\Throwable) {
+                            // already exists — safe to ignore
+                        }
                     }
-                }
-                
-                return true;
-            });
+
+                    // Assign each permission individually only if not already assigned
+                    // This avoids the bulk INSERT that triggers UNIQUE violations
+                    foreach (['Admin', 'Super Admin'] as $roleName) {
+                        try {
+                            $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
+                            if (!$role) {
+                                continue;
+                            }
+                            foreach ($corePermissions as $permissionName) {
+                                try {
+                                    if (!$role->hasPermissionTo($permissionName)) {
+                                        $role->givePermissionTo($permissionName);
+                                    }
+                                } catch (\Throwable) {
+                                    // duplicate — already assigned, skip
+                                }
+                            }
+                        } catch (\Throwable) {
+                            // role sync failed — skip this role
+                        }
+                    }
+
+                    return true;
+                });
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Permission boot sync skipped: ' . $e->getMessage());
+            }
         }
     }
 

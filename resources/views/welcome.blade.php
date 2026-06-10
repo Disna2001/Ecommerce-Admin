@@ -255,7 +255,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
                         <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Personalized Ledger</h2>
                     </div>
                 </div>
-                <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid gap-4 sm:gap-8 grid-cols-2 xl:grid-cols-4">
                     @foreach($personalizedRecommendations as $product)
                         <article class="premium-card group overflow-hidden flex flex-col h-full">
                             <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">

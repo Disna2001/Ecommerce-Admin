@@ -26,14 +26,14 @@
         <!-- Metric Summary -->
         <x-admin.stock.summary :stocks="$stocks" :movementSummary="$movementSummary" />
 
-        <div class="grid gap-8 lg:grid-cols-12">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
             <!-- Sidebar Navigation -->
-            <div class="lg:col-span-3 xl:col-span-2">
+            <div class="w-full lg:col-span-3 xl:col-span-2">
                 <x-admin.stock.sidebar :stockWorkspaceTab="$stockWorkspaceTab" :movementSummary="$movementSummary" />
             </div>
 
             <!-- Main Workspace -->
-            <div class="lg:col-span-9 xl:col-span-10 space-y-8">
+            <div class="w-full lg:col-span-9 xl:col-span-10 space-y-8">
                 @if($stockWorkspaceTab === 'inventory')
                     <x-admin.stock.filters 
                         :categories="$categories" 

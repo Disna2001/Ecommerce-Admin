@@ -81,10 +81,23 @@
                             <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hardware Alias</label>
                             <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.alias" class="w-full rounded-2xl border-slate-100 bg-white px-4 py-2.5 text-sm font-bold shadow-inner focus:border-emerald-500 focus:ring-0 transition-all">
                         </div>
-                        <div class="space-y-1.5">
-                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">System Queue Name</label>
-                            <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.queue_name" placeholder="Xprinter XP-365B" class="w-full rounded-2xl border-slate-100 bg-white px-4 py-2.5 text-sm font-bold shadow-inner focus:border-emerald-500 focus:ring-0 transition-all">
-                        </div>
+                        @if(($printer['connection_type'] ?? 'usb') === 'network')
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="space-y-1.5">
+                                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">IP Address</label>
+                                    <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.ip_address" placeholder="192.168.1.100" class="w-full rounded-2xl border-slate-100 bg-white px-3 py-2.5 text-xs font-bold shadow-inner focus:border-emerald-500 focus:ring-0 transition-all">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Port</label>
+                                    <input type="number" wire:model="printer_catalog.{{ $printerIndex }}.port" placeholder="9100" class="w-full rounded-2xl border-slate-100 bg-white px-3 py-2.5 text-xs font-bold shadow-inner focus:border-emerald-500 focus:ring-0 transition-all">
+                                </div>
+                            </div>
+                        @else
+                            <div class="space-y-1.5">
+                                <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">System Queue Name</label>
+                                <input type="text" wire:model="printer_catalog.{{ $printerIndex }}.queue_name" placeholder="Xprinter XP-365B" class="w-full rounded-2xl border-slate-100 bg-white px-4 py-2.5 text-sm font-bold shadow-inner focus:border-emerald-500 focus:ring-0 transition-all">
+                            </div>
+                        @endif
                         <div class="space-y-1.5">
                             <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Connection</label>
                             <select wire:model="printer_catalog.{{ $printerIndex }}.connection_type" class="w-full rounded-2xl border-slate-100 bg-white px-4 py-2.5 text-sm font-bold shadow-inner focus:border-emerald-500 focus:ring-0 transition-all">
@@ -165,6 +178,7 @@
                                     <option value="pdf">Direct PDF</option>
                                     <option value="browser_print">Browser UI Print</option>
                                     <option value="either">Hybrid Either</option>
+                                    <option value="raw_printer">Raw ESC/POS Printer</option>
                                 </select>
                             </div>
                             <div class="space-y-1.5">

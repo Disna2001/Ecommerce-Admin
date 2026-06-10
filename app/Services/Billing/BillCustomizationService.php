@@ -316,6 +316,8 @@ class BillCustomizationService
             'alias' => 'Printer',
             'queue_name' => '',
             'connection_type' => 'usb',
+            'ip_address' => '',
+            'port' => 9100,
             'bill_types' => ['pos_receipt'],
             'paper_size' => 'thermal_80',
             'device_scope' => 'counter',
@@ -325,6 +327,8 @@ class BillCustomizationService
         ];
 
         $normalized = array_merge($defaults, $printer);
+        $normalized['ip_address'] = (string) ($normalized['ip_address'] ?? '');
+        $normalized['port'] = (int) ($normalized['port'] ?? 9100);
         $normalized['enabled'] = (bool) $normalized['enabled'];
         $normalized['auto_print'] = (bool) $normalized['auto_print'];
         $normalized['bill_types'] = collect($normalized['bill_types'] ?? [])

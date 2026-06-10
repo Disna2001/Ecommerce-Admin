@@ -1,4 +1,4 @@
-<div class="rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-sm h-fit sticky top-24">
+<div class="w-full rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-sm h-fit sticky top-24">
     <nav class="flex flex-col gap-1">
         <p class="mb-4 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Inventory Hub</p>
         

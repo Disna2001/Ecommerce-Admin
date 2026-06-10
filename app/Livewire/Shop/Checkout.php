@@ -121,6 +121,8 @@ class Checkout extends Component
                     : 'We received your order successfully and will update you at each next step.')
         );
 
+        $customerNotificationService->sendAdminOrderNotification($order);
+
         if ($this->payment_method === 'payhere') {
             return redirect()->route('checkout.payhere.redirect', ['order' => $order->order_number]);
         }
