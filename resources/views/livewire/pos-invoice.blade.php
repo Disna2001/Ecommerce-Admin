@@ -1827,31 +1827,9 @@
                 width: auto !important;
                 height: auto !important;
             }
-            body.pos-receipt-print-active .admin-shell,
-            body.pos-receipt-print-active .admin-main,
-            body.pos-receipt-print-active .admin-content,
-            body.pos-receipt-print-active [x-data] {
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-                height: auto !important;
-                min-height: 0 !important;
-                display: block !important;
-            }
-            body.pos-receipt-print-active .admin-topbar,
-            body.pos-receipt-print-active .pos-shell {
+            body.pos-receipt-print-active > :not(#pos-receipt-print-zone) {
                 display: none !important;
             }
-            body.pos-receipt-print-active * {
-                visibility: hidden !important;
-            }
-
-            body.pos-receipt-print-active #pos-receipt-print-zone,
-            body.pos-receipt-print-active #pos-receipt-print-zone * {
-                visibility: visible !important;
-            }
-
             body.pos-receipt-print-active #pos-receipt-print-zone {
                 display: block !important;
                 position: static !important;
@@ -1860,8 +1838,11 @@
                 width: 100% !important;
                 background: #fff !important;
             }
+            body.pos-receipt-print-active #pos-receipt-print-zone * {
+                visibility: visible !important;
+            }
             body.pos-receipt-print-active .receipt-paper {
-                margin: 0 !important;
+                margin: 0 auto !important;
                 box-shadow: none !important;
                 border: none !important;
                 page-break-after: avoid !important;
@@ -1920,6 +1901,9 @@
                     node.style.display = visible ? '' : 'none';
                 });
             };
+
+            let printPlaceholder = null;
+            let printZoneNode = null;
 
             window.addEventListener('print-receipt', () => {
                 const printZone = document.getElementById('pos-receipt-print-zone');
@@ -1981,12 +1965,35 @@
                     footerNoteNode.style.display = profile.footer_note ? '' : 'none';
                 }
 
+                // If already printing or placeholder exists, clean up first to avoid duplicating
+                if (printPlaceholder) {
+                    if (printZoneNode) {
+                        printPlaceholder.parentNode.insertBefore(printZoneNode, printPlaceholder);
+                    }
+                    printPlaceholder.remove();
+                    printPlaceholder = null;
+                }
+
+                // Move printZone directly under body to escape layouts and prevent empty space issues
+                printZoneNode = printZone;
+                printPlaceholder = document.createElement('div');
+                printPlaceholder.id = 'pos-receipt-print-placeholder';
+                printPlaceholder.style.display = 'none';
+                printZone.parentNode.insertBefore(printPlaceholder, printZone);
+                document.body.appendChild(printZone);
+
                 document.body.classList.add('pos-receipt-print-active');
                 setTimeout(() => window.print(), 60);
             });
 
             window.addEventListener('afterprint', () => {
                 document.body.classList.remove('pos-receipt-print-active');
+                if (printZoneNode && printPlaceholder) {
+                    printPlaceholder.parentNode.insertBefore(printZoneNode, printPlaceholder);
+                    printPlaceholder.remove();
+                    printPlaceholder = null;
+                    printZoneNode = null;
+                }
             });
         })();
     </script>
