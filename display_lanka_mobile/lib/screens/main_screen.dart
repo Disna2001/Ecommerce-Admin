@@ -4,6 +4,7 @@ import 'webview_tab_screen.dart';
 import 'profile_screen.dart';
 import '../providers/auth_provider.dart';
 import '../providers/wishlist_provider.dart';
+import '../providers/settings_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,12 +13,13 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
       if (auth.isAuthenticated && auth.token != null) {
@@ -25,6 +27,20 @@ class _MainScreenState extends State<MainScreen> {
             .fetchWishlists(auth.token!);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Trigger background check for website updates when app is resumed
+      Provider.of<SettingsProvider>(context, listen: false).fetchSettings();
+    }
   }
 
   @override
@@ -87,9 +103,13 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: currentTabBarIndex,
-          onTap: (index) => setState(() {
-            _selectedIndex = tabToScreenMap[index];
-          }),
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = tabToScreenMap[index];
+            });
+            // Check for website updates in background when transitioning tabs
+            Provider.of<SettingsProvider>(context, listen: false).fetchSettings();
+          },
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           selectedItemColor: const Color(0xFF0F172A),

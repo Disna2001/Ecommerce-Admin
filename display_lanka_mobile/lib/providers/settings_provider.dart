@@ -11,6 +11,7 @@ class SettingsProvider extends ChangeNotifier {
   Color _accentColor = const Color(0xFF6366F1);
   String? _supportEmail;
   String? _supportPhone;
+  String? _siteVersion;
   bool _isLoading = true;
   bool _isDark = false;
 
@@ -20,6 +21,7 @@ class SettingsProvider extends ChangeNotifier {
   Color get accentColor => _accentColor;
   String? get supportEmail => _supportEmail;
   String? get supportPhone => _supportPhone;
+  String? get siteVersion => _siteVersion;
   bool get isLoading => _isLoading;
   bool get isDark => _isDark;
 
@@ -52,6 +54,7 @@ class SettingsProvider extends ChangeNotifier {
       
       _supportEmail = settings['support_email'];
       _supportPhone = settings['support_phone'];
+      _siteVersion = settings['site_version'];
     } catch (e) {
       debugPrint('Failed to load dynamic site settings: $e');
     } finally {

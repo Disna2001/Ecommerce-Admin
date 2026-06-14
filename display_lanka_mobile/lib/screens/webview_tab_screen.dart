@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 
 class WebViewTabScreen extends StatefulWidget {
   final String url;
@@ -14,6 +16,21 @@ class _WebViewTabScreenState extends State<WebViewTabScreen> with AutomaticKeepA
   late final WebViewController _controller;
   bool _isLoading = true;
   double _progress = 0.0;
+  String? _lastVersion;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final settings = Provider.of<SettingsProvider>(context);
+    final version = settings.siteVersion;
+    if (version != null && _lastVersion != null && version != _lastVersion) {
+      _lastVersion = version;
+      // Force reload the WebView with the latest updates from the site
+      _controller.loadRequest(Uri.parse(widget.url));
+    } else if (version != null && _lastVersion == null) {
+      _lastVersion = version;
+    }
+  }
 
   @override
   bool get wantKeepAlive => true;
