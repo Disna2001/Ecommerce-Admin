@@ -90,6 +90,11 @@ Route::get('/auth/checkout-login', function (\Illuminate\Http\Request $request) 
     }
     $user = $token->tokenable;
     auth()->login($user);
+    
+    $redirect = $request->query('redirect');
+    if ($redirect) {
+        return redirect($redirect);
+    }
     return redirect()->route('checkout.index');
 })->name('auth.checkout-login');
 
@@ -102,6 +107,11 @@ Route::get('/auth/admin-login', function (\Illuminate\Http\Request $request) {
     }
     $user = $token->tokenable;
     auth()->login($user);
+    
+    $redirect = $request->query('redirect');
+    if ($redirect) {
+        return redirect($redirect);
+    }
     return redirect()->route('admin.dashboard');
 })->name('auth.admin-login');
 
