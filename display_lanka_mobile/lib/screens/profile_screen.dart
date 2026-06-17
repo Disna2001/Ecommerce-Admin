@@ -4,11 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import 'login_screen.dart';
 import 'web_admin_screen.dart';
-import 'orders_screen.dart';
-import 'wishlist_screen.dart';
-import 'addresses_screen.dart';
-import 'help_hub_screen.dart';
-import 'policies_hub_screen.dart';
+import 'web_page_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -128,7 +124,15 @@ class ProfileScreen extends StatelessWidget {
             auth.isAuthenticated,
             onTap: () {
               if (auth.isAuthenticated) {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WebPageScreen(
+                      title: 'My Orders',
+                      url: 'https://client1.displaylanka.shop/auth/checkout-login?token=${auth.token}&redirect=/profile?tab=orders',
+                    ),
+                  ),
+                );
               }
             },
           ),
@@ -140,7 +144,15 @@ class ProfileScreen extends StatelessWidget {
             true,
             onTap: () {
               if (auth.isAuthenticated) {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WebPageScreen(
+                      title: 'Wishlist',
+                      url: 'https://client1.displaylanka.shop/auth/checkout-login?token=${auth.token}&redirect=/wishlist',
+                    ),
+                  ),
+                );
               } else {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
               }
@@ -154,7 +166,15 @@ class ProfileScreen extends StatelessWidget {
             auth.isAuthenticated,
             onTap: () {
               if (auth.isAuthenticated) {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddressesScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WebPageScreen(
+                      title: 'Addresses',
+                      url: 'https://client1.displaylanka.shop/auth/checkout-login?token=${auth.token}&redirect=/profile?tab=addresses',
+                    ),
+                  ),
+                );
               }
             },
           ),
@@ -198,7 +218,12 @@ class ProfileScreen extends StatelessWidget {
             true,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const HelpHubScreen()),
+              MaterialPageRoute(
+                builder: (context) => const WebPageScreen(
+                  title: 'Help Center',
+                  url: 'https://client1.displaylanka.shop/help-center',
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -209,7 +234,12 @@ class ProfileScreen extends StatelessWidget {
             true,
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const PoliciesHubScreen()),
+              MaterialPageRoute(
+                builder: (context) => const WebPageScreen(
+                  title: 'Privacy Policy',
+                  url: 'https://client1.displaylanka.shop/privacy-policy',
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 24),
