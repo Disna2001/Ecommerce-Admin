@@ -184,7 +184,7 @@ class _PoliciesHubScreenState extends State<PoliciesHubScreen> with SingleTicker
         final bodyText = (sec['body'] as List<String>).join('\n\n');
 
         return Container(
-          margin: const EdgeInsets.bottom(16),
+          margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: surfaceColor,
             borderRadius: BorderRadius.circular(24),

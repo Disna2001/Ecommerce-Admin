@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Storage;
 
 $wishCount = count(session('wishlist', []));
 $cartCount = collect(session('cart', []))->sum('quantity');
+$isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeStore()" x-init="init()" :class="{ dark: dark }">
@@ -37,7 +38,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
     <div id="site-progress" class="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-0 opacity-0 transition-[width,opacity] duration-300" style="background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));"></div>
     <livewire:storefront.header-bar />
 
-    <main class="px-4 pb-16 space-y-12">
+    <main class="px-4 {{ $isApp ? 'pb-16' : 'pb-24 lg:pb-16' }} space-y-12">
         <!-- Hero Protocol -->
         @if(($heroSlideshowEnabled ?? true) && ($heroBanners ?? collect())->isNotEmpty())
             <section x-data="{ activeSlide: 0, slidesCount: {{ $heroBanners->count() }} }" 
@@ -404,7 +405,7 @@ $cartCount = collect(session('cart', []))->sum('quantity');
     </main>
 
     <!-- Global Footer -->
-    <footer id="footer" class="mt-24 px-4 pb-12">
+    <footer id="footer" class="mt-24 px-4 pb-12 hidden lg:block">
         <div class="mx-auto max-w-7xl rounded-[3.5rem] bg-slate-950 px-8 py-12 sm:px-12 sm:py-20 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-indigo-500/10 blur-[120px] rounded-full"></div>
             <div class="relative z-10 grid gap-10 sm:gap-16 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">

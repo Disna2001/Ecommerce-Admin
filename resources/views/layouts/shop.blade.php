@@ -20,6 +20,7 @@
     $footerCopyright = str_replace('{year}', date('Y'), $footerCopyright);
     $supportEmail = \App\Models\SiteSetting::get('support_email', \App\Models\SiteSetting::get('support_notification_email', ''));
     $supportPhone = \App\Models\SiteSetting::get('support_phone', '');
+    $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeStore()" x-init="init()" :class="{ dark: dark }">
@@ -80,11 +81,11 @@
         </div>
     @endif
 
-    <main class="px-4 pb-16">
+    <main class="px-4 {{ $isApp ? 'pb-16' : 'pb-24 lg:pb-16' }}">
         @yield('content')
     </main>
 
-    <footer class="mt-16 px-4 pb-10">
+    <footer class="mt-16 px-4 pb-10 hidden lg:block">
         <div class="mx-auto max-w-7xl rounded-[2rem] bg-slate-950 px-8 py-10 text-white shadow-2xl">
             <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
                 <div>

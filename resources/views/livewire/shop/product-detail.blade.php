@@ -175,7 +175,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="hidden lg:flex mb-2 flex-col gap-3 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-3 w-full sm:w-auto">
                             <div class="flex items-center overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 flex-1 sm:flex-initial">
                                 <button wire:click="decrementQty" class="flex h-12 w-10 items-center justify-center text-lg font-bold text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800">-</button>
@@ -369,4 +369,27 @@
             </div>
         @endif
     </div>
+
+    <!-- Mobile Sticky Action Bar -->
+    @php
+        $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
+    @endphp
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 border-t border-slate-100 dark:border-white/5 p-4 flex items-center justify-between gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] {{ $isApp ? 'mb-0' : 'mb-[64px]' }}">
+        <div class="flex items-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 overflow-hidden">
+            <button wire:click="decrementQty" class="flex h-11 w-9 items-center justify-center text-base font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">-</button>
+            <span class="flex h-11 w-10 items-center justify-center text-xs font-semibold">{{ $quantity }}</span>
+            <button wire:click="incrementQty" class="flex h-11 w-9 items-center justify-center text-base font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">+</button>
+        </div>
+        <div class="flex-1 flex gap-2">
+            <button wire:click="addToCart" wire:loading.attr="disabled" wire:target="addToCart" class="flex-1 h-11 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest transition shadow-lg" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                <span wire:loading.remove wire:target="addToCart">Add to Cart</span>
+                <span wire:loading wire:target="addToCart"><i class="fas fa-spinner fa-spin"></i></span>
+            </button>
+            <button wire:click="buyNow" wire:loading.attr="disabled" wire:target="buyNow" class="flex-1 h-11 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-black uppercase tracking-widest transition shadow-lg" {{ $product->storefront_available_quantity <= 0 ? 'disabled style=opacity:.5' : '' }}>
+                <span wire:loading.remove wire:target="buyNow">Buy Now</span>
+                <span wire:loading wire:target="buyNow"><i class="fas fa-spinner fa-spin"></i></span>
+            </button>
+        </div>
+    </div>
 </div>
+

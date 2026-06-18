@@ -2,7 +2,7 @@
 
 <div class="space-y-6">
     <!-- Attention Protocol Zone -->
-    <div class="grid gap-6 lg:grid-cols-4">
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         @foreach($this->attentionQueues as $queue)
             <button 
                 wire:click="{{ $queue['action'] }}"

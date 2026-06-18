@@ -1,4 +1,4 @@
-@props(['mail_mailer' => 'smtp', 'mail_from_name' => '', 'mail_from_address' => '', 'order_notification_email' => '', 'support_notification_email' => '', 'mail_smtp_host' => '', 'mail_smtp_port' => '', 'mail_smtp_encryption' => '', 'mail_smtp_username' => '', 'mail_smtp_password' => '', 'test_email_recipient' => ''])
+@props(['mail_mailer' => 'smtp', 'mail_from_name' => '', 'mail_from_address' => '', 'order_notification_email' => '', 'support_notification_email' => '', 'mail_smtp_host' => '', 'mail_smtp_port' => '', 'mail_smtp_encryption' => '', 'mail_smtp_username' => '', 'mail_smtp_password' => '', 'test_email_recipient' => '', 'onesignal_enabled' => false, 'onesignal_app_id' => '', 'onesignal_rest_api_key' => ''])
 
 @php
     $selectedClasses = [
@@ -112,6 +112,41 @@
                     <input type="email" wire:model="support_notification_email" placeholder="support-alerts@yourcompany.com" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-sky-500 focus:ring-0 transition-all">
                 </div>
                 <p class="text-[10px] font-medium text-slate-400 leading-relaxed italic">Internal system alerts will be dispatched to these addresses immediately upon triggering.</p>
+            </div>
+        </div>
+
+        <!-- OneSignal Push Integration -->
+        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between px-2">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OneSignal Push alerts</p>
+                <button type="button" wire:click="$set('onesignal_enabled', {{ !$onesignal_enabled ? 'true' : 'false' }})" 
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $onesignal_enabled ? 'bg-indigo-600' : 'bg-slate-200' }}">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $onesignal_enabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">OneSignal App ID</label>
+                    <input type="text" wire:model="onesignal_app_id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                        class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all"
+                        {{ !$onesignal_enabled ? 'disabled' : '' }}>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">REST API Key</label>
+                    <div class="relative" x-data="{ show: false }">
+                        <input :type="show ? 'text' : 'password'" wire:model="onesignal_rest_api_key" placeholder="Enter REST API Key" 
+                            class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all"
+                            {{ !$onesignal_enabled ? 'disabled' : '' }}>
+                        <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-indigo-600 transition-colors"
+                            {{ !$onesignal_enabled ? 'disabled' : '' }}>
+                            <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-[10px] font-medium text-slate-400 leading-relaxed italic">Automatically forwards real-time push alerts to registered customer devices when orders are placed or updated.</p>
             </div>
         </div>
 

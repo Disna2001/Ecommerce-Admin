@@ -18,30 +18,30 @@
     <div class="storefront-page-shell">
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <!-- Catalog Governance Header -->
-        <div class="glass storefront-reveal rounded-[2.5rem] p-10 shadow-2xl mb-12">
-            <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div class="glass storefront-reveal rounded-[1.5rem] sm:rounded-[2.5rem] p-5 sm:p-10 shadow-lg sm:shadow-2xl mb-6 sm:mb-12">
+            <div class="flex flex-col gap-6 sm:gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-2xl">
-                    <nav class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+                    <nav class="mb-4 sm:mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                         <a href="/" class="hover:text-[var(--primary)] transition-colors">Registry</a>
                         <i class="fas fa-chevron-right text-[8px]"></i>
                         <span class="text-slate-900 dark:text-white">Active Catalog</span>
                     </nav>
-                    <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight sm:text-5xl">
+                    <h1 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
                         {{ $catalogSettings['title'] }}
-                        <span class="block text-sm font-bold uppercase tracking-[0.3em] text-[var(--primary)] mt-4">{{ $products->total() }} Records in Ledger</span>
+                        <span class="block text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-[var(--primary)] mt-3 sm:mt-4">{{ $products->total() }} Records in Ledger</span>
                     </h1>
                 </div>
-
-                <div class="flex flex-wrap items-center gap-4">
+ 
+                <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                     <button @click="mobileFilters = !mobileFilters"
-                            class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:bg-slate-50 lg:hidden">
+                            class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 sm:px-6 py-3 sm:py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:bg-slate-50 lg:hidden dark:bg-slate-900 dark:border-white/10 dark:text-white">
                         <i class="fas fa-sliders-h text-xs"></i>
                         Filters
                     </button>
-
+ 
                     <div class="relative group">
                         <select wire:model.live="sort"
-                                class="appearance-none rounded-full border border-slate-200 bg-white pl-8 pr-12 py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-8 focus:ring-[var(--primary)]/5">
+                                class="appearance-none rounded-full border border-slate-200 bg-white pl-8 pr-12 py-3 sm:py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-8 focus:ring-[var(--primary)]/5 dark:bg-slate-900 dark:border-white/10 dark:text-white">
                             <option value="newest">Latest Entries</option>
                             <option value="price_asc">Valuation: Low-High</option>
                             <option value="price_desc">Valuation: High-Low</option>
@@ -52,19 +52,19 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- Quick Classification Strip -->
             @if($categories->isNotEmpty())
-                <div class="mt-12 pt-8 border-t border-slate-100 dark:border-white/5">
-                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6">Quick Classification</p>
-                    <div class="flex flex-wrap gap-3">
+                <div class="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-slate-100 dark:border-white/5">
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4 sm:mb-6">Quick Classification</p>
+                    <div class="flex overflow-x-auto pb-3 gap-2 custom-scrollbar lg:flex-wrap lg:overflow-visible lg:pb-0">
                         <button wire:click="$set('category', '')"
-                                class="rounded-full px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-all {{ $category === '' ? 'bg-slate-900 text-white shadow-xl scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}">
+                                class="shrink-0 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-[10px] font-black uppercase tracking-widest transition-all {{ $category === '' ? 'bg-slate-900 text-white shadow-xl scale-105 dark:bg-white dark:text-slate-900' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400' }}">
                             Full Registry
                         </button>
                         @foreach($categories->take(12) as $cat)
                             <button wire:click="$set('category', '{{ $cat->id }}')"
-                                    class="rounded-full px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-all {{ (string) $category === (string) $cat->id ? 'text-white shadow-xl scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}"
+                                    class="shrink-0 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-[10px] font-black uppercase tracking-widest transition-all {{ (string) $category === (string) $cat->id ? 'text-white shadow-xl scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400' }}"
                                     @if((string) $category === (string) $cat->id) style="background: linear-gradient(90deg, var(--primary), var(--secondary))" @endif>
                                 {{ $cat->name }}
                             </button>
@@ -124,7 +124,7 @@
                     <div class="grid grid-cols-2 gap-4 sm:gap-8 xl:grid-cols-3">
                         @forelse($products as $product)
                             @php($inWishlist = in_array($product->id, $wishlist))
-                            <article wire:key="product-card-{{ $product->id }}" class="premium-card group overflow-hidden flex flex-col h-full">
+                            <article wire:key="product-card-{{ $product->id }}" class="premium-card !rounded-[1.5rem] sm:!rounded-[2.5rem] lg:!rounded-[3rem] group overflow-hidden flex flex-col h-full">
                                 <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">
                                     <div class="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 flex flex-col gap-1.5 sm:gap-2">
                                         @if($product->discount_badge)
@@ -134,7 +134,7 @@
                                             {{ $product->isLowStock() ? 'Limited' : 'In Stock' }}
                                         </div>
                                     </div>
-                                    <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1.5rem] sm:rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
+                                    <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1rem] sm:rounded-[2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
                                         @if($product->primary_image_url)
                                             <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
                                         @else

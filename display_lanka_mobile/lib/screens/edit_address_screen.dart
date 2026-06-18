@@ -205,7 +205,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                     ),
                     activeColor: theme.colorScheme.primary,
                     contentPadding: EdgeInsets.zero,
-                    controlType: ListTileControlType.leading,
+                    controlAffinity: ListTileControlAffinity.leading,
                   ),
                   const SizedBox(height: 40),
                   ElevatedButton(

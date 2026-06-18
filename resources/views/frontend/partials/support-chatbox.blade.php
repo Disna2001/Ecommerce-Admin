@@ -16,7 +16,7 @@
 
 <div
     x-data="{ open: false }"
-    class="fixed bottom-5 right-5 z-[65]"
+    class="fixed bottom-24 lg:bottom-5 right-5 z-[65]"
 >
     <div
         x-show="open"

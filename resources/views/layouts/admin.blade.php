@@ -31,7 +31,7 @@
         <x-admin.sidebar.overlay />
         <x-admin.sidebar.main />
 
-        <main :class="sidebarOpen ? 'main-content-with-sidebar' : 'main-content-full'" class="admin-main main-content">
+        <main :class="sidebarOpen ? 'main-content-with-sidebar' : 'main-content-full'" class="admin-main main-content pb-20 lg:pb-0">
             <div class="admin-content">
                 @hasSection('header')
                     @php
@@ -53,6 +53,77 @@
             </div>
         </main>
     </div>
+
+    {{-- Mobile Bottom Navigation (lg:hidden) --}}
+    @php
+        $mobileNavPendingOrders = \App\Models\Order::whereIn('status', ['pending','confirmed'])->count();
+        $mobileNavLowStock = \App\Models\Stock::whereColumn('quantity','<=','reorder_level')->count();
+        $currentRoute = request()->route()?->getName() ?? '';
+    @endphp
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-slate-950/95 border-t border-slate-100 dark:border-white/5 backdrop-blur-md flex items-stretch shadow-[0_-8px_30px_rgba(0,0,0,0.06)]" style="padding-bottom: env(safe-area-inset-bottom, 0)">
+        @can('view dashboard')
+        <a href="{{ route('admin.dashboard') }}" class="relative flex flex-col items-center justify-center gap-1 flex-1 py-3 group transition-all {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }}">
+            <div class="flex h-6 w-6 items-center justify-center">
+                <i class="fas fa-chart-pie text-base transition-transform group-active:scale-90"></i>
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-wider">Dash</span>
+            @if(str_starts_with($currentRoute, 'admin.dashboard'))
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-full bg-slate-900 dark:bg-white"></span>
+            @endif
+        </a>
+        @endcan
+
+        @can('view inventory')
+        <a href="{{ route('admin.stocks') }}" class="relative flex flex-col items-center justify-center gap-1 flex-1 py-3 group transition-all {{ str_starts_with($currentRoute, 'admin.stocks') ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }}">
+            <div class="relative flex h-6 w-6 items-center justify-center">
+                <i class="fas fa-cubes text-base transition-transform group-active:scale-90"></i>
+                @if($mobileNavLowStock > 0)
+                    <span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 text-[7px] font-black text-white ring-2 ring-white dark:ring-slate-950">{{ $mobileNavLowStock > 9 ? '9+' : $mobileNavLowStock }}</span>
+                @endif
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-wider">Stock</span>
+            @if(str_starts_with($currentRoute, 'admin.stocks'))
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-full bg-slate-900 dark:bg-white"></span>
+            @endif
+        </a>
+        @endcan
+
+        @can('view orders')
+        <a href="{{ route('admin.orders') }}" class="relative flex flex-col items-center justify-center gap-1 flex-1 py-3 group transition-all {{ str_starts_with($currentRoute, 'admin.orders') ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }}">
+            <div class="relative flex h-6 w-6 items-center justify-center">
+                <i class="fas fa-receipt text-base transition-transform group-active:scale-90"></i>
+                @if($mobileNavPendingOrders > 0)
+                    <span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 text-[7px] font-black text-white ring-2 ring-white dark:ring-slate-950">{{ $mobileNavPendingOrders > 9 ? '9+' : $mobileNavPendingOrders }}</span>
+                @endif
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-wider">Orders</span>
+            @if(str_starts_with($currentRoute, 'admin.orders'))
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-full bg-slate-900 dark:bg-white"></span>
+            @endif
+        </a>
+        @endcan
+
+        @can('view users')
+        <a href="{{ route('admin.users') }}" class="relative flex flex-col items-center justify-center gap-1 flex-1 py-3 group transition-all {{ str_starts_with($currentRoute, 'admin.users') ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300' }}">
+            <div class="flex h-6 w-6 items-center justify-center">
+                <i class="fas fa-user-astronaut text-base transition-transform group-active:scale-90"></i>
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-wider">Users</span>
+            @if(str_starts_with($currentRoute, 'admin.users'))
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-8 rounded-full bg-slate-900 dark:bg-white"></span>
+            @endif
+        </a>
+        @endcan
+
+        @can('view pos')
+        <button type="button" @click="launchPos('{{ route('admin.pos') }}')" class="relative flex flex-col items-center justify-center gap-1 flex-1 py-3 group transition-all text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 active:scale-95">
+            <div class="flex h-6 w-6 items-center justify-center">
+                <i class="fas fa-cash-register text-base transition-transform group-active:scale-90"></i>
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-wider">POS</span>
+        </button>
+        @endcan
+    </nav>
 
     @livewireScripts
     @stack('scripts')

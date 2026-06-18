@@ -142,6 +142,11 @@ class SystemSettingsManager extends Component
 
     public string $ai_goal_text = 'Help the team manage sales, stock levels, and operational decisions quickly.';
     
+    // OneSignal Push Notification settings
+    public bool $onesignal_enabled = false;
+    public string $onesignal_app_id = '';
+    public string $onesignal_rest_api_key = '';
+
     public bool $maintenance_mode = false;
     public string $maintenance_secret = 'admin-bypass';
 
@@ -158,6 +163,7 @@ class SystemSettingsManager extends Component
             'ai_enabled', 'ai_provider', 'ai_model', 'ai_api_key',
             'ai_sales_tracking_enabled', 'ai_inventory_guidance_enabled', 'ai_management_guidance_enabled',
             'ai_prompt_context', 'ai_goal_text', 'custom_integrations_api_key',
+            'onesignal_enabled', 'onesignal_app_id', 'onesignal_rest_api_key',
         ];
 
         foreach ($keys as $key) {
@@ -335,6 +341,9 @@ class SystemSettingsManager extends Component
             'custom_integrations_api_key' => 'nullable|string|max:255',
             'ai_prompt_context' => 'nullable|string|max:4000',
             'ai_goal_text' => 'nullable|string|max:1000',
+            'onesignal_enabled' => 'nullable|boolean',
+            'onesignal_app_id' => 'nullable|string|max:100',
+            'onesignal_rest_api_key' => 'nullable|string|max:100',
 
             'billing_profiles' => 'nullable|array',
             'billing_profiles.*.id' => 'required|string|max:100',
@@ -378,6 +387,7 @@ class SystemSettingsManager extends Component
             'whatsapp_provider', 'whatsapp_phone_number', 'whatsapp_api_url', 'whatsapp_api_key', 'whatsapp_webhook_verify_token',
             'whatsapp_order_template', 'whatsapp_payment_template',
             'ai_provider', 'ai_model', 'ai_api_key', 'ai_prompt_context', 'ai_goal_text', 'custom_integrations_api_key',
+            'onesignal_app_id', 'onesignal_rest_api_key',
         ];
     }
 
@@ -390,12 +400,13 @@ class SystemSettingsManager extends Component
             'ai_sales_tracking_enabled',
             'ai_inventory_guidance_enabled',
             'ai_management_guidance_enabled',
+            'onesignal_enabled',
         ];
     }
 
     private function groupFor(string $key): string
     {
-        if (str_starts_with($key, 'mail_') || str_contains($key, 'notification_email') || $key === 'test_email_recipient') {
+        if (str_starts_with($key, 'mail_') || str_contains($key, 'notification_email') || $key === 'test_email_recipient' || str_starts_with($key, 'onesignal_')) {
             return 'communications';
         }
 
@@ -501,6 +512,7 @@ class SystemSettingsManager extends Component
                     $this->whatsapp_enabled ? 'WhatsApp' : null,
                     filled($this->mail_from_address) ? 'Email' : null,
                     $this->ai_enabled ? 'AI' : null,
+                    $this->onesignal_enabled ? 'Push' : null,
                 ])->filter()->values()->all(),
                 'configured_secrets' => collect([
                     $this->mail_smtp_password,
@@ -509,6 +521,7 @@ class SystemSettingsManager extends Component
                     $this->whatsapp_api_key,
                     $this->ai_api_key,
                     $this->custom_integrations_api_key,
+                    $this->onesignal_rest_api_key,
                 ])->filter(fn ($value) => filled($value))->count(),
             ],
             'checklist' => $checklist,

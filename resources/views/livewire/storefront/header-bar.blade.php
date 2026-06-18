@@ -1,11 +1,12 @@
 @php
     use Illuminate\Support\Facades\Storage;
     $request = request();
+    $isApp = str_contains($request->userAgent(), 'DisplayLankaApp');
 @endphp
 
 <div>
     @if($layout['topbarEnabled'])
-        <div class="px-4 py-2 text-xs font-semibold text-white" style="background:linear-gradient(90deg, {{ $layout['topbarFrom'] }}, {{ $layout['topbarTo'] }})">
+        <div class="hidden lg:block px-4 py-2 text-xs font-semibold text-white" style="background:linear-gradient(90deg, {{ $layout['topbarFrom'] }}, {{ $layout['topbarTo'] }})">
             <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-4 sm:justify-between">
                 <span><i class="fas fa-bolt mr-2 text-[10px]"></i>{{ $layout['utilityBadge'] }}</span>
                 <div class="hidden items-center gap-5 sm:flex">
@@ -17,7 +18,7 @@
         </div>
     @endif
 
-    <header class="sticky top-0 z-50 px-2 sm:px-4 py-4 sm:py-6" x-data="{ mobileMenuOpen: false, searchOpen: false }">
+    <header class="hidden lg:block sticky top-0 z-50 px-2 sm:px-4 py-4 sm:py-6" x-data="{ mobileMenuOpen: false, searchOpen: false }">
         <div class="glass mx-auto flex max-w-7xl flex-col gap-4 rounded-[2.5rem] px-3 sm:px-6 py-3 sm:py-4 shadow-[0_25px_80px_rgba(0,0,0,0.06)]">
             <div class="flex items-center justify-between gap-1 sm:gap-8">
                 <!-- Branding Protocol -->
@@ -189,4 +190,83 @@
             </div>
         </div>
     </header>
+
+    @if(!$isApp)
+    <!-- Compact Top Mobile Header -->
+    <header class="lg:hidden sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-100 dark:border-white/5 px-4 py-3 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+            @if($layout['logoPath'])
+                <img src="{{ Storage::url($layout['logoPath']) }}" alt="{{ $layout['siteName'] }}" class="h-6 w-auto">
+            @else
+                <span class="text-lg font-black tracking-tight text-slate-900 dark:text-white" style="color:var(--primary)">{{ $layout['siteName'] }}</span>
+            @endif
+        </a>
+        
+        <div class="flex items-center gap-2">
+            <!-- Theme Toggle -->
+            <button @click="toggle()" type="button" class="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <i class="fas" :class="dark ? 'fa-sun' : 'fa-moon'"></i>
+            </button>
+            
+            <!-- Notifications Tray -->
+            <div class="relative" x-data="{ open:false }">
+                <button @click="open=!open" type="button" class="relative flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i class="far fa-bell"></i>
+                    @if($unreadNotifications > 0)
+                        <span class="absolute right-0 top-0 flex h-3 min-w-[12px] items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white ring-2 ring-white dark:ring-slate-900">{{ $unreadNotifications }}</span>
+                    @endif
+                </button>
+                <div x-show="open" @click.away="open=false" x-transition class="fixed inset-x-4 top-14 z-[60] overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl dark:border-white/5 dark:bg-slate-950" style="display:none">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Intelligence</p>
+                        <button type="button" wire:click="markNotificationsSeen" class="text-[9px] font-black uppercase tracking-widest text-emerald-500 hover:underline">Flush All</button>
+                    </div>
+                    <div class="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                        @forelse($notifications as $notification)
+                            <div class="rounded-xl p-3 border {{ $notification['read'] ? 'border-slate-100 bg-slate-50/50' : 'border-indigo-100 bg-indigo-50/50 shadow-sm' }} dark:border-white/5 dark:bg-slate-900/50">
+                                <p class="text-xs font-black text-slate-900 dark:text-white mb-1">{{ $notification['title'] }}</p>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">{{ $notification['body'] }}</p>
+                            </div>
+                        @empty
+                            <p class="text-center py-6 text-xs text-slate-400 font-bold uppercase tracking-widest">No active alerts</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sticky Bottom Navigation Bar -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-950/95 border-t border-slate-100 dark:border-white/5 backdrop-blur-md py-3 px-6 flex items-center justify-between pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+        @php
+            $tabs = [
+                ['route' => '/', 'icon' => 'fa-home', 'label' => 'Home', 'active' => request()->is('/')],
+                ['route' => '/products', 'icon' => 'fa-grip-vertical', 'label' => 'Shop', 'active' => request()->is('products*')],
+                ['route' => '/cart', 'icon' => 'fa-shopping-bag', 'label' => 'Cart', 'active' => request()->is('cart*'), 'badge' => $cartCount],
+                ['route' => '/wishlist', 'icon' => 'fa-heart', 'label' => 'Saved', 'active' => request()->is('wishlist*')],
+                ['route' => Auth::check() ? route('profile.index') : route('login'), 'icon' => 'fa-user-circle', 'label' => 'Profile', 'active' => request()->is('profile*') || request()->is('login*') || request()->is('register*')]
+            ];
+        @endphp
+
+        @foreach($tabs as $tab)
+            <a href="{{ $tab['route'] }}" class="relative flex flex-col items-center justify-center gap-1 group flex-1">
+                <div class="flex h-6 w-6 items-center justify-center text-lg transition-transform group-active:scale-95 {{ $tab['active'] ? 'text-[var(--primary)]' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200' }}">
+                    <i class="{{ $tab['icon'] === 'fa-heart' ? 'fas' : 'far' }} {{ $tab['icon'] }}"></i>
+                </div>
+                
+                <span class="text-[9px] font-black uppercase tracking-wider {{ $tab['active'] ? 'text-[var(--primary)]' : 'text-slate-400' }}">
+                    {{ $tab['label'] }}
+                </span>
+
+                @if(isset($tab['badge']) && $tab['badge'] > 0)
+                    <span class="absolute top-0 right-1/4 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white ring-2 ring-white dark:ring-slate-950">{{ $tab['badge'] }}</span>
+                @endif
+                
+                @if($tab['active'])
+                    <span class="absolute -bottom-2 h-[3px] w-5 rounded-full bg-[var(--primary)] animate-pulse"></span>
+                @endif
+            </a>
+        @endforeach
+    </nav>
+    @endif
 </div>

@@ -3,7 +3,7 @@
     'movementSummary'
 ])
 
-<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
     @foreach([
         ['total', 'Total Assets', $stocks->total() . ' items', 'fa-boxes-stacked', 'slate'],
         ['low_stock', 'Critical Alert', $this->lowStockCount . ' low stock', 'fa-triangle-exclamation', 'amber'],

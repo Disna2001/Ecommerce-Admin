@@ -23,6 +23,7 @@ class _WebAdminScreenState extends State<WebAdminScreen> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent('DisplayLankaApp')
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (progress) {

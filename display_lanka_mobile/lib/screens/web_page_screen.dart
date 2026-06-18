@@ -21,6 +21,7 @@ class _WebPageScreenState extends State<WebPageScreen> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent('DisplayLankaApp')
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (progress) {

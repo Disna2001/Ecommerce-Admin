@@ -52,6 +52,7 @@ class _WebViewTabScreenState extends State<WebViewTabScreen> with AutomaticKeepA
   void _initController() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent('DisplayLankaApp')
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (progress) {

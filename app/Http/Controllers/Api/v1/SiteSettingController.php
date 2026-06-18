@@ -22,6 +22,8 @@ class SiteSettingController extends Controller
             'support_email' => SiteSetting::get('support_email'),
             'support_phone' => SiteSetting::get('support_phone'),
             'site_version' => $siteVersion,
+            'onesignal_enabled' => (bool) SiteSetting::get('onesignal_enabled', false),
+            'onesignal_app_id' => SiteSetting::get('onesignal_app_id'),
         ];
 
         return response()->json($settings);

@@ -53,6 +53,31 @@ class CustomerNotificationService
         ]);
 
         SendWhatsAppNotificationJob::dispatch($order->id, $stage, $message, $whatsAppOutbox->id, $order->tenant_id);
+
+        if (\App\Models\SiteSetting::get('onesignal_enabled', false)) {
+            $pushOutbox = NotificationOutbox::create([
+                'channel' => 'push',
+                'recipient' => $order->user_id ? 'customer_' . $order->user_id : $order->customer_email,
+                'subject' => 'Order status update - ' . $order->order_number,
+                'status' => 'queued',
+                'provider' => 'onesignal',
+                'related_type' => Order::class,
+                'related_id' => $order->id,
+                'payload' => ['stage' => $stage, 'message' => $message],
+                'attempt_count' => 1,
+                'last_attempt_at' => now(),
+                'queued_at' => now(),
+            ]);
+
+            \App\Jobs\SendOneSignalNotificationJob::dispatch(
+                $order->id,
+                'order_status',
+                $stage,
+                $message,
+                $pushOutbox->id,
+                $order->tenant_id
+            );
+        }
     }
 
     public function sendInvoice(Invoice $invoice): bool
@@ -120,5 +145,30 @@ class CustomerNotificationService
             $outbox->id,
             $order->tenant_id
         );
+
+        if (\App\Models\SiteSetting::get('onesignal_enabled', false)) {
+            $pushOutbox = NotificationOutbox::create([
+                'channel' => 'push',
+                'recipient' => 'admins',
+                'subject' => '[New Order Received] - ' . $order->order_number,
+                'status' => 'queued',
+                'provider' => 'onesignal',
+                'related_type' => Order::class,
+                'related_id' => $order->id,
+                'payload' => ['admin_notification' => true],
+                'attempt_count' => 1,
+                'last_attempt_at' => now(),
+                'queued_at' => now(),
+            ]);
+
+            \App\Jobs\SendOneSignalNotificationJob::dispatch(
+                $order->id,
+                'admin_new_order',
+                null,
+                null,
+                $pushOutbox->id,
+                $order->tenant_id
+            );
+        }
     }
 }

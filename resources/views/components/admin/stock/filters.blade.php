@@ -24,21 +24,23 @@
     </div>
 
     <!-- Quick Filter Matrix -->
-    <div class="flex flex-wrap items-center gap-2 p-1.5 rounded-[1.5rem] bg-slate-100/50 border border-slate-200/60 w-fit">
-        @foreach(['all' => 'All Assets', 'low_stock' => 'Critical', 'out_of_stock' => 'Deficit', 'active' => 'Operational', 'inactive' => 'Drafts', 'discontinued' => 'Archived'] as $filterKey => $filterLabel)
-            <button type="button" wire:click="setInventoryQuickFilter('{{ $filterKey }}')" 
-                class="group relative flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-300 {{ $inventoryQuickFilter === $filterKey ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600' }}">
-                <span>{{ $filterLabel }}</span>
-                <span class="inline-flex min-w-[1.25rem] items-center justify-center rounded-lg px-1.5 py-0.5 text-[10px] font-black {{ $inventoryQuickFilter === $filterKey ? 'bg-slate-900 text-white shadow-md shadow-slate-200' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300' }}">{{ $inventoryQuickCounts[$filterKey] ?? 0 }}</span>
+    <div class="flex overflow-x-auto scrollbar-none items-center gap-2 p-1.5 rounded-[1.5rem] bg-slate-100/50 border border-slate-200/60 w-full lg:w-fit">
+        <div class="flex items-center gap-2 w-max">
+            @foreach(['all' => 'All Assets', 'low_stock' => 'Critical', 'out_of_stock' => 'Deficit', 'active' => 'Operational', 'inactive' => 'Drafts', 'discontinued' => 'Archived'] as $filterKey => $filterLabel)
+                <button type="button" wire:click="setInventoryQuickFilter('{{ $filterKey }}')" 
+                    class="group relative flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-300 {{ $inventoryQuickFilter === $filterKey ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600' }}">
+                    <span>{{ $filterLabel }}</span>
+                    <span class="inline-flex min-w-[1.25rem] items-center justify-center rounded-lg px-1.5 py-0.5 text-[10px] font-black {{ $inventoryQuickFilter === $filterKey ? 'bg-slate-900 text-white shadow-md shadow-slate-200' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300' }}">{{ $inventoryQuickCounts[$filterKey] ?? 0 }}</span>
+                </button>
+            @endforeach
+            <div class="mx-2 h-6 w-px bg-slate-200"></div>
+            <button type="button" wire:click="toggleCompactTableMode" class="h-9 w-9 flex items-center justify-center rounded-xl {{ $compactTableMode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-600' }}" title="Density Toggle">
+                <i class="fas {{ $compactTableMode ? 'fa-align-justify' : 'fa-grip-lines' }} text-xs"></i>
             </button>
-        @endforeach
-        <div class="mx-2 h-6 w-px bg-slate-200"></div>
-        <button type="button" wire:click="toggleCompactTableMode" class="h-9 w-9 flex items-center justify-center rounded-xl {{ $compactTableMode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-400 border border-slate-200 hover:text-slate-600' }}" title="Density Toggle">
-            <i class="fas {{ $compactTableMode ? 'fa-align-justify' : 'fa-grip-lines' }} text-xs"></i>
-        </button>
-        <button type="button" wire:click="resetInventoryBoard" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-rose-400 border border-slate-200 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Reset All Filters">
-            <i class="fas fa-rotate-left text-xs"></i>
-        </button>
+            <button type="button" wire:click="resetInventoryBoard" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-rose-400 border border-slate-200 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Reset All Filters">
+                <i class="fas fa-rotate-left text-xs"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Advanced Filter Hub -->

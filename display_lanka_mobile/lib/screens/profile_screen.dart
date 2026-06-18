@@ -5,6 +5,10 @@ import '../providers/settings_provider.dart';
 import 'login_screen.dart';
 import 'web_admin_screen.dart';
 import 'web_page_screen.dart';
+import 'orders_screen.dart';
+import 'addresses_screen.dart';
+import 'wishlist_screen.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -126,12 +130,7 @@ class ProfileScreen extends StatelessWidget {
               if (auth.isAuthenticated) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => WebPageScreen(
-                      title: 'My Orders',
-                      url: 'https://client1.displaylanka.shop/auth/checkout-login?token=${auth.token}&redirect=/profile?tab=orders',
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const OrdersScreen()),
                 );
               }
             },
@@ -146,12 +145,7 @@ class ProfileScreen extends StatelessWidget {
               if (auth.isAuthenticated) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => WebPageScreen(
-                      title: 'Wishlist',
-                      url: 'https://client1.displaylanka.shop/auth/checkout-login?token=${auth.token}&redirect=/wishlist',
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const WishlistScreen()),
                 );
               } else {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
@@ -168,17 +162,12 @@ class ProfileScreen extends StatelessWidget {
               if (auth.isAuthenticated) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => WebPageScreen(
-                      title: 'Addresses',
-                      url: 'https://client1.displaylanka.shop/auth/checkout-login?token=${auth.token}&redirect=/profile?tab=addresses',
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const AddressesScreen()),
                 );
               }
             },
           ),
-          if (auth.isAuthenticated && auth.user?['is_admin'] == true) ...[
+          if (auth.isAuthenticated && auth.user?['user_type'] == 'admin') ...[
             const SizedBox(height: 12),
             _buildMenuItem(
               Icons.admin_panel_settings_rounded,

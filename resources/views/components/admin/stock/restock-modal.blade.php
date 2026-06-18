@@ -17,11 +17,11 @@
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-95 translate-y-4"
         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-        class="relative w-full max-w-xl rounded-[3rem] border border-slate-200 bg-white shadow-2xl overflow-hidden"
+        class="relative w-full max-w-xl rounded-2xl sm:rounded-[3rem] border border-slate-200 bg-white shadow-2xl overflow-hidden"
     >
         <form wire:submit.prevent="processRestock" class="flex flex-col">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-8 py-6">
+            <div class="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-8 sm:py-6">
                 <div class="flex items-center gap-4">
                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-xl">
                         <i class="fas fa-plus-circle text-xs"></i>
@@ -37,7 +37,7 @@
             </div>
 
             <!-- Modal Content -->
-            <div class="px-8 py-10 space-y-8">
+            <div class="px-5 py-6 sm:px-8 sm:py-10 space-y-6 sm:space-y-8">
                 <div class="rounded-2xl bg-slate-50 p-6 border border-slate-100">
                     <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-3">Asset Identity</p>
                     <h4 class="text-sm font-black text-slate-900 tracking-tight leading-tight uppercase">{{ $restockProductName }}</h4>
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="border-t border-slate-100 bg-slate-50/50 px-8 py-6">
+            <div class="border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-8 sm:py-6">
                 <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-2xl bg-slate-900 px-8 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
                     <i class="fas fa-arrow-down text-[10px] opacity-50"></i>
                     Finalize Intake

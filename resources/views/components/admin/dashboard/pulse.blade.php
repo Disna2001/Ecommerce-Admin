@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @foreach([
             ['Stock In', $todayStockIn, 'fa-arrow-down-long', 'emerald'],
             ['Stock Out', $todayStockOut, 'fa-arrow-up-long', 'rose'],

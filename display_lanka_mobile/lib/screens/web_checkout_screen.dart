@@ -25,6 +25,7 @@ class _WebCheckoutScreenState extends State<WebCheckoutScreen> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent('DisplayLankaApp')
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (progress) {

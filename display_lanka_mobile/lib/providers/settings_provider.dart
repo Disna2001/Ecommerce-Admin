@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../services/notification_service.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
@@ -12,6 +13,8 @@ class SettingsProvider extends ChangeNotifier {
   String? _supportEmail;
   String? _supportPhone;
   String? _siteVersion;
+  String? _onesignalAppId;
+  bool _onesignalEnabled = false;
   bool _isLoading = true;
   bool _isDark = false;
 
@@ -22,6 +25,8 @@ class SettingsProvider extends ChangeNotifier {
   String? get supportEmail => _supportEmail;
   String? get supportPhone => _supportPhone;
   String? get siteVersion => _siteVersion;
+  String? get onesignalAppId => _onesignalAppId;
+  bool get onesignalEnabled => _onesignalEnabled;
   bool get isLoading => _isLoading;
   bool get isDark => _isDark;
 
@@ -55,6 +60,13 @@ class SettingsProvider extends ChangeNotifier {
       _supportEmail = settings['support_email'];
       _supportPhone = settings['support_phone'];
       _siteVersion = settings['site_version'];
+      
+      _onesignalAppId = settings['onesignal_app_id'];
+      _onesignalEnabled = settings['onesignal_enabled'] == true || settings['onesignal_enabled'] == '1';
+
+      if (_onesignalEnabled && _onesignalAppId != null && _onesignalAppId!.isNotEmpty) {
+        await NotificationService.initialize(_onesignalAppId!);
+      }
     } catch (e) {
       debugPrint('Failed to load dynamic site settings: $e');
     } finally {

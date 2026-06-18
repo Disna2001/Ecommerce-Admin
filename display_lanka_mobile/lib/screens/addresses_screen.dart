@@ -184,7 +184,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                     final isDefault = address['is_default'] == true;
 
                     return Container(
-                      margin: const EdgeInsets.bottom(16),
+                      margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
                         color: surfaceColor,
                         borderRadius: BorderRadius.circular(24),

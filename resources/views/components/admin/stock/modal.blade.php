@@ -56,28 +56,30 @@
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-95 translate-y-4"
         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-        class="relative w-full max-w-7xl rounded-[3rem] border border-slate-200 bg-white shadow-2xl overflow-hidden"
+        class="relative w-full max-w-7xl rounded-2xl sm:rounded-[3rem] border border-slate-200 bg-white shadow-2xl overflow-hidden"
     >
         <form wire:submit.prevent="store" class="flex flex-col h-[90vh]">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-8 py-6">
-                <div class="flex items-center gap-6">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-slate-900 text-white shadow-xl">
-                        <i class="fas {{ $stock_id ? 'fa-pen-nib' : 'fa-plus' }} text-sm"></i>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 bg-slate-50/50 px-4 py-4 sm:px-8 sm:py-6 shrink-0">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] sm:rounded-[1.25rem] bg-slate-900 text-white shadow-xl shrink-0">
+                            <i class="fas {{ $stock_id ? 'fa-pen-nib' : 'fa-plus' }} text-xs sm:text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">Architecture: {{ $stockWorkflowMode === 'edit' ? 'Modification' : 'Creation' }}</p>
+                            <h3 class="text-lg sm:text-2xl font-black tracking-tight text-slate-900">{{ $stock_id ? 'Refine Product Profile' : 'New Product Intake' }}</h3>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">Architecture: {{ $stockWorkflowMode === 'edit' ? 'Modification' : 'Creation' }}</p>
-                        <h3 class="text-2xl font-black tracking-tight text-slate-900">{{ $stock_id ? 'Refine Product Profile' : 'New Product Intake' }}</h3>
-                    </div>
-                    <div class="h-10 w-px bg-slate-200 mx-2"></div>
-                    <div class="flex items-center gap-1 rounded-[1.25rem] border border-slate-200 bg-white p-1 shadow-inner">
-                        <button type="button" wire:click="setEntryMode('quick')" class="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all {{ $entryMode === 'quick' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900' }}">Quick Mode</button>
-                        <button type="button" wire:click="setEntryMode('advanced')" class="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all {{ $entryMode === 'advanced' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900' }}">Advanced</button>
+                    <div class="hidden sm:block h-10 w-px bg-slate-200 mx-2"></div>
+                    <div class="flex items-center gap-1 rounded-[1.25rem] border border-slate-200 bg-white p-1 shadow-inner w-full sm:w-auto justify-center">
+                        <button type="button" wire:click="setEntryMode('quick')" class="flex-1 sm:flex-initial rounded-xl px-4 sm:px-5 py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all {{ $entryMode === 'quick' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900' }}">Quick Mode</button>
+                        <button type="button" wire:click="setEntryMode('advanced')" class="flex-1 sm:flex-initial rounded-xl px-4 sm:px-5 py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all {{ $entryMode === 'advanced' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900' }}">Advanced</button>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="hidden xl:flex items-center gap-3 pr-4 border-r border-slate-100">
-                        <div class="text-right">
+                <div class="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="text-left sm:text-right">
                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Stock Health</p>
                             <p class="text-[11px] font-black text-slate-900 uppercase">{{ $this->projectedStockHealth }}</p>
                         </div>
@@ -92,12 +94,12 @@
             </div>
 
             <!-- Workflow Stepper -->
-            <div class="px-8 py-4 bg-white border-b border-slate-50">
-                <div class="flex flex-wrap items-center gap-3 p-1.5 rounded-[1.5rem] bg-slate-100/50 border border-slate-200/60 w-fit">
+            <div class="px-4 sm:px-8 py-4 bg-white border-b border-slate-50 overflow-x-auto custom-scrollbar shrink-0">
+                <div class="flex flex-nowrap items-center gap-3 p-1.5 rounded-[1.5rem] bg-slate-100/50 border border-slate-200/60 w-max">
                     @foreach($stockSteps as $stepKey => $step)
                         <button type="button" wire:click="setStockFormStep('{{ $stepKey }}')" 
-                            class="group relative flex items-center gap-3 rounded-xl px-5 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all duration-300 {{ $stockFormStep === $stepKey ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600' }}">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg text-[10px] font-black transition-all duration-300 {{ $stockFormStep === $stepKey ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300' }}">{{ $loop->iteration }}</span>
+                            class="group relative flex items-center gap-3 rounded-xl px-4 sm:px-5 py-2 sm:py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all duration-300 {{ $stockFormStep === $stepKey ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600' }} shrink-0">
+                            <span class="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg text-[9px] sm:text-[10px] font-black transition-all duration-300 {{ $stockFormStep === $stepKey ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300' }}">{{ $loop->iteration }}</span>
                             <span>{{ $step['label'] }}</span>
                             @if($stockFormStep === $stepKey)
                                 <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 h-1 w-4 rounded-full bg-slate-900"></div>
@@ -108,12 +110,12 @@
             </div>
 
             <!-- Modal Workspace -->
-            <div class="flex-1 overflow-y-auto px-10 py-10 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto px-4 py-6 sm:px-10 sm:py-10 custom-scrollbar">
                 @if($stockFormStep === 'catalog')
-                    <div class="grid gap-12 lg:grid-cols-2">
+                    <div class="grid gap-6 lg:gap-12 lg:grid-cols-2">
                         <!-- Identity & Details -->
                         <div class="space-y-8">
-                            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                            <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md"><i class="fas fa-id-card text-xs"></i></div>
                                     <div>
@@ -172,7 +174,7 @@
 
                         <!-- Classification & AI Features -->
                         <div class="space-y-8">
-                            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                            <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md"><i class="fas fa-layer-group text-xs"></i></div>
                                     <div>
@@ -241,7 +243,7 @@
                             </div>
 
                             @if($showQuickSetup)
-                                <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50/30 p-8 animate-in fade-in slide-in-from-top-4">
+                                <div class="rounded-2xl sm:rounded-3xl border border-dashed border-slate-200 bg-slate-50/30 p-5 sm:p-8 animate-in fade-in slide-in-from-top-4">
                                     <div class="flex items-center gap-3 mb-6">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-200 text-slate-600"><i class="fas fa-bolt text-[10px]"></i></div>
                                         <div>
@@ -271,10 +273,10 @@
                 @endif
 
                 @if($stockFormStep === 'inventory')
-                    <div class="grid gap-12 lg:grid-cols-2">
+                    <div class="grid gap-6 lg:gap-12 lg:grid-cols-2">
                         <!-- Commercials & Stock -->
                         <div class="space-y-8">
-                            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                            <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md"><i class="fas fa-coins text-xs"></i></div>
                                     <div>
@@ -325,7 +327,7 @@
                                     </div>
 
                                     <!-- Margin Intelligence Bar -->
-                                    <div class="mt-8 rounded-[2rem] bg-slate-900 p-8 text-white shadow-2xl shadow-slate-200 relative overflow-hidden">
+                                    <div class="mt-6 sm:mt-8 rounded-2xl sm:rounded-[2rem] bg-slate-900 p-5 sm:p-8 text-white shadow-2xl shadow-slate-200 relative overflow-hidden">
                                         <div class="absolute right-0 top-0 h-32 w-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
                                         <div class="relative z-10">
                                             <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
@@ -353,7 +355,7 @@
 
                         <!-- Technical Specs & Storefront -->
                         <div class="space-y-8">
-                            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                            <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md"><i class="fas fa-microchip text-xs"></i></div>
                                     <div>
@@ -395,7 +397,7 @@
                             </div>
 
                             @if($entryMode === 'advanced')
-                                <div class="rounded-3xl border border-slate-200 bg-slate-50/50 p-8 animate-in fade-in slide-in-from-top-4">
+                                <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-slate-50/50 p-5 sm:p-8 animate-in fade-in slide-in-from-top-4">
                                     <div class="flex items-center justify-between mb-8">
                                         <div class="flex items-center gap-4">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md"><i class="fas fa-map-location-dot text-xs"></i></div>
@@ -440,10 +442,10 @@
                 @endif
 
                 @if($stockFormStep === 'media')
-                    <div class="grid gap-12 lg:grid-cols-2">
+                    <div class="grid gap-6 lg:gap-12 lg:grid-cols-2">
                         <!-- Visual Assets -->
                         <div class="space-y-8">
-                            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                            <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md"><i class="fas fa-panorama text-xs"></i></div>
                                     <div>
@@ -452,7 +454,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="grid grid-cols-3 gap-4 mb-8">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
                                     @foreach($currentImages as $index => $img)
                                         <div class="relative group aspect-square rounded-2xl overflow-hidden border border-slate-100 bg-slate-50">
                                             <img src="{{ asset('storage/' . ($img['path'] ?? '')) }}" class="h-full w-full object-cover">
@@ -493,7 +495,7 @@
 
                         <!-- Motion Assets -->
                         <div class="space-y-8">
-                             <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                             <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md"><i class="fas fa-video text-xs"></i></div>
                                     <div>
@@ -548,17 +550,17 @@
                 @endif
 
                 @if($stockFormStep === 'review')
-                    <div class="grid gap-12 lg:grid-cols-2">
+                    <div class="grid gap-6 lg:gap-12 lg:grid-cols-2">
                         <!-- Technical Summary -->
                         <div class="space-y-8">
-                             <div class="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
-                                <div class="flex items-center gap-6 mb-12">
-                                    <div class="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white shadow-2xl shadow-slate-200">
-                                        <i class="fas fa-microscope text-2xl"></i>
+                             <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-10 shadow-sm">
+                                <div class="flex items-center gap-4 sm:gap-6 mb-6 sm:mb-12">
+                                    <div class="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-[1rem] sm:rounded-[1.5rem] bg-slate-900 text-white shadow-2xl shadow-slate-200 shrink-0">
+                                        <i class="fas fa-microscope text-lg sm:text-2xl"></i>
                                     </div>
                                     <div>
                                         <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mb-2">Protocol: Review</p>
-                                        <h3 class="text-3xl font-black tracking-tight text-slate-900">Technical Audit</h3>
+                                        <h3 class="text-xl sm:text-3xl font-black tracking-tight text-slate-900">Technical Audit</h3>
                                     </div>
                                 </div>
 
@@ -574,9 +576,9 @@
                                          </div>
                                      </div>
 
-                                     <div class="p-8 rounded-[2rem] bg-slate-50 border border-slate-100">
+                                     <div class="p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] bg-slate-50 border border-slate-100">
                                          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Registry Placement</p>
-                                         <div class="flex flex-wrap gap-4">
+                                         <div class="flex flex-wrap gap-2 sm:gap-4">
                                              <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $categories->find($category_id)?->name ?? 'General' }}</span>
                                              <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $brands->find($brand_id)?->name ?? 'Universal' }}</span>
                                              <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $makes->find($make_id)?->name ?? 'Premium' }}</span>
@@ -593,10 +595,10 @@
 
                         <!-- Operational Impact -->
                         <div class="space-y-8">
-                            <div class="rounded-3xl bg-slate-900 p-10 text-white shadow-2xl shadow-slate-300 relative overflow-hidden">
+                            <div class="rounded-2xl sm:rounded-3xl bg-slate-900 p-5 sm:p-10 text-white shadow-2xl shadow-slate-300 relative overflow-hidden">
                                 <div class="absolute left-0 top-0 h-64 w-64 bg-white/5 rounded-full -ml-32 -mt-32"></div>
                                 <div class="relative z-10">
-                                    <div class="flex items-center gap-4 mb-12">
+                                    <div class="flex items-center gap-4 mb-6 sm:mb-12">
                                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white shadow-xl"><i class="fas fa-radar text-lg"></i></div>
                                         <div>
                                             <p class="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Impact Analysis</p>
@@ -605,7 +607,7 @@
                                     </div>
 
                                     <div class="space-y-8">
-                                        <div class="grid gap-10 md:grid-cols-2">
+                                        <div class="grid gap-6 sm:gap-10 md:grid-cols-2">
                                             <div class="space-y-6">
                                                 <div class="flex justify-between border-b border-white/10 pb-4">
                                                     <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Acquisition</span>
@@ -626,16 +628,16 @@
                                                     <span class="text-sm font-black tracking-tight text-emerald-400">{{ (int)$quantity }} Units</span>
                                                 </div>
                                              </div>
-                                        </div>
-                                    </div>
+                                         </div>
+                                     </div>
                                 </div>
 
-                                <div class="mt-12 flex flex-col items-center justify-center p-8 border-t border-white/10">
-                                     <button type="submit" class="flex items-center gap-4 rounded-[2rem] bg-white px-16 py-6 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                <div class="mt-8 sm:mt-12 flex flex-col items-center justify-center p-4 sm:p-8 border-t border-white/10">
+                                     <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-4 rounded-[2rem] bg-white px-6 sm:px-16 py-4 sm:py-6 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
                                         <i class="fas fa-rocket text-sm opacity-50"></i>
                                         Synchronize Registry
                                      </button>
-                                     <p class="mt-4 text-[9px] font-bold text-white/40 uppercase tracking-widest">By synchronizing, you commit these changes to the master inventory</p>
+                                     <p class="mt-4 text-[9px] font-bold text-white/40 uppercase tracking-widest text-center">By synchronizing, you commit these changes to the master inventory</p>
                                 </div>
                             </div>
                         </div>
@@ -644,24 +646,26 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="border-t border-slate-100 bg-slate-50/50 px-10 py-8 flex items-center justify-between">
-                <div class="flex items-center gap-4">
+            <div class="border-t border-slate-100 bg-slate-50/50 px-4 sm:px-10 py-4 sm:py-8 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+                <div class="flex items-center justify-center sm:justify-start w-full sm:w-auto">
                     <button type="button" @click="show = false" class="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">Discard Draft</button>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
                     @if($stockFormStep !== 'catalog')
-                         <button type="button" wire:click="setStockFormStep('{{ array_keys($stockSteps)[array_search($stockFormStep, array_keys($stockSteps)) - 1] }}')" class="rounded-2xl border border-slate-200 bg-white px-8 py-4 text-[10px] font-black text-slate-900 uppercase tracking-widest transition-all hover:border-slate-900 shadow-sm">Previous Protocol</button>
+                         <button type="button" wire:click="setStockFormStep('{{ array_keys($stockSteps)[array_search($stockFormStep, array_keys($stockSteps)) - 1] }}')" class="flex-1 sm:flex-initial text-center rounded-2xl border border-slate-200 bg-white px-4 sm:px-8 py-3.5 sm:py-4 text-[10px] font-black text-slate-900 uppercase tracking-widest transition-all hover:border-slate-900 shadow-sm">
+                            <span>Previous</span> <span class="hidden sm:inline">Protocol</span>
+                         </button>
                     @endif
                     
                     @if($stockFormStep !== 'review')
-                         <button type="button" wire:click="setStockFormStep('{{ array_keys($stockSteps)[array_search($stockFormStep, array_keys($stockSteps)) + 1] }}')" class="flex items-center gap-3 rounded-2xl bg-slate-900 px-10 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                         <button type="button" wire:click="setStockFormStep('{{ array_keys($stockSteps)[array_search($stockFormStep, array_keys($stockSteps)) + 1] }}')" class="flex-1 sm:flex-initial flex items-center justify-center gap-3 rounded-2xl bg-slate-900 px-6 sm:px-10 py-3.5 sm:py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             <span>Continue</span>
                             <i class="fas fa-arrow-right text-[10px] opacity-50"></i>
                          </button>
                     @else
-                         <button type="submit" class="flex items-center gap-3 rounded-2xl bg-emerald-600 px-10 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                         <button type="submit" class="flex-1 sm:flex-initial flex items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 sm:px-10 py-3.5 sm:py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             <i class="fas fa-check text-[10px] opacity-50"></i>
-                            Finalize Synchronization
+                            <span>Finalize</span> <span class="hidden sm:inline">Synchronization</span>
                          </button>
                     @endif
                 </div>

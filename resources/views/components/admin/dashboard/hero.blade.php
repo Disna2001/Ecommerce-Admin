@@ -1,6 +1,6 @@
 @props(['todayOrders', 'pendingPaymentReviews', 'monthRevenue', 'failedOutbox'])
 
-<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+<div class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6">
     @foreach([
         ['Revenue (Month)', 'Rs ' . number_format($monthRevenue, 0), 'fa-chart-line', 'indigo', 'Performance'],
         ['Daily Orders', $todayOrders, 'fa-cart-shopping', 'emerald', 'Volume'],

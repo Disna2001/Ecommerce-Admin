@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\SiteSetting;
 use App\Models\Stock;
 use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class AIAssistant extends Component
@@ -147,6 +148,8 @@ class AIAssistant extends Component
 
             $this->prompt = '';
         } catch (\Throwable $e) {
+            Log::error('AIAssistant Chat Error: ' . $e->getMessage(), ['exception' => $e]);
+
             $fallback = $this->buildFallbackReply($e->getMessage());
 
             $this->messages[] = [

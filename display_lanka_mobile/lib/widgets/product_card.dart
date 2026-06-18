@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/store_models.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
+import '../providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
@@ -68,11 +69,22 @@ class ProductCard extends StatelessWidget {
                   Positioned(
                     top: 12,
                     right: 12,
-                    child: Consumer<WishlistProvider>(
-                      builder: (context, wishlist, child) {
-                        final isFav = wishlist.isFavorite(product.id);
+                    child: Consumer2<WishlistProvider, AuthProvider>(
+                      builder: (context, wishlist, auth, child) {
+                        final isWished = wishlist.isWished(product.id);
                         return GestureDetector(
-                          onTap: () => wishlist.toggleFavorite(product),
+                          onTap: () {
+                            if (auth.isAuthenticated && auth.token != null) {
+                              wishlist.toggleWishlist(auth.token!, product.id);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Sign in to save to wishlist'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
@@ -86,9 +98,9 @@ class ProductCard extends StatelessWidget {
                               ],
                             ),
                             child: Icon(
-                              isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                              isWished ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                               size: 16,
-                              color: isFav ? const Color(0xFFF43F5E) : const Color(0xFF0F172A),
+                              color: isWished ? const Color(0xFFF43F5E) : const Color(0xFF0F172A),
                             ),
                           ),
                         );

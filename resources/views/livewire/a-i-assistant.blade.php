@@ -1,6 +1,6 @@
 <div>
     <button wire:click="openAssistant"
-            class="fixed bottom-6 right-6 z-50 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-slate-900 via-violet-700 to-indigo-600 px-5 py-4 text-white shadow-2xl transition hover:-translate-y-0.5 hover:shadow-violet-500/30">
+            class="fixed bottom-24 lg:bottom-6 right-6 z-50 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-slate-900 via-violet-700 to-indigo-600 px-5 py-4 text-white shadow-2xl transition hover:-translate-y-0.5 hover:shadow-violet-500/30">
         <span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.847-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.847a4.5 4.5 0 003.09 3.09L15.75 12l-2.847.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715 18 9.75l-.259-1.035a2.25 2.25 0 00-1.456-1.456L15.25 7l1.035-.259a2.25 2.25 0 001.456-1.456L18 4.25l.259 1.035a2.25 2.25 0 001.456 1.456L20.75 7l-1.035.259a2.25 2.25 0 00-1.456 1.456z"></path>

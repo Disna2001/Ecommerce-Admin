@@ -13,11 +13,14 @@
     inputMode: @entangle('input_mode').live,
     deviceType: 'desktop',
     fullscreenActive: false,
+    posTab: 'search',
+    isTabletMobile: window.innerWidth < 1100,
     initPrintRouting() {
         this.usbPrinterName = localStorage.getItem('posUsbPrinterName') || '';
         this.printerHint = localStorage.getItem('posPreferredPrinter') || this.matchCatalogPrinter(this.usbPrinterName) || this.defaultPrinterHint;
         this.inputMode = localStorage.getItem('posInputMode') || this.inputMode || 'keyboard_scanner';
         const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+        this.isTabletMobile = window.innerWidth < 1100;
         if (window.innerWidth < 640) {
             this.deviceType = 'mobile';
         } else if (coarsePointer || window.innerWidth < 1024) {
@@ -132,6 +135,9 @@
     init() {
         this.initPrintRouting();
         this.initFullscreen();
+        window.addEventListener('resize', () => {
+            this.isTabletMobile = window.innerWidth < 1100;
+        });
         this.$watch('showSuccessModal', (value) => {
             if (value) {
                 this.$nextTick(() => {
@@ -288,8 +294,28 @@
             </div>
         </div>
 
+        <!-- Mobile Segmented Tab Selector -->
+        <div x-show="isTabletMobile" class="mb-4 flex items-center justify-between gap-1 p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl relative z-10" x-cloak>
+            <button @click="posTab = 'search'" type="button" 
+                class="flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all"
+                :class="posTab === 'search' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">
+                <i class="fas fa-barcode mr-2"></i>Search
+            </button>
+            <button @click="posTab = 'cart'" type="button" 
+                class="flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all relative"
+                :class="posTab === 'cart' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">
+                <i class="fas fa-cart-shopping mr-2"></i>Cart
+                <span class="absolute top-1 right-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white" x-text="{{ count($cart) }}"></span>
+            </button>
+            <button @click="posTab = 'settle'" type="button" 
+                class="flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all"
+                :class="posTab === 'settle' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">
+                <i class="fas fa-wallet mr-2"></i>Pay
+            </button>
+        </div>
+
         <div class="pos-workspace">
-            <section class="pos-panel pos-panel--tall">
+            <section class="pos-panel pos-panel--tall" :class="isTabletMobile && posTab !== 'search' ? 'hidden' : ''">
                 <div class="pos-panel__header">
                     <div>
                         <p class="pos-panel__eyebrow">Product Search</p>
@@ -369,7 +395,7 @@
                 </div>
             </section>
 
-            <section class="pos-panel pos-panel--tall">
+            <section class="pos-panel pos-panel--tall" :class="isTabletMobile && posTab !== 'cart' ? 'hidden' : ''">
                 <div class="pos-panel__header">
                     <div>
                         <p class="pos-panel__eyebrow">Active Cart</p>
@@ -424,7 +450,7 @@
                 </div>
             </section>
 
-            <section class="pos-rail">
+            <section class="pos-rail" :class="isTabletMobile && posTab !== 'settle' ? 'hidden' : ''">
                 <div class="pos-panel">
                     <div class="pos-panel__header">
                         <div>

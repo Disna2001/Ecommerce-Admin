@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
@@ -30,6 +31,10 @@ class AuthProvider extends ChangeNotifier {
       
       if (_token != null && userString != null) {
         _user = jsonDecode(userString);
+        if (_user != null && _user!['id'] != null) {
+          final prefix = _user!['user_type'] == 'admin' ? 'admin_' : 'customer_';
+          NotificationService.loginUser("$prefix${_user!['id']}");
+        }
         // Refresh profile data from live site database
         await refreshProfile();
       }
@@ -49,6 +54,11 @@ class AuthProvider extends ChangeNotifier {
       _user = freshProfile;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_user', jsonEncode(_user));
+      
+      if (_user != null && _user!['id'] != null) {
+        final prefix = _user!['user_type'] == 'admin' ? 'admin_' : 'customer_';
+        NotificationService.loginUser("$prefix${_user!['id']}");
+      }
     } catch (e) {
       debugPrint('Failed to refresh user profile data: $e');
     }
@@ -67,6 +77,11 @@ class AuthProvider extends ChangeNotifier {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', _token!);
         await prefs.setString('auth_user', jsonEncode(_user));
+
+        if (_user != null && _user!['id'] != null) {
+          final prefix = _user!['user_type'] == 'admin' ? 'admin_' : 'customer_';
+          NotificationService.loginUser("$prefix${_user!['id']}");
+        }
       }
     } catch (e) {
       _token = null;
@@ -91,6 +106,11 @@ class AuthProvider extends ChangeNotifier {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', _token!);
         await prefs.setString('auth_user', jsonEncode(_user));
+
+        if (_user != null && _user!['id'] != null) {
+          final prefix = _user!['user_type'] == 'admin' ? 'admin_' : 'customer_';
+          NotificationService.loginUser("$prefix${_user!['id']}");
+        }
       }
     } catch (e) {
       _token = null;
@@ -113,6 +133,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Server-side logout token invalidation failed: $e');
     } finally {
+      await NotificationService.logoutUser();
       _token = null;
       _user = null;
       final prefs = await SharedPreferences.getInstance();

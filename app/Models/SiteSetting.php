@@ -32,6 +32,7 @@ class SiteSetting extends Model
         'payhere_merchant_secret',
         'google_client_secret',
         'facebook_client_secret',
+        'onesignal_rest_api_key',
     ];
 
     // -------------------------------------------------------------------------

@@ -55,7 +55,7 @@
             <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-8">
                     @foreach($cart as $id => $item)
-                        <div class="premium-card !p-6 !rounded-[2.5rem] group border border-slate-50 hover:border-[var(--primary)] transition-all dark:border-white/5">
+                        <div class="premium-card !p-4 sm:!p-6 !rounded-[1.5rem] sm:!rounded-[2.5rem] group border border-slate-50 hover:border-[var(--primary)] transition-all dark:border-white/5">
                             <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
                                 <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-50 dark:bg-white/5">
                                     @if(!empty($item['image']))
@@ -157,4 +157,20 @@
             </div>
         @endif
     </div>
+
+    <!-- Mobile Sticky Checkout Bar -->
+    @if(!empty($cart))
+        @php
+            $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
+        @endphp
+        <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 border-t border-slate-100 dark:border-white/5 p-4 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.05)] {{ $isApp ? 'mb-0' : 'mb-[64px]' }}">
+            <div>
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">Total Valuation</span>
+                <p class="text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($total, 0) }}</p>
+            </div>
+            <a href="{{ url('/checkout') }}" class="h-11 px-6 flex items-center justify-center rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white text-xs font-black uppercase tracking-widest transition shadow-lg">
+                Checkout
+            </a>
+        </div>
+    @endif
 </div>

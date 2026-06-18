@@ -91,6 +91,9 @@
                             :mail_smtp_username="$mail_smtp_username"
                             :mail_smtp_password="$mail_smtp_password"
                             :test_email_recipient="$test_email_recipient"
+                            :onesignal_enabled="$onesignal_enabled"
+                            :onesignal_app_id="$onesignal_app_id"
+                            :onesignal_rest_api_key="$onesignal_rest_api_key"
                         />
                     @elseif($activeTab === 'hosting')
                         <x-admin.settings.tab-hosting />

@@ -36,7 +36,8 @@
     </div>
 
     <!-- Inventory Ledger Table -->
-    <div class="overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+    <!-- Inventory Ledger Table (Desktop Only) -->
+    <div class="hidden lg:block overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-100">
                 <thead>
@@ -159,6 +160,85 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="block lg:hidden space-y-4">
+        @forelse($stocks as $stock)
+            <div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <div class="flex items-start gap-4">
+                    <div class="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-inner">
+                        @php $firstImage = collect($stock->images)->first(); @endphp
+                        @if($firstImage)
+                            <img src="{{ asset('storage/' . ($firstImage->path ?? $firstImage['path'] ?? '')) }}" class="h-full w-full object-cover">
+                        @else
+                            <div class="flex h-full w-full items-center justify-center text-slate-300">
+                                <i class="fas fa-image text-xl"></i>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-start justify-between gap-2">
+                            <h4 class="truncate text-sm font-black text-slate-900 tracking-tight leading-tight">{{ $stock->name }}</h4>
+                            <input type="checkbox" wire:model="selectedStockIds" value="{{ $stock->id }}" class="mt-1 h-4 w-4 rounded border-slate-200 text-slate-900 focus:ring-0 transition-all">
+                        </div>
+                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-1">
+                            {{ $stock->category->name ?? 'Unset' }} · {{ $stock->brand->name ?? 'No Brand' }}
+                        </p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                            SKU: {{ $stock->sku }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                    <div>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Stock Level</p>
+                        <p class="mt-1 text-xs font-black {{ $stock->isLowStock() ? 'text-rose-600' : 'text-slate-900' }}">
+                            {{ $stock->quantity }} Units
+                        </p>
+                        <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 shadow-inner">
+                            <div class="h-full rounded-full transition-all duration-700 {{ $stock->isLowStock() ? 'bg-rose-500 shadow-lg shadow-rose-200' : 'bg-emerald-500 shadow-lg shadow-emerald-200' }}" style="width: {{ min(100, ($stock->quantity / max(1, $stock->reorder_level * 2)) * 100) }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Commercials</p>
+                        <p class="mt-1 text-xs font-black text-slate-900">
+                            Rs {{ number_format($stock->selling_price, 0) }}
+                        </p>
+                        <p class="mt-1 text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                            {{ number_format($stock->margin_percent, 1) }}% Margin
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+                    <button wire:click="openRestockModal({{ $stock->id }})" class="flex-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all text-xs font-bold uppercase tracking-wider" title="Restock">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Restock</span>
+                    </button>
+                    <button wire:click="edit({{ $stock->id }})" class="flex-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-wider" title="Edit">
+                        <i class="fas fa-pen-nib"></i>
+                        <span>Edit</span>
+                    </button>
+                    <button 
+                        onclick="confirm('Decommission this asset from registry?') || event.stopImmediatePropagation()"
+                        wire:click="delete({{ $stock->id }})" 
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                        title="Archive"
+                    >
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-[2rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-200 mb-4">
+                    <i class="fas fa-box-open text-2xl"></i>
+                </div>
+                <p class="text-sm font-black text-slate-900 tracking-tight">No assets identified</p>
+            </div>
+        @endforelse
     </div>
 
     <!-- Pagination Hub -->

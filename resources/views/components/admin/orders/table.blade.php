@@ -11,7 +11,8 @@
         </div>
     </div>
 
-    <div class="overflow-x-auto">
+    <!-- Desktop Fulfillment Table -->
+    <div class="hidden lg:block overflow-x-auto">
         <table class="w-full border-separate border-spacing-y-4">
             <thead>
                 <tr class="text-left">
@@ -109,6 +110,90 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="block lg:hidden space-y-4 mt-6">
+        @forelse($orders as $order)
+            <div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-md">
+                            <i class="fas fa-box-archive text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest">#{{ $order->order_number }}</h4>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">{{ $order->customer_name }}</p>
+                        </div>
+                    </div>
+                    @php
+                        $sTone = match($order->status) {
+                            'pending' => 'amber',
+                            'confirmed', 'processing' => 'indigo',
+                            'shipped', 'delivered', 'completed' => 'emerald',
+                            'cancelled', 'rejected' => 'rose',
+                            'return_requested' => 'pink',
+                            default => 'slate'
+                        };
+                    @endphp
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-{{ $sTone }}-50 text-{{ $sTone }}-600 border border-{{ $sTone }}-100">
+                        <i class="fas {{ $order->status_icon ?? 'fa-circle' }} text-[8px]"></i>
+                        <span class="text-[8px] font-black uppercase tracking-widest">{{ $order->status_label }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                    <div>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Date Origin</p>
+                        <p class="mt-1 text-[10px] font-bold text-slate-600">
+                            {{ $order->created_at->format('M d, Y') }} at {{ $order->created_at->format('h:i A') }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Value & Payment</p>
+                        <p class="mt-1 text-xs font-black text-slate-900">
+                            Rs {{ number_format($order->total, 0) }}
+                        </p>
+                        <p class="mt-0.5 text-[8px] font-black uppercase tracking-widest text-{{ match($order->payment_status) {
+                            'paid' => 'emerald',
+                            'pending' => 'amber',
+                            'failed' => 'rose',
+                            default => 'slate'
+                        } }}-600">
+                            {{ $order->payment_status }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+                    @if($order->payment_review_status === 'pending_review')
+                        <button wire:click="openPaymentModal({{ $order->id }})" class="flex-1 h-9 rounded-xl bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest shadow-md">Verify Payment</button>
+                    @endif
+
+                    @if($order->status === 'pending')
+                         <button wire:click="quickConfirm({{ $order->id }})" class="flex-1 h-9 rounded-xl bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest">Confirm</button>
+                         <button wire:click="openStatusModal({{ $order->id }})" class="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900"><i class="fas fa-ellipsis text-xs"></i></button>
+                    @endif
+
+                    @if(in_array($order->status, ['confirmed', 'processing']) && !$order->tracking_number)
+                        <button wire:click="openTrackingModal({{ $order->id }})" class="flex-1 h-9 rounded-xl bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest shadow-md">Ship</button>
+                    @endif
+
+                    @if($order->status === 'shipped')
+                        <button wire:click="markAsDelivered({{ $order->id }})" class="flex-1 h-9 rounded-xl bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest shadow-md">Delivered</button>
+                    @endif
+
+                    <button wire:click="viewOrder({{ $order->id }})" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-900">
+                        <i class="fas fa-eye text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-[2rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
+                <i class="fas fa-receipt text-3xl text-slate-200 mb-4"></i>
+                <p class="text-sm font-black text-slate-900 uppercase tracking-tight">No orders found</p>
+            </div>
+        @endforelse
     </div>
 
     <div class="mt-8">

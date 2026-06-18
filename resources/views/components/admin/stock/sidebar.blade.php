@@ -1,4 +1,32 @@
-<div class="w-full rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-sm h-fit sticky top-24">
+<!-- Mobile Horizontal Navigation Bar -->
+<div class="block lg:hidden w-full overflow-x-auto scrollbar-none py-2 mb-4">
+    <div class="flex items-center gap-2 w-max px-1">
+        @foreach([
+            ['inventory', 'Inventory Board', 'fa-table-columns'],
+            ['intake', 'Intake Desk', 'fa-plus-circle'],
+            ['import', 'Bulk Registry', 'fa-file-csv'],
+            ['categories', 'Categories', 'fa-tags'],
+            ['brands', 'Brands', 'fa-copyright'],
+            ['makes', 'Makes', 'fa-car'],
+            ['suppliers', 'Suppliers', 'fa-truck-moving'],
+            ['item_types', 'Item Types', 'fa-boxes-packing'],
+            ['warranties', 'Warranties', 'fa-shield-halved'],
+            ['quality_levels', 'Quality Tiers', 'fa-award']
+        ] as [$tab, $label, $icon])
+            <button 
+                type="button" 
+                wire:click="setStockWorkspaceTab('{{ $tab }}')" 
+                class="flex items-center gap-2 rounded-full px-4 py-2.5 text-[10px] font-black uppercase tracking-wider transition-all {{ $stockWorkspaceTab === $tab ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}"
+            >
+                <i class="fas {{ $icon }} text-[10px]"></i>
+                <span>{{ $label }}</span>
+            </button>
+        @endforeach
+    </div>
+</div>
+
+<!-- Desktop Vertical Sidebar -->
+<div class="hidden lg:block w-full rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-sm h-fit sticky top-24">
     <nav class="flex flex-col gap-1">
         <p class="mb-4 px-4 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Inventory Hub</p>
         
