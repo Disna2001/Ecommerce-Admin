@@ -22,6 +22,19 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold text-rose-700 animate-in fade-in slide-in-from-top-2">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-exclamation-circle text-rose-500 mr-1"></i> Configuration validation failed. Please check the following fields:
+            </div>
+            <ul class="list-disc list-inside pl-6 mt-2 text-xs font-semibold text-rose-600 space-y-0.5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="grid min-w-0 gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
         <!-- Sidebar Navigation -->
         <div class="space-y-6">
