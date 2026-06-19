@@ -240,18 +240,44 @@
     <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-950/95 border-t border-slate-100 dark:border-white/5 backdrop-blur-md py-3 px-6 flex items-center justify-between pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
         @php
             $tabs = [
-                ['route' => '/', 'icon' => 'fa-home', 'label' => 'Home', 'active' => request()->is('/')],
-                ['route' => '/products', 'icon' => 'fa-grip-vertical', 'label' => 'Shop', 'active' => request()->is('products*')],
-                ['route' => '/cart', 'icon' => 'fa-shopping-bag', 'label' => 'Cart', 'active' => request()->is('cart*'), 'badge' => $cartCount],
-                ['route' => '/wishlist', 'icon' => 'fa-heart', 'label' => 'Saved', 'active' => request()->is('wishlist*')],
-                ['route' => Auth::check() ? route('profile.index') : route('login'), 'icon' => 'fa-user-circle', 'label' => 'Profile', 'active' => request()->is('profile*') || request()->is('login*') || request()->is('register*')]
+                [
+                    'route' => '/', 
+                    'iconClass' => 'fas fa-home', 
+                    'label' => 'Home', 
+                    'active' => request()->is('/')
+                ],
+                [
+                    'route' => '/products', 
+                    'iconClass' => 'fas fa-grip-vertical', 
+                    'label' => 'Shop', 
+                    'active' => request()->is('products*')
+                ],
+                [
+                    'route' => '/cart', 
+                    'iconClass' => 'fas fa-shopping-bag', 
+                    'label' => 'Cart', 
+                    'active' => request()->is('cart*'), 
+                    'badge' => $cartCount
+                ],
+                [
+                    'route' => '/wishlist', 
+                    'iconClass' => request()->is('wishlist*') ? 'fas fa-heart' : 'far fa-heart', 
+                    'label' => 'Saved', 
+                    'active' => request()->is('wishlist*')
+                ],
+                [
+                    'route' => Auth::check() ? route('profile.index') : route('login'), 
+                    'iconClass' => (request()->is('profile*') || request()->is('login*') || request()->is('register*')) ? 'fas fa-user-circle' : 'far fa-user-circle', 
+                    'label' => 'Profile', 
+                    'active' => request()->is('profile*') || request()->is('login*') || request()->is('register*')
+                ]
             ];
         @endphp
 
         @foreach($tabs as $tab)
             <a href="{{ $tab['route'] }}" class="relative flex flex-col items-center justify-center gap-1 group flex-1">
                 <div class="flex h-6 w-6 items-center justify-center text-lg transition-transform group-active:scale-95 {{ $tab['active'] ? 'text-[var(--primary)]' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200' }}">
-                    <i class="{{ $tab['icon'] === 'fa-heart' ? 'fas' : 'far' }} {{ $tab['icon'] }}"></i>
+                    <i class="{{ $tab['iconClass'] }}"></i>
                 </div>
                 
                 <span class="text-[9px] font-black uppercase tracking-wider {{ $tab['active'] ? 'text-[var(--primary)]' : 'text-slate-400' }}">
