@@ -29,9 +29,15 @@
         <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
             <div class="flex items-center justify-between px-2">
                 <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Direct Connect: WhatsApp Messaging</p>
-                <div class="flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full {{ $whatsapp_enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></span>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $whatsapp_enabled ? 'INTEGRATION ACTIVE' : 'SYSTEM OFFLINE' }}</span>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full {{ $whatsapp_enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></span>
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $whatsapp_enabled ? 'INTEGRATION ACTIVE' : 'SYSTEM OFFLINE' }}</span>
+                    </div>
+                    <button type="button" wire:click="$set('whatsapp_enabled', {{ !$whatsapp_enabled ? 'true' : 'false' }})" 
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $whatsapp_enabled ? 'bg-emerald-600' : 'bg-slate-200' }}">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $whatsapp_enabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    </button>
                 </div>
             </div>
 
