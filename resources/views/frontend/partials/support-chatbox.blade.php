@@ -4,6 +4,24 @@
     $chatSiteName = SiteSetting::get('site_name', 'DISPLAY LANKA.LK');
     $chatPrimary = SiteSetting::get('primary_color', '#6d28d9');
     $chatSecondary = SiteSetting::get('secondary_color', '#7c3aed');
+    
+    // Storefront WhatsApp Floating Button settings
+    $whatsappChatEnabled = (bool) SiteSetting::get('whatsapp_chat_enabled', false);
+    $whatsappChatNumber = preg_replace('/\D+/', '', SiteSetting::get('whatsapp_chat_number', ''));
+    $whatsappChatMessage = SiteSetting::get('whatsapp_chat_message', '');
+    $whatsappChatLink = ($whatsappChatEnabled && $whatsappChatNumber)
+        ? "https://wa.me/{$whatsappChatNumber}?text=" . rawurlencode($whatsappChatMessage)
+        : null;
+
+    // Determine positions
+    if ($whatsappChatLink) {
+        $whatsappClasses = "fixed bottom-24 lg:bottom-5 right-5 z-[65]";
+        $assistantClasses = "fixed bottom-44 lg:bottom-24 right-5 z-[65]";
+    } else {
+        $whatsappClasses = "hidden";
+        $assistantClasses = "fixed bottom-24 lg:bottom-5 right-5 z-[65]";
+    }
+
     $chatWhatsappEnabled = (bool) SiteSetting::get('whatsapp_enabled', false);
     $chatWhatsappNumber = preg_replace('/\D+/', '', SiteSetting::get('whatsapp_phone_number', ''));
     $chatSupportEmail = SiteSetting::get('support_email', SiteSetting::get('support_notification_email', ''));
@@ -12,11 +30,13 @@
     $chatWhatsappLink = ($chatWhatsappEnabled && $chatWhatsappNumber)
         ? "https://wa.me/{$chatWhatsappNumber}?text={$chatMessage}"
         : null;
+
+    $dropdownWhatsappLink = $whatsappChatLink ?: $chatWhatsappLink;
 @endphp
 
 <div
     x-data="{ open: false }"
-    class="fixed bottom-24 lg:bottom-5 right-5 z-[65]"
+    class="{{ $assistantClasses }}"
 >
     <div
         x-show="open"
@@ -43,9 +63,9 @@
             </div>
 
             <div class="space-y-3">
-                @if($chatWhatsappLink)
+                @if($dropdownWhatsappLink)
                     <a
-                        href="{{ $chatWhatsappLink }}"
+                        href="{{ $dropdownWhatsappLink }}"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300"
@@ -126,3 +146,18 @@
         <i class="fas" :class="open ? 'fa-xmark' : 'fa-comments'"></i>
     </button>
 </div>
+
+@if($whatsappChatLink)
+    <div class="{{ $whatsappClasses }}">
+        <a
+            href="{{ $whatsappChatLink }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_20px_50px_rgba(16,185,129,0.35)] transition hover:scale-105"
+            style="background:linear-gradient(135deg, #10B981, #059669)"
+            aria-label="Chat on WhatsApp"
+        >
+            <i class="fab fa-whatsapp text-2xl"></i>
+        </a>
+    </div>
+@endif

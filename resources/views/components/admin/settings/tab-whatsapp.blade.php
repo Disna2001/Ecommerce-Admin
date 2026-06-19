@@ -1,4 +1,4 @@
-@props(['app_public_url' => '', 'whatsapp_enabled' => false, 'whatsapp_provider' => 'meta_cloud'])
+@props(['app_public_url' => '', 'whatsapp_enabled' => false, 'whatsapp_provider' => 'meta_cloud', 'whatsapp_chat_enabled' => false])
 <div class="space-y-8">
     <div class="flex items-center gap-4">
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-inner"><i class="fas fa-comment-dots text-lg"></i></div>
@@ -106,6 +106,35 @@
                 <div class="space-y-1.5">
                     <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Settlement Template</label>
                     <textarea wire:model="whatsapp_payment_template" rows="4" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-6 py-4 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storefront Chat Button Configurations -->
+        <div class="lg:col-span-3 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <div class="flex items-center justify-between px-2">
+                <div>
+                    <h4 class="text-sm font-black text-slate-900 uppercase tracking-wider">Storefront WhatsApp Floating Button</h4>
+                    <p class="text-[10px] font-medium text-slate-400 leading-relaxed mt-1">Configure the WhatsApp quick chat button visible to storefront visitors.</p>
+                </div>
+                <button type="button" wire:click="$set('whatsapp_chat_enabled', {{ !$whatsapp_chat_enabled ? 'true' : 'false' }})" 
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $whatsapp_chat_enabled ? 'bg-emerald-600' : 'bg-slate-200' }}">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $whatsapp_chat_enabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                </button>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2 mt-4">
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">WhatsApp Number (with Country Code, no spaces/special chars)</label>
+                    <input type="text" wire:model="whatsapp_chat_number" placeholder="e.g. 94702615076" 
+                        class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all"
+                        {{ !$whatsapp_chat_enabled ? 'disabled' : '' }}>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Default Message</label>
+                    <textarea wire:model="whatsapp_chat_message" rows="2" placeholder="e.g. Hello, I need assistance with display screens."
+                        class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all resize-none"
+                        {{ !$whatsapp_chat_enabled ? 'disabled' : '' }}></textarea>
                 </div>
             </div>
         </div>

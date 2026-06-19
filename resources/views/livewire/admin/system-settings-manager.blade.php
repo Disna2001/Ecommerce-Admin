@@ -109,7 +109,12 @@
                     @elseif($activeTab === 'api_keys')
                         <x-admin.settings.tab-api-keys />
                     @elseif($activeTab === 'whatsapp')
-                        <x-admin.settings.tab-whatsapp :app-public-url="$app_public_url" :whatsapp-enabled="$whatsapp_enabled" :whatsapp-provider="$whatsapp_provider" />
+                        <x-admin.settings.tab-whatsapp 
+                            :app-public-url="$app_public_url" 
+                            :whatsapp-enabled="$whatsapp_enabled" 
+                            :whatsapp-provider="$whatsapp_provider" 
+                            :whatsapp-chat-enabled="$whatsapp_chat_enabled" 
+                        />
                     @elseif($activeTab === 'ai')
                         <x-admin.settings.tab-ai :ai-model="$ai_model" />
                     @elseif($activeTab === 'maintenance')

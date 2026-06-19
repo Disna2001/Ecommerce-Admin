@@ -121,6 +121,12 @@ class SystemSettingsManager extends Component
 
     public string $whatsapp_payment_template = 'Payment update for order {order_number}: {payment_status}.';
 
+    public bool $whatsapp_chat_enabled = false;
+
+    public string $whatsapp_chat_number = '';
+
+    public string $whatsapp_chat_message = '';
+
     // AI
     public bool $ai_enabled = true;
 
@@ -160,6 +166,7 @@ class SystemSettingsManager extends Component
             'company_address', 'company_tax_id', 'currency_code', 'currency_symbol', 'asset_cdn_url',
             'whatsapp_enabled', 'whatsapp_provider', 'whatsapp_phone_number', 'whatsapp_api_url',
             'whatsapp_api_key', 'whatsapp_webhook_verify_token', 'whatsapp_order_template', 'whatsapp_payment_template',
+            'whatsapp_chat_enabled', 'whatsapp_chat_number', 'whatsapp_chat_message',
             'ai_enabled', 'ai_provider', 'ai_model', 'ai_api_key',
             'ai_sales_tracking_enabled', 'ai_inventory_guidance_enabled', 'ai_management_guidance_enabled',
             'ai_prompt_context', 'ai_goal_text', 'custom_integrations_api_key',
@@ -334,6 +341,9 @@ class SystemSettingsManager extends Component
             'whatsapp_webhook_verify_token' => 'nullable|string|max:255',
             'whatsapp_order_template' => 'nullable|string|max:1000',
             'whatsapp_payment_template' => 'nullable|string|max:1000',
+            'whatsapp_chat_enabled' => 'nullable|boolean',
+            'whatsapp_chat_number' => 'nullable|string|max:50',
+            'whatsapp_chat_message' => 'nullable|string|max:1000',
 
             'ai_provider' => 'nullable|string|max:50',
             'ai_model' => 'nullable|string|max:100',
@@ -386,6 +396,7 @@ class SystemSettingsManager extends Component
             'company_address', 'company_tax_id', 'currency_code', 'currency_symbol', 'asset_cdn_url',
             'whatsapp_provider', 'whatsapp_phone_number', 'whatsapp_api_url', 'whatsapp_api_key', 'whatsapp_webhook_verify_token',
             'whatsapp_order_template', 'whatsapp_payment_template',
+            'whatsapp_chat_number', 'whatsapp_chat_message',
             'ai_provider', 'ai_model', 'ai_api_key', 'ai_prompt_context', 'ai_goal_text', 'custom_integrations_api_key',
             'onesignal_app_id', 'onesignal_rest_api_key',
         ];
@@ -396,6 +407,7 @@ class SystemSettingsManager extends Component
         return [
             'force_https',
             'whatsapp_enabled',
+            'whatsapp_chat_enabled',
             'ai_enabled',
             'ai_sales_tracking_enabled',
             'ai_inventory_guidance_enabled',
