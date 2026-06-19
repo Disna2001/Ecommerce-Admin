@@ -375,6 +375,15 @@ class _WebviewScreenState extends State<WebviewScreen> {
                                 pullToRefreshController?.endRefreshing();
                                 // Ignore minor subresource load errors
                                 if (request.isForMainFrame ?? true) {
+                                  // Ignore aborted and cancelled requests (which are normal for redirects/Livewire navigations)
+                                  final errorTypeStr = error.type.toString();
+                                  if (errorTypeStr.contains("CANCELLED") || 
+                                      errorTypeStr.contains("CONNECTION_ABORTED") ||
+                                      errorTypeStr.contains("ERR_ABORTED") ||
+                                      error.description.contains("CONNECTION_ABORTED") ||
+                                      error.description.contains("ERR_ABORTED")) {
+                                    return;
+                                  }
                                   setState(() {
                                     hasError = true;
                                     errorDescription = "${error.description} (${error.type})";
