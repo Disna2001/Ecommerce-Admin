@@ -99,19 +99,21 @@ class _WebviewScreenState extends State<WebviewScreen> {
        _checkConnectivity();
     });
 
-    pullToRefreshController = PullToRefreshController(
-      settings: PullToRefreshSettings(
-        color: const Color(0xFF1E3A8A),
-      ),
-      onRefresh: () async {
-        if (Platform.isAndroid) {
-          webViewController?.reload();
-        } else if (Platform.isIOS) {
-          webViewController?.loadUrl(
-              urlRequest: URLRequest(url: await webViewController?.getUrl()));
-        }
-      },
-    );
+    if (Platform.isAndroid || Platform.isIOS) {
+      pullToRefreshController = PullToRefreshController(
+        settings: PullToRefreshSettings(
+          color: const Color(0xFF1E3A8A),
+        ),
+        onRefresh: () async {
+          if (Platform.isAndroid) {
+            webViewController?.reload();
+          } else if (Platform.isIOS) {
+            webViewController?.loadUrl(
+                urlRequest: URLRequest(url: await webViewController?.getUrl()));
+          }
+        },
+      );
+    }
   }
 
   @override
