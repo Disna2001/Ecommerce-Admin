@@ -161,7 +161,9 @@ class _WebviewScreenState extends State<WebviewScreen> {
         currentUrl = "$baseUrl/admin";
       } else {
         activeTab = SidebarTab.storefront;
-        currentUrl = "$baseUrl/";
+        currentUrl = baseUrl.contains("displaylanka.shop") 
+            ? "https://www.displaylanka.shop/" 
+            : "$baseUrl/";
       }
       
       settingsLoaded = true;
@@ -225,6 +227,11 @@ class _WebviewScreenState extends State<WebviewScreen> {
         targetPath = "/admin/pos";
         break;
       case SidebarTab.storefront:
+        if (baseUrl.contains("displaylanka.shop")) {
+          final newUrl = "https://www.displaylanka.shop/";
+          webViewController?.loadUrl(urlRequest: URLRequest(url: WebUri(newUrl)));
+          return;
+        }
         targetPath = "/";
         break;
       case SidebarTab.settings:
