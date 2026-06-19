@@ -71,6 +71,8 @@ class _WebviewScreenState extends State<WebviewScreen> {
   );
 
   PullToRefreshController? pullToRefreshController;
+  WebViewEnvironment? webViewEnvironment;
+  String errorDescription = "";
   
   // Settings & Configuration
   String baseUrl = "https://client1.displaylanka.shop";
@@ -123,6 +125,23 @@ class _WebviewScreenState extends State<WebviewScreen> {
   }
 
   Future<void> _loadSettings() async {
+    if (Platform.isWindows) {
+      try {
+        final availableVersion = await WebViewEnvironment.getAvailableVersion();
+        if (availableVersion != null) {
+          final localAppData = Platform.environment['LOCALAPPDATA'] ?? Directory.systemTemp.path;
+          final customPath = '$localAppData\\DisplayLankaAdminClient\\WebView2Data';
+          webViewEnvironment = await WebViewEnvironment.create(
+            settings: WebViewEnvironmentSettings(
+              userDataFolder: customPath,
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint("Error initializing WebViewEnvironment: $e");
+      }
+    }
+
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       baseUrl = prefs.getString('baseUrl') ?? "https://client1.displaylanka.shop";
@@ -299,6 +318,7 @@ class _WebviewScreenState extends State<WebviewScreen> {
                             ignoring: showNativeSettings,
                             child: InAppWebView(
                               key: webViewKey,
+                              webViewEnvironment: webViewEnvironment,
                               initialUrlRequest: URLRequest(url: WebUri(currentUrl)),
                               initialSettings: settings,
                               pullToRefreshController: pullToRefreshController,
@@ -309,6 +329,7 @@ class _WebviewScreenState extends State<WebviewScreen> {
                                 setState(() {
                                   currentUrl = url.toString();
                                   hasError = false;
+                                  errorDescription = "";
                                 });
                               },
                               onPermissionRequest: (controller, request) async {
@@ -356,6 +377,7 @@ class _WebviewScreenState extends State<WebviewScreen> {
                                 if (request.isForMainFrame ?? true) {
                                   setState(() {
                                     hasError = true;
+                                    errorDescription = "${error.description} (${error.type})";
                                   });
                                 }
                               },
@@ -396,6 +418,17 @@ class _WebviewScreenState extends State<WebviewScreen> {
                                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                                     textAlign: TextAlign.center,
                                   ),
+                                  if (errorDescription.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                                      child: Text(
+                                        errorDescription,
+                                        style: const TextStyle(fontSize: 12, color: Colors.redAccent, fontWeight: FontWeight.w500),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
                                   const SizedBox(height: 24),
                                   ElevatedButton.icon(
                                     onPressed: () {
