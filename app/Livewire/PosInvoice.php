@@ -1200,6 +1200,20 @@ class PosInvoice extends Component
 
         $company = $billCustomizationService->companyPayload();
         $rawData = \App\Services\EscPosService::buildInvoiceReceipt($invoice, $profile, $company);
+
+        // Check if request is initiated from the Electron Desktop application
+        $isDesktopClient = str_contains(request()->userAgent() ?? '', 'DisplayLankaDesktop');
+
+        if ($isDesktopClient) {
+            // Forward raw data to desktop client to spool locally
+            $this->dispatch('print-raw-client', [
+                'printer' => $printer,
+                'data' => base64_encode($rawData)
+            ]);
+            return;
+        }
+
+        // Fallback to server-side print spooling (useful for local development in normal browsers)
         $result = \App\Services\EscPosService::sendToPort($rawData, $printer);
 
         if ($result['success']) {

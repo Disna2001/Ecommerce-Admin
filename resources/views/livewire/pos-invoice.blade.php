@@ -2021,6 +2021,42 @@
                     printZoneNode = null;
                 }
             });
+
+            window.addEventListener('print-raw-client', async (event) => {
+                const detail = event.detail[0] || event.detail;
+                const printer = detail.printer;
+                const data = detail.data;
+
+                if (!printer || !data) {
+                    window.dispatchEvent(new CustomEvent('show-error', {
+                        detail: { message: 'Invalid print event details received.' }
+                    }));
+                    return;
+                }
+
+                if (window.api && window.api.printRaw) {
+                    try {
+                        const result = await window.api.printRaw(printer, data);
+                        if (result && result.success) {
+                            window.dispatchEvent(new CustomEvent('show-success', {
+                                detail: { message: `Receipt successfully spooled locally to ${printer.alias || printer.queue_name}` }
+                            }));
+                        } else {
+                            window.dispatchEvent(new CustomEvent('show-error', {
+                                detail: { message: `Desktop local print failed: ${result ? result.error : 'Unknown error'}` }
+                            }));
+                        }
+                    } catch (err) {
+                        window.dispatchEvent(new CustomEvent('show-error', {
+                            detail: { message: `Desktop local print exception: ${err.message}` }
+                        }));
+                    }
+                } else {
+                    window.dispatchEvent(new CustomEvent('show-warning', {
+                        detail: { message: 'Desktop raw printing is only supported when running via the Electron client app.' }
+                    }));
+                }
+            });
         })();
     </script>
 @endpush

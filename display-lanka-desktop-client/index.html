@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display Lanka - Desktop Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-accent: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent 30%),
+                   radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 25%),
+                   linear-gradient(180deg, #020617 0%, #0b0f19 100%);
+      --surface: rgba(15, 23, 42, 0.6);
+      --surface-solid: #0f172a;
+      --border: rgba(148, 163, 184, 0.12);
+      --border-focus: rgba(99, 102, 241, 0.4);
+      --text: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-soft: #64748b;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-accent);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 580px;
+      z-index: 10;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: border-color 0.3s ease;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .header-logo {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 1.2rem;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 20px -10px var(--primary);
+    }
+
+    .header-info h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .header-info p {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+    }
+
+    /* Connection Error Banner */
+    .error-banner {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      align-items: flex-start;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .error-banner i {
+      color: var(--danger);
+      font-size: 1.25rem;
+      margin-top: 0.1rem;
+    }
+
+    .error-details h4 {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .error-details p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      line-height: 1.45;
+    }
+
+    .error-details code {
+      font-family: monospace;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.4rem;
+      font-size: 0.72rem;
+      display: inline-block;
+      margin-top: 0.4rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-soft);
+      margin-bottom: 0.6rem;
+      padding-left: 0.25rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 1.25rem;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: 1.15rem;
+      padding: 1rem 1.25rem 1rem 3rem;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--text);
+      font-weight: 700;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Radio Segment Control */
+    .radio-group {
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      background: var(--surface-solid);
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.15rem 1.25rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .radio-option:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .radio-option:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .radio-option input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.15rem;
+      height: 1.15rem;
+      border: 2px solid var(--text-soft);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .radio-option input[type="radio"]:checked {
+      border-color: var(--primary);
+    }
+
+    .radio-option input[type="radio"]:checked::after {
+      content: '';
+      width: 0.55rem;
+      height: 0.55rem;
+      background: var(--primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .radio-text h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .radio-text p {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      margin-top: 0.15rem;
+    }
+
+    /* Actions Desk */
+    .actions {
+      display: flex;
+      gap: 0.85rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      border: none;
+      border-radius: 1.15rem;
+      padding: 1.1rem 1.5rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn--primary {
+      background: var(--primary);
+      color: white;
+      flex: 2;
+      box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn--primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn--secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .btn--secondary:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: var(--text);
+    }
+
+    .btn--danger {
+      background: transparent;
+      color: var(--text-soft);
+      font-size: 0.72rem;
+      padding: 0.85rem 1rem;
+      margin-top: 1rem;
+      border-radius: 0.85rem;
+      width: 100%;
+      border: 1px dashed var(--border);
+    }
+
+    .btn--danger:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Toast Alert Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface-solid);
+      border: 1px solid var(--success);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast i {
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      
+      <!-- Logo Header -->
+      <div class="header">
+        <div class="header-logo">
+          <i class="fas fa-terminal"></i>
+        </div>
+        <div class="header-info">
+          <h1>Display Lanka</h1>
+          <p>Desktop Control Desk</p>
+        </div>
+      </div>
+
+      <!-- Network Failure Warning Panel -->
+      <div id="error-panel" class="error-banner">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div class="error-details">
+          <h4>Counter Connection Failed</h4>
+          <p id="error-text">Unable to establish connection to the remote merchant workspace.</p>
+          <code id="error-code">ERR_CONNECTION_REFUSED</code>
+        </div>
+      </div>
+
+      <!-- Config Form -->
+      <form id="config-form">
+        <div class="form-group">
+          <label for="base-url">Server Base URL</label>
+          <div class="input-wrapper">
+            <i class="fas fa-network-wired"></i>
+            <input type="text" id="base-url" class="form-input" placeholder="e.g. http://ecommerce.test">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Default Startup View</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="default-view" value="/admin" checked>
+              <div class="radio-text">
+                <h4>Admin Dashboard</h4>
+                <p>Loads business overview analytics and logs on boot.</p>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="default-view" value="/admin/pos">
+              <div class="radio-text">
+                <h4>POS Counter Checkout</h4>
+                <p>Loads the high-speed billing interface directly.</p>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="default-view" value="/">
+              <div class="radio-text">
+                <h4>Storefront Portal</h4>
+                <p>Opens the customer-facing catalog workspace.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="launch-btn" class="btn btn--secondary">
+            <i class="fas fa-play"></i> Launch
+          </button>
+          <button type="submit" class="btn btn--primary">
+            <i class="fas fa-save"></i> Save Config
+          </button>
+        </div>
+      </form>
+
+      <button type="button" id="clear-cache-btn" class="btn btn--danger">
+        <i class="fas fa-trash-can"></i> Clear Spooler & App Cache
+      </button>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toast-text">Configurations synchronized!</span>
+  </div>
+
+  <script>
+    const baseUrlInput = document.getElementById('base-url');
+    const form = document.getElementById('config-form');
+    const launchBtn = document.getElementById('launch-btn');
+    const clearCacheBtn = document.getElementById('clear-cache-btn');
+    const errorPanel = document.getElementById('error-panel');
+    const errorText = document.getElementById('error-text');
+    const errorCode = document.getElementById('error-code');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+
+    // Show toast message
+    function showToast(message, isSuccess = true) {
+      toastText.textContent = message;
+      toast.style.borderColor = isSuccess ? 'var(--success)' : 'var(--danger)';
+      toast.querySelector('i').className = isSuccess ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+      toast.querySelector('i').style.color = isSuccess ? 'var(--success)' : 'var(--danger)';
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 3000);
+    }
+
+    // Load initial configs from main process
+    async function loadConfig() {
+      try {
+        const config = await window.api.getConfig();
+        baseUrlInput.value = config.baseUrl || '';
+        
+        const radio = document.querySelector(`input[name="default-view"][value="${config.defaultView}"]`);
+        if (radio) radio.checked = true;
+      } catch (err) {
+        console.error('Failed to query system config:', err);
+      }
+    }
+
+    // Save configurations
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const baseUrl = baseUrlInput.value.trim();
+      const defaultView = document.querySelector('input[name="default-view"]:checked').value;
+
+      if (!baseUrl) {
+        showToast('Please enter a server base URL.', false);
+        return;
+      }
+
+      try {
+        const success = await window.api.saveConfig({ baseUrl, defaultView });
+        if (success) {
+          showToast('Settings saved successfully!');
+        } else {
+          showToast('Failed to save settings.', false);
+        }
+      } catch (err) {
+        showToast('An error occurred during save.', false);
+      }
+    });
+
+    // Launch View directly
+    launchBtn.addEventListener('click', async () => {
+      if (!baseUrlInput.value.trim()) {
+        showToast('Please enter a server base URL first.', false);
+        return;
+      }
+      window.api.launchView();
+    });
+
+    // Clear system cache
+    clearCacheBtn.addEventListener('click', async () => {
+      const confirmed = confirm('Clear application storage, cookies, and local database cache?');
+      if (!confirmed) return;
+
+      try {
+        const success = await window.api.clearCache();
+        if (success) {
+          showToast('Storage caches cleared successfully.');
+        } else {
+          showToast('Failed to clean app caches.', false);
+        }
+      } catch (err) {
+        showToast('Cache cleanup failed.', false);
+      }
+    });
+
+    // Listen for connection error reports from Electron main process
+    window.api.onConnectionError((data) => {
+      errorPanel.style.display = 'flex';
+      errorText.textContent = `Unable to connect to: ${data.url}. Reason: ${data.description}`;
+      errorCode.textContent = `Error Code: ${data.code}`;
+    });
+
+    // Initialize Page
+    loadConfig();
+  </script>
+</body>
+</html>

@@ -904,6 +904,162 @@
             padding: 0;
             border-radius: 0;
         }
+
+        /* --- ADVANCED MOBILE NAVIGATION TABS TRANSFORMATION --- */
+        /* Convert vertical sidebars/sub-navigation tab menus into swipeable horizontal tab bars on mobile */
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav,
+        .grid-cols-\[300px_minmax\(0\,1fr\)\] nav,
+        .grid-cols-\[280px_minmax\(0\,1fr\)\] nav {
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            padding: 0.6rem !important;
+            gap: 0.6rem !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav::-webkit-scrollbar,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav::-webkit-scrollbar {
+            display: none;
+        }
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav button,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav button,
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav a,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav a {
+            display: inline-flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
+            width: auto !important;
+            padding: 0.6rem 1.15rem !important;
+            border-radius: 1.15rem !important;
+        }
+        /* Hide decorative elements that don't fit horizontally */
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav button .fa-chevron-right,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav button .fa-chevron-right,
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav button .ml-13,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav button .ml-13,
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\] nav a .fa-chevron-right,
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\] nav a .fa-chevron-right {
+            display: none !important;
+        }
+
+        /* Adjust structural grid wrapper layout */
+        .xl\:grid-cols-\[300px_minmax\(0\,1fr\)\],
+        .xl\:grid-cols-\[280px_minmax\(0\,1fr\)\],
+        .grid.xl\:grid-cols-12 {
+            grid-template-columns: 1fr !important;
+            gap: 1.15rem !important;
+        }
+        .lg\:col-span-7, .lg\:col-span-5 {
+            grid-column: span 12 / span 12 !important;
+        }
+
+        /* --- RESPONSIVE TYPOGRAPHY & SPACING --- */
+        .text-3xl {
+            font-size: 1.6rem !important;
+        }
+        .text-4xl {
+            font-size: 1.85rem !important;
+        }
+        .p-8 {
+            padding: 1.25rem !important;
+        }
+        .p-6 {
+            padding: 1rem !important;
+        }
+        .p-5 {
+            padding: 0.9rem !important;
+        }
+        [class*="rounded-[2.5rem]"],
+        [class*="rounded-[2rem]"],
+        [class*="rounded-[3rem]"] {
+            border-radius: 1.35rem !important;
+        }
+        .rounded-[2.25rem] {
+            border-radius: 1.15rem !important;
+        }
+
+        /* --- MOBILE FORM INPUT & COMPACTION --- */
+        input[type="text"], 
+        input[type="email"], 
+        input[type="password"], 
+        input[type="number"], 
+        select, 
+        textarea {
+            padding: 0.75rem 1.15rem !important;
+            font-size: 0.85rem !important;
+            border-radius: 1rem !important;
+        }
+        label {
+            font-size: 9px !important;
+        }
+
+        /* Force multi-column grids to collapse cleanly into single-column layout */
+        .grid-cols-2, .grid-cols-3, .grid-cols-4,
+        .sm\:grid-cols-2, .sm\:grid-cols-3, .sm\:grid-cols-4,
+        .md\:grid-cols-2, .md\:grid-cols-3, .md\:grid-cols-4,
+        .lg\:grid-cols-2, .lg\:grid-cols-3, .lg\:grid-cols-4 {
+            grid-template-columns: 1fr !important;
+            gap: 1.15rem !important;
+        }
+
+        /* Keep a compact 2-column layout for small actions or dashboard cards if space permits */
+        .grid.gap-4.md\:grid-cols-3,
+        .grid.gap-4.md\:grid-cols-4,
+        .grid.gap-4.sm\:grid-cols-2,
+        .grid-cols-2.md\:grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 0.85rem !important;
+        }
+
+        /* --- MOBILE BOTTOM SHEETS FOR MODALS & WINDOWS --- */
+        .fixed.inset-0.z-40.flex,
+        .fixed.inset-0.z-\[100\].flex {
+            padding: 0.5rem !important;
+            align-items: flex-end !important; /* Elegant drawer slide-up from bottom */
+        }
+        
+        .fixed.inset-0.z-40.flex > div.relative,
+        .fixed.inset-0.z-\[100\].flex > div.relative {
+            max-height: 92vh !important;
+            border-radius: 1.85rem 1.85rem 0 0 !important;
+            margin-bottom: 0 !important;
+            width: 100% !important;
+        }
+
+        .lg\:grid-cols-\[1\.2fr_0\.8fr\],
+        .lg\:grid-cols-\[1fr_320px\] {
+            grid-template-columns: 1fr !important;
+            gap: 1.15rem !important;
+        }
+
+        /* --- POS MOBILE CONSOLE ENHANCEMENTS --- */
+        .pos-shell {
+            height: auto !important;
+        }
+        .pos-workspace {
+            grid-template-columns: 1fr !important;
+            height: auto !important;
+        }
+        .pos-panel--tall {
+            height: auto !important;
+            min-height: 400px !important;
+        }
+        .pos-result-list, 
+        .pos-cart-list {
+            max-height: 450px !important;
+        }
+        .pos-actions {
+            justify-content: flex-start !important;
+            width: 100% !important;
+        }
+        .pos-actions button, 
+        .pos-actions a {
+            flex: 1 1 calc(50% - 0.5rem) !important;
+            justify-content: center !important;
+        }
     }
 
     [x-cloak] {
