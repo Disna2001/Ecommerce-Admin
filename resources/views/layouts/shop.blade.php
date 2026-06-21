@@ -29,7 +29,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>window._token='{{ csrf_token() }}';</script>
+    
+    <!-- SEO Meta Tags -->
     <title>@yield('title', $safeSiteName) - {{ $safeSiteName }}</title>
+    <meta name="description" content="@yield('meta_description', \App\Models\SiteSetting::get('meta_description', $footerTagline))">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="@yield('title', $safeSiteName) - {{ $safeSiteName }}">
+    <meta property="og:description" content="@yield('meta_description', \App\Models\SiteSetting::get('meta_description', $footerTagline))">
+    <meta property="og:url" content="{{ url()->current() }}">
+    @if(!empty($safeLogo))
+        <meta property="og:image" content="{{ Storage::url($safeLogo) }}">
+    @endif
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="@yield('title', $safeSiteName) - {{ $safeSiteName }}">
+    <meta property="twitter:description" content="@yield('meta_description', \App\Models\SiteSetting::get('meta_description', $footerTagline))">
+    @if(!empty($safeLogo))
+        <meta property="twitter:image" content="{{ Storage::url($safeLogo) }}">
+    @endif
     
     @if(!empty($safeFavicon))
         <link rel="icon" href="{{ Storage::url($safeFavicon) }}">
@@ -127,6 +147,7 @@
             <div class="mt-10 border-t border-white/10 pt-5 text-xs text-white/50">{{ $footerCopyright }}</div>
         </div>
     </footer>
+    @include('frontend.partials.support-chatbox')
 </div>
 
 @livewireScripts

@@ -13,6 +13,18 @@ class Cart extends Component
     public bool   $couponError  = false;
     public bool   $couponApplied = false;
 
+    public function mount()
+    {
+        // Auto-apply claimed coupon if not already applied
+        if (session()->has('claimed_coupon') && !session()->has('applied_coupon_code')) {
+            $this->couponCode = session('claimed_coupon');
+            $this->applyCoupon();
+        } elseif (session()->has('applied_coupon_code')) {
+            $this->couponCode = session('applied_coupon_code');
+            $this->recalculateDiscount();
+        }
+    }
+
     public function getCartProperty(): array
     {
         $cart = session('cart', []);
@@ -65,6 +77,7 @@ class Cart extends Component
         }
 
         session(['cart' => $cart]);
+        $this->recalculateDiscount();
         $this->dispatch('cart-updated', count: collect($cart)->sum('quantity'));
     }
 
@@ -73,6 +86,7 @@ class Cart extends Component
         $cart = session('cart', []);
         unset($cart[$id]);
         session(['cart' => $cart]);
+        $this->recalculateDiscount();
         $this->dispatch('cart-updated', count: collect($cart)->sum('quantity'));
         $this->dispatch('notify', type: 'info', message: 'Item removed.');
     }
@@ -86,17 +100,24 @@ class Cart extends Component
         if (!$discount) {
             $this->couponMsg   = 'Invalid or expired coupon code.';
             $this->couponError = true;
+            $this->couponApplied = false;
+            session()->forget(['cart_discount', 'applied_coupon_code']);
             return;
         }
 
         if ($subtotal < $discount->min_order_amount) {
             $this->couponMsg   = 'Minimum order of Rs '.number_format($discount->min_order_amount,2).' required.';
             $this->couponError = true;
+            $this->couponApplied = false;
+            session()->forget(['cart_discount', 'applied_coupon_code']);
             return;
         }
 
         $amount = $discount->calculateDiscount($subtotal);
-        session(['cart_discount' => $amount]);
+        session([
+            'cart_discount' => $amount,
+            'applied_coupon_code' => $code
+        ]);
 
         $this->couponMsg     = '✓ Saved Rs '.number_format($amount,2).'!';
         $this->couponError   = false;
@@ -106,10 +127,52 @@ class Cart extends Component
 
     public function removeCoupon()
     {
-        session()->forget('cart_discount');
+        session()->forget(['cart_discount', 'applied_coupon_code', 'claimed_coupon']);
         $this->couponCode    = '';
         $this->couponMsg     = '';
         $this->couponApplied = false;
+        $this->couponError   = false;
+    }
+
+    protected function recalculateDiscount()
+    {
+        $cart = session('cart', []);
+        if (empty($cart)) {
+            session()->forget(['cart_discount', 'applied_coupon_code']);
+            $this->couponApplied = false;
+            $this->couponMsg = '';
+            return;
+        }
+
+        if (!session()->has('applied_coupon_code')) {
+            return;
+        }
+
+        $code = session('applied_coupon_code');
+        $discount = Discount::active()->where('code', $code)->first();
+        $subtotal = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
+
+        if (!$discount) {
+            session()->forget(['cart_discount', 'applied_coupon_code']);
+            $this->couponApplied = false;
+            $this->couponMsg = '';
+            return;
+        }
+
+        if ($subtotal < $discount->min_order_amount) {
+            session()->forget('cart_discount');
+            $this->couponMsg   = 'Minimum order of Rs '.number_format($discount->min_order_amount,2).' required.';
+            $this->couponError = true;
+            $this->couponApplied = false;
+            return;
+        }
+
+        $amount = $discount->calculateDiscount($subtotal);
+        session(['cart_discount' => $amount]);
+
+        $this->couponMsg     = '✓ Saved Rs '.number_format($amount,2).'!';
+        $this->couponError   = false;
+        $this->couponApplied = true;
     }
 
     public function render()

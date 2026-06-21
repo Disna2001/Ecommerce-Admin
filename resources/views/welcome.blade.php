@@ -12,7 +12,26 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>window._token='{{ csrf_token() }}';</script>
+    <!-- SEO Meta Tags -->
     <title>{{ $siteName }}</title>
+    <meta name="description" content="{{ \App\Models\SiteSetting::get('meta_description', \App\Models\SiteSetting::get('footer_tagline', 'Your one-stop shop for everything trendy.')) }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $siteName }}">
+    <meta property="og:description" content="{{ \App\Models\SiteSetting::get('meta_description', \App\Models\SiteSetting::get('footer_tagline', 'Your one-stop shop for everything trendy.')) }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    @if($logoPath)
+        <meta property="og:image" content="{{ Storage::url($logoPath) }}">
+    @endif
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="{{ $siteName }}">
+    <meta property="twitter:description" content="{{ \App\Models\SiteSetting::get('meta_description', \App\Models\SiteSetting::get('footer_tagline', 'Your one-stop shop for everything trendy.')) }}">
+    @if($logoPath)
+        <meta property="twitter:image" content="{{ Storage::url($logoPath) }}">
+    @endif
     @if($faviconPath)<link rel="icon" href="{{ Storage::url($faviconPath) }}">@endif
     @if($logoPath)<link rel="preload" as="image" href="{{ Storage::url($logoPath) }}">@endif
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -281,7 +300,19 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
                                 <div class="bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2 text-xs font-mono font-black text-slate-700 dark:text-slate-200 tracking-wider">
                                     {{ $coupon->code }}
                                 </div>
-                                <button @click="navigator.clipboard.writeText(code); copied = true; setTimeout(() => copied = false, 2000)" 
+                                <button @click="
+                                            navigator.clipboard.writeText(code);
+                                            copied = true;
+                                            setTimeout(() => copied = false, 2000);
+                                            fetch('/coupons/claim', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name=&quot;csrf-token&quot;]').getAttribute('content')
+                                                },
+                                                body: JSON.stringify({ code: code })
+                                            });
+                                        " 
                                         class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-md hover:scale-105 transition-all shrink-0">
                                     <span x-text="copied ? 'Copied!' : 'Claim'"></span>
                                 </button>
@@ -503,8 +534,6 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
             </div>
         </div>
     </footer>
-
-    @include('frontend.partials.support-chatbox')
 </div>
 
 @livewireScripts

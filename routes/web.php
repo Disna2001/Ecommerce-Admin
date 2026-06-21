@@ -20,6 +20,12 @@ Route::get('/refund-policy', [StorefrontController::class, 'refundPolicy'])->nam
 Route::get('/privacy-policy', [StorefrontController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-and-conditions', [StorefrontController::class, 'termsConditions'])->name('terms-and-conditions');
 
+// Background coupon claiming for storefront discovery
+Route::post('/coupons/claim', function (\Illuminate\Http\Request $request) {
+    session(['claimed_coupon' => strtoupper(trim($request->code))]);
+    return response()->json(['success' => true]);
+});
+
 // Dynamic XML Sitemap for SEO
 Route::get('/sitemap.xml', function () {
     $stocks = \App\Models\Stock::visibleOnStorefront()->get();

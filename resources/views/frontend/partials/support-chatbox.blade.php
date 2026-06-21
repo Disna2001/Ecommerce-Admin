@@ -15,11 +15,11 @@
 
     // Determine positions
     if ($whatsappChatLink) {
-        $whatsappClasses = "fixed bottom-24 lg:bottom-5 right-5 z-[65]";
-        $assistantClasses = "fixed bottom-44 lg:bottom-24 right-5 z-[65]";
+        $whatsappClasses = "fixed bottom-36 lg:bottom-5 right-5 z-[65]";
+        $assistantClasses = "fixed bottom-52 lg:bottom-24 right-5 z-[65]";
     } else {
         $whatsappClasses = "hidden";
-        $assistantClasses = "fixed bottom-24 lg:bottom-5 right-5 z-[65]";
+        $assistantClasses = "fixed bottom-36 lg:bottom-5 right-5 z-[65]";
     }
 
     $chatWhatsappEnabled = (bool) SiteSetting::get('whatsapp_enabled', false);
