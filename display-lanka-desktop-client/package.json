@@ -4,9 +4,25 @@
   "description": "Desktop Webview client for Display Lanka Storefront & Admin Portal",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.displaylanka.desktop",
+    "productName": "Display Lanka",
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "icon.png"
+    },
+    "directories": {
+      "output": "dist"
+    }
   },
   "devDependencies": {
-    "electron": "^31.0.0"
+    "electron": "^31.0.0",
+    "electron-builder": "^26.15.3"
   }
 }

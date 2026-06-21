@@ -208,7 +208,7 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
                     <div class="card rounded-[2rem] px-6 py-6 sm:px-8 shadow-xl transition-all hover:scale-[1.01]" 
                          style="background: {{ $banner->bg_color ?: 'linear-gradient(120deg, var(--primary), var(--secondary))' }}; color: {{ $banner->text_color ?: '#ffffff' }}">
                         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                            <div class="max-w-3xl">
+                            <div class="flex-1 max-w-3xl">
                                 @if($banner->subtitle)
                                     <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em]">{{ $banner->subtitle }}</span>
                                 @endif
@@ -217,13 +217,22 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
                                     <p class="mt-3 max-w-2xl text-sm leading-7 opacity-80">{{ $banner->caption }}</p>
                                 @endif
                             </div>
+                            @if($banner->image_path)
+                                <div class="shrink-0 my-2 lg:my-0">
+                                    <div class="relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-lg p-1">
+                                        <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title }}" class="h-24 w-40 rounded-xl object-cover transition-transform duration-500 hover:scale-105">
+                                    </div>
+                                </div>
+                            @endif
                             @if($banner->button_text)
-                                <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
-                                   class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold shadow-lg hover:scale-105 transition-transform"
-                                   style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
-                                    {{ $banner->button_text }}
-                                    <i class="fas fa-arrow-right text-xs"></i>
-                                </a>
+                                <div class="shrink-0">
+                                    <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
+                                       class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold shadow-lg hover:scale-105 transition-transform"
+                                       style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
+                                        {{ $banner->button_text }}
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </a>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -244,6 +253,41 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
                             <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
+                </div>
+        @endif
+
+        <!-- Active Coupons Section -->
+        @if(($activeCoupons ?? collect())->isNotEmpty())
+            <section class="mx-auto max-w-7xl px-4">
+                <div class="mb-10 flex items-end justify-between">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">Exclusive Rewards</p>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Active Coupons & Deals</h2>
+                    </div>
+                </div>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach($activeCoupons as $coupon)
+                        <div class="premium-card p-6 border-2 border-dashed border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/50 flex flex-col justify-between" x-data="{ copied: false, code: '{{ $coupon->code }}' }">
+                            <div>
+                                <span class="inline-flex rounded-full bg-[var(--primary)]/10 text-[var(--primary)] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] mb-4">
+                                    {{ $coupon->type === 'percentage' ? ((int)$coupon->value).'% Off' : 'Rs '.number_format($coupon->value, 0).' Off' }}
+                                </span>
+                                <h3 class="text-base font-black text-slate-900 dark:text-white mb-2">{{ $coupon->name }}</h3>
+                                @if($coupon->description)
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed line-clamp-2">{{ $coupon->description }}</p>
+                                @endif
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
+                                <div class="bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2 text-xs font-mono font-black text-slate-700 dark:text-slate-200 tracking-wider">
+                                    {{ $coupon->code }}
+                                </div>
+                                <button @click="navigator.clipboard.writeText(code); copied = true; setTimeout(() => copied = false, 2000)" 
+                                        class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest text-white shadow-md hover:scale-105 transition-all shrink-0">
+                                    <span x-text="copied ? 'Copied!' : 'Claim'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </section>
         @endif
@@ -389,13 +433,13 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
 
         <!-- Final Protocol CTA -->
         <section class="mx-auto max-w-7xl px-4">
-            <div class="relative rounded-[3.5rem] px-8 py-20 text-center text-white overflow-hidden shadow-2xl" style="background:linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))">
+            <div class="relative rounded-[2.5rem] px-6 py-12 sm:px-8 sm:py-16 text-center text-white overflow-hidden shadow-2xl" style="background:linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))">
                 <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
                 <div class="relative z-10">
-                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-white/60 mb-6">Execution Phase</p>
-                    <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tight mb-6">{{ $finalCtaTitle }}</h2>
-                    <p class="mx-auto max-w-2xl text-lg text-white/80 mb-12">{{ $finalCtaSubtitle }}</p>
-                    <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex w-full sm:w-auto justify-center items-center gap-4 rounded-full bg-white px-12 py-4 sm:py-5 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition-all group">
+                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-white/60 mb-4">Execution Phase</p>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight mb-4">{{ $finalCtaTitle }}</h2>
+                    <p class="mx-auto max-w-2xl text-base text-white/80 mb-8">{{ $finalCtaSubtitle }}</p>
+                    <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex w-full sm:w-auto justify-center items-center gap-4 rounded-full bg-white px-10 py-4 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition-all group">
                         {{ $finalCtaButtonText }}
                         <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
                     </a>

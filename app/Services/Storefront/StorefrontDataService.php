@@ -124,6 +124,7 @@ class StorefrontDataService
             'promoStripTo' => SiteSetting::get('promo_strip_to', '#334155'),
             'heroBanners' => Banner::active()->where('position', 'hero')->take(3)->get(),
             'promoBanners' => Banner::active()->where('position', 'promo')->take(3)->get(),
+            'activeCoupons' => \App\Models\Discount::active()->whereNotNull('code')->where('code', '!=', '')->orderByDesc('created_at')->take(4)->get(),
             'featured' => $this->enrichProducts($this->getProductsByIds('home_featured_products_', $featuredIds)),
             'newArrivals' => $this->enrichProducts($this->getProductsByIds('home_new_products_', $newIds)),
             'deals' => $this->enrichProducts($this->getProductsByIds('home_deal_products_', $dealIds)),

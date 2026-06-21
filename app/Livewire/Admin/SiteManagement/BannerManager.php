@@ -30,8 +30,6 @@ class BannerManager extends Component
     public $positions = [
         'hero'    => 'Hero (Main)',
         'promo'   => 'Promo Strip',
-        'sidebar' => 'Sidebar',
-        'top_bar' => 'Top Bar',
     ];
 
     protected function rules()
