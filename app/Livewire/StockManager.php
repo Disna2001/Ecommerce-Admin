@@ -1894,7 +1894,23 @@ class StockManager extends Component
                 $categoryName = trim($data['category'] ?? '');
                 $categoryId = null;
                 if ($categoryName !== '') {
-                    $category = Category::firstOrCreate(['name' => $categoryName], ['slug' => Str::slug($categoryName)]);
+                    $category = Category::where('name', $categoryName)->first();
+                    if (!$category) {
+                        $baseSlug = Str::slug($categoryName);
+                        if (empty($baseSlug)) {
+                            $baseSlug = 'category';
+                        }
+                        $slug = $baseSlug;
+                        $counter = 1;
+                        while (Category::where('slug', $slug)->exists()) {
+                            $slug = $baseSlug . '-' . $counter;
+                            $counter++;
+                        }
+                        $category = Category::create([
+                            'name' => $categoryName,
+                            'slug' => $slug
+                        ]);
+                    }
                     $categoryId = $category->id;
                 }
 
@@ -1902,7 +1918,24 @@ class StockManager extends Component
                 $brandName = trim($data['brand'] ?? '');
                 $brandId = null;
                 if ($brandName !== '') {
-                    $brand = Brand::firstOrCreate(['name' => $brandName], ['slug' => Str::slug($brandName), 'status' => 'active']);
+                    $brand = Brand::where('name', $brandName)->first();
+                    if (!$brand) {
+                        $baseSlug = Str::slug($brandName);
+                        if (empty($baseSlug)) {
+                            $baseSlug = 'brand';
+                        }
+                        $slug = $baseSlug;
+                        $counter = 1;
+                        while (Brand::where('slug', $slug)->exists()) {
+                            $slug = $baseSlug . '-' . $counter;
+                            $counter++;
+                        }
+                        $brand = Brand::create([
+                            'name' => $brandName,
+                            'slug' => $slug,
+                            'status' => 'active'
+                        ]);
+                    }
                     $brandId = $brand->id;
                 }
 
@@ -1910,13 +1943,24 @@ class StockManager extends Component
                 $makeName = trim($data['make'] ?? '');
                 $makeId = null;
                 if ($makeName !== '') {
-                    $make = Make::firstOrCreate(
-                        ['name' => $makeName],
-                        [
-                            'code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $makeName), 0, 4)),
+                    $make = Make::where('name', $makeName)->first();
+                    if (!$make) {
+                        $baseCode = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $makeName), 0, 4));
+                        if (empty($baseCode)) {
+                            $baseCode = 'MAKE';
+                        }
+                        $code = $baseCode;
+                        $counter = 1;
+                        while (Make::where('code', $code)->exists()) {
+                            $code = substr($baseCode, 0, 3) . $counter;
+                            $counter++;
+                        }
+                        $make = Make::create([
+                            'name' => $makeName,
+                            'code' => $code,
                             'is_active' => true
-                        ]
-                    );
+                        ]);
+                    }
                     $makeId = $make->id;
                 }
 
@@ -1924,15 +1968,22 @@ class StockManager extends Component
                 $supplierName = trim($data['supplier'] ?? '');
                 $supplierId = null;
                 if ($supplierName !== '') {
-                    $supplier = Supplier::firstOrCreate(
-                        ['name' => $supplierName],
-                        [
-                            'email' => Str::slug($supplierName) . '@placeholder.stock-ai.local',
+                    $supplier = Supplier::where('name', $supplierName)->first();
+                    if (!$supplier) {
+                        $email = Str::slug($supplierName) . '@placeholder.stock-ai.local';
+                        $counter = 1;
+                        while (Supplier::where('email', $email)->exists()) {
+                            $email = Str::slug($supplierName) . '-' . $counter . '@placeholder.stock-ai.local';
+                            $counter++;
+                        }
+                        $supplier = Supplier::create([
+                            'name' => $supplierName,
+                            'email' => $email,
                             'company' => $supplierName,
                             'contact_person' => $supplierName,
                             'status' => 'active'
-                        ]
-                    );
+                        ]);
+                    }
                     $supplierId = $supplier->id;
                 }
 
@@ -1940,16 +1991,27 @@ class StockManager extends Component
                 $qualityLevelName = trim($data['quality level'] ?? $data['quality_level'] ?? '');
                 $qualityLevelCode = null;
                 if ($qualityLevelName !== '') {
-                    $qualityLevel = ItemQualityLevel::firstOrCreate(
-                        ['name' => $qualityLevelName],
-                        [
-                            'code' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $qualityLevelName), 0, 4)),
+                    $qualityLevel = ItemQualityLevel::where('name', $qualityLevelName)->first();
+                    if (!$qualityLevel) {
+                        $baseCode = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $qualityLevelName), 0, 4));
+                        if (empty($baseCode)) {
+                            $baseCode = 'QLVL';
+                        }
+                        $code = $baseCode;
+                        $counter = 1;
+                        while (ItemQualityLevel::where('code', $code)->exists()) {
+                            $code = substr($baseCode, 0, 3) . $counter;
+                            $counter++;
+                        }
+                        $qualityLevel = ItemQualityLevel::create([
+                            'name' => $qualityLevelName,
+                            'code' => $code,
                             'level_order' => ItemQualityLevel::count() + 1,
                             'is_active' => true,
                             'color' => 'slate',
                             'icon' => 'fa-award'
-                        ]
-                    );
+                        ]);
+                    }
                     $qualityLevelCode = $qualityLevel->code;
                 }
 
