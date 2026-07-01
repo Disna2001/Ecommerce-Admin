@@ -41,7 +41,7 @@
  
                     <div class="relative group">
                         <select wire:model.live="sort"
-                                class="appearance-none rounded-full border border-slate-200 bg-white pl-8 pr-12 py-3 sm:py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-8 focus:ring-[var(--primary)]/5 dark:bg-slate-900 dark:border-white/10 dark:text-white">
+                                class="appearance-none bg-none rounded-full border border-slate-200 bg-white pl-8 pr-12 py-3 sm:py-4 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-8 focus:ring-[var(--primary)]/5 dark:bg-slate-900 dark:border-white/10 dark:text-white">
                             <option value="newest">Latest Entries</option>
                             <option value="price_asc">Valuation: Low-High</option>
                             <option value="price_desc">Valuation: High-Low</option>
@@ -104,7 +104,7 @@
                                 <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Classifications</p>
                                 <button wire:click="clearFilters" class="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:underline">Flush</button>
                             </div>
-                            <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                            <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
                                 <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
                                     <input type="radio" wire:model.live="category" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
                                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">All Categories</span>
@@ -113,6 +113,40 @@
                                     <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
                                         <input type="radio" wire:model.live="category" value="{{ $cat->id }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
                                         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">{{ $cat->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6">Device Brands</p>
+                            <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+                                <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
+                                    <input type="radio" wire:model.live="brand" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">All Brands</span>
+                                </label>
+                                @foreach($brands as $b)
+                                    <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
+                                        <input type="radio" wire:model.live="brand" value="{{ $b->id }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">{{ $b->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Quality Level Filter -->
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6">Quality Levels</p>
+                            <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+                                <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
+                                    <input type="radio" wire:model.live="quality" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">All Qualities</span>
+                                </label>
+                                @foreach($qualityLevels as $ql)
+                                    <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all">
+                                        <input type="radio" wire:model.live="quality" value="{{ $ql->code }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900">{{ $ql->name }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -220,7 +254,7 @@
                         <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Classifications</p>
                         <button @click="mobileFilters = false" wire:click="clearFilters" class="text-[9px] font-black uppercase tracking-widest text-rose-500 hover:underline">Flush</button>
                     </div>
-                    <div class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                    <div class="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                         <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
                             <input type="radio" wire:model.live="category" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
                             <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">All Categories</span>
@@ -229,6 +263,40 @@
                             <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
                                 <input type="radio" wire:model.live="category" value="{{ $cat->id }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
                                 <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">{{ $cat->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Brand Filter (Mobile) -->
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Device Brands</p>
+                    <div class="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                        <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
+                            <input type="radio" wire:model.live="brand" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">All Brands</span>
+                        </label>
+                        @foreach($brands as $b)
+                            <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
+                                <input type="radio" wire:model.live="brand" value="{{ $b->id }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">{{ $b->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Quality Level Filter (Mobile) -->
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Quality Levels</p>
+                    <div class="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                        <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
+                            <input type="radio" wire:model.live="quality" value="" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">All Qualities</span>
+                        </label>
+                        @foreach($qualityLevels as $ql)
+                            <label class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer group transition-all dark:hover:bg-slate-900/50">
+                                <input type="radio" wire:model.live="quality" value="{{ $ql->code }}" class="w-4 h-4 text-[var(--primary)] border-slate-300 focus:ring-0">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white">{{ $ql->name }}</span>
                             </label>
                         @endforeach
                     </div>

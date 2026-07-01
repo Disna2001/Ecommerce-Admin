@@ -10,7 +10,6 @@ use App\Services\Promotions\DiscountOrchestrator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
 
 class AutomatedDiscountHub extends Component
 {

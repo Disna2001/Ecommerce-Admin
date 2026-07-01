@@ -21,6 +21,7 @@ class ProductList extends Component
     public string $sort         = 'newest';
     public string $category     = '';
     public string $brand        = '';
+    public string $quality      = '';
     public string $min_price    = '';
     public string $max_price    = '';
     public int    $perPage      = 16;
@@ -31,6 +32,7 @@ class ProductList extends Component
         'sort'      => ['except' => 'newest'],
         'category'  => ['except' => ''],
         'brand'     => ['except' => ''],
+        'quality'   => ['except' => ''],
         'min_price' => ['except' => ''],
         'max_price' => ['except' => ''],
     ];
@@ -39,12 +41,13 @@ class ProductList extends Component
     public function updatingSort()     { $this->resetPage(); }
     public function updatingCategory() { $this->resetPage(); }
     public function updatingBrand()    { $this->resetPage(); }
+    public function updatingQuality()  { $this->resetPage(); }
     public function updatingMinPrice() { $this->resetPage(); }
     public function updatingMaxPrice() { $this->resetPage(); }
 
     public function clearFilters()
     {
-        $this->reset(['search','sort','category','brand','min_price','max_price']);
+        $this->reset(['search','sort','category','brand','quality','min_price','max_price']);
         $this->resetPage();
     }
 
@@ -93,6 +96,7 @@ class ProductList extends Component
             'sort' => $this->sort,
             'category' => $this->category,
             'brand' => $this->brand,
+            'quality' => $this->quality,
             'min_price' => $this->min_price,
             'max_price' => $this->max_price,
             'per_page' => $this->perPage,
@@ -110,6 +114,7 @@ class ProductList extends Component
             }))
             ->when($this->category, fn($q) => $q->where('category_id', $this->category))
             ->when($this->brand,    fn($q) => $q->where('brand_id',    $this->brand))
+            ->when($this->quality,  fn($q) => $q->where('quality_level', $this->quality))
             ->when($this->min_price, fn($q) => $q->where('selling_price','>=',$this->min_price))
             ->when($this->max_price, fn($q) => $q->where('selling_price','<=',$this->max_price));
 
@@ -148,6 +153,7 @@ class ProductList extends Component
             'products'   => $products,
             'categories' => Cache::remember('product_list_categories', 600, fn() => Category::query()->select('id', 'name')->orderBy('name')->get()),
             'brands'     => Cache::remember('product_list_brands', 600, fn() => Brand::query()->select('id', 'name')->orderBy('name')->get()),
+            'qualityLevels' => Cache::remember('product_list_quality_levels', 600, fn() => \App\Models\ItemQualityLevel::query()->where('is_active', true)->select('code', 'name')->orderBy('name')->get()),
             'wishlist'   => session('wishlist', []),
             'catalogSettings' => [
                 'badge' => SiteSetting::get('catalog_hero_badge', 'Browse Store'),
