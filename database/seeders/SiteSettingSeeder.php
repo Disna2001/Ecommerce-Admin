@@ -20,7 +20,7 @@ class SiteSettingSeeder extends Seeder
         $defaults = [
             // ── Branding ──────────────────────────────────────────────
             ['key' => 'site_name',        'value' => 'DISPLAY LANKA.LK',                          'type' => 'text',    'group' => 'branding',    'label' => 'Site Name'],
-            ['key' => 'site_tagline',     'value' => 'Your one-stop shop for everything trendy.',  'type' => 'text',    'group' => 'branding',    'label' => 'Site Tagline'],
+            ['key' => 'site_tagline',     'value' => 'Sri Lanka\'s leading display screen & electronics store.', 'type' => 'text',    'group' => 'branding',    'label' => 'Site Tagline'],
             ['key' => 'logo_path',        'value' => '',                                           'type' => 'image',   'group' => 'branding',    'label' => 'Logo'],
             ['key' => 'favicon_path',     'value' => '',                                           'type' => 'image',   'group' => 'branding',    'label' => 'Favicon'],
 
@@ -32,36 +32,39 @@ class SiteSettingSeeder extends Seeder
             ['key' => 'bg_color',         'value' => '#f9fafb',  'type' => 'color', 'group' => 'appearance', 'label' => 'Page Background'],
             ['key' => 'nav_bg_color',     'value' => '#ffffff',  'type' => 'color', 'group' => 'appearance', 'label' => 'Navigation Background'],
 
+            ['key' => 'heading_font',     'value' => 'Plus Jakarta Sans', 'type' => 'text', 'group' => 'appearance', 'label' => 'Heading Font'],
+            ['key' => 'body_font',        'value' => 'Figtree',           'type' => 'text', 'group' => 'appearance', 'label' => 'Body Font'],
+
             // ── Top Bar ───────────────────────────────────────────────
             ['key' => 'topbar_enabled',   'value' => '1',                                         'type' => 'boolean', 'group' => 'appearance', 'label' => 'Show Top Bar'],
-            ['key' => 'topbar_text',      'value' => 'Summer Sale! Up to 50% off selected items.','type' => 'text',    'group' => 'appearance', 'label' => 'Top Bar Text'],
+            ['key' => 'topbar_text',      'value' => 'Sri Lanka\'s trusted source for smartphone displays & electronics.', 'type' => 'text',    'group' => 'appearance', 'label' => 'Top Bar Text'],
             ['key' => 'topbar_bg_from',   'value' => '#7c3aed',  'type' => 'color', 'group' => 'appearance', 'label' => 'Top Bar Gradient From'],
             ['key' => 'topbar_bg_to',     'value' => '#4f46e5',  'type' => 'color', 'group' => 'appearance', 'label' => 'Top Bar Gradient To'],
 
             // ── Hero ──────────────────────────────────────────────────
-            ['key' => 'hero_title',       'value' => 'Summer Sale',                               'type' => 'text',  'group' => 'hero', 'label' => 'Hero Title'],
-            ['key' => 'hero_subtitle',    'value' => 'Get up to 50% off on trending items',       'type' => 'text',  'group' => 'hero', 'label' => 'Hero Subtitle'],
-            ['key' => 'hero_button_text', 'value' => 'Shop Now',                                  'type' => 'text',  'group' => 'hero', 'label' => 'Hero Button Text'],
-            ['key' => 'hero_button_link', 'value' => '#',                                         'type' => 'text',  'group' => 'hero', 'label' => 'Hero Button Link'],
-            ['key' => 'hero_highlight_text', 'value' => 'Unbeatable Prices',                      'type' => 'text',  'group' => 'hero', 'label' => 'Hero Highlight Text'],
-            ['key' => 'hero_microcopy',   'value' => 'Delivered to your inbox in seconds.',       'type' => 'text',  'group' => 'hero', 'label' => 'Hero Microcopy'],
+            ['key' => 'hero_title',       'value' => 'Genuine Smartphone Displays & Parts',       'type' => 'text',  'group' => 'hero', 'label' => 'Hero Title'],
+            ['key' => 'hero_subtitle',    'value' => 'Original display assemblies, replacement screens, and electronic components.', 'type' => 'text',  'group' => 'hero', 'label' => 'Hero Subtitle'],
+            ['key' => 'hero_button_text', 'value' => 'Shop Collection',                           'type' => 'text',  'group' => 'hero', 'label' => 'Hero Button Text'],
+            ['key' => 'hero_button_link', 'value' => '/products',                                 'type' => 'text',  'group' => 'hero', 'label' => 'Hero Button Link'],
+            ['key' => 'hero_highlight_text', 'value' => 'Unbeatable Quality',                      'type' => 'text',  'group' => 'hero', 'label' => 'Hero Highlight Text'],
+            ['key' => 'hero_microcopy',   'value' => 'Fast Sri Lanka-wide delivery & order tracking.', 'type' => 'text',  'group' => 'hero', 'label' => 'Hero Microcopy'],
             ['key' => 'hero_bg_from',     'value' => '#7c3aed',  'type' => 'color', 'group' => 'hero', 'label' => 'Hero Gradient From'],
             ['key' => 'hero_bg_to',       'value' => '#4f46e5',  'type' => 'color', 'group' => 'hero', 'label' => 'Hero Gradient To'],
             ['key' => 'hero_image_path',  'value' => '',                                           'type' => 'image', 'group' => 'hero', 'label' => 'Hero Image'],
 
             // Homepage content
-            ['key' => 'utility_badge_text',      'value' => 'Instant Delivery',                        'type' => 'text', 'group' => 'homepage', 'label' => 'Utility Badge'],
+            ['key' => 'utility_badge_text',      'value' => 'Fast Delivery',                           'type' => 'text', 'group' => 'homepage', 'label' => 'Utility Badge'],
             ['key' => 'utility_left_text',       'value' => 'Secure Payments',                         'type' => 'text', 'group' => 'homepage', 'label' => 'Utility Left'],
             ['key' => 'utility_center_text',     'value' => '24/7 Support',                            'type' => 'text', 'group' => 'homepage', 'label' => 'Utility Center'],
             ['key' => 'home_search_placeholder', 'value' => 'Search products...',                      'type' => 'text', 'group' => 'homepage', 'label' => 'Search Placeholder'],
-            ['key' => 'feature_one_text',        'value' => 'Instant Delivery',                        'type' => 'text', 'group' => 'homepage', 'label' => 'Feature One'],
+            ['key' => 'feature_one_text',        'value' => 'Fast Delivery',                           'type' => 'text', 'group' => 'homepage', 'label' => 'Feature One'],
             ['key' => 'feature_two_text',        'value' => 'Secure Payment',                          'type' => 'text', 'group' => 'homepage', 'label' => 'Feature Two'],
             ['key' => 'feature_three_text',      'value' => '24/7 Available',                          'type' => 'text', 'group' => 'homepage', 'label' => 'Feature Three'],
             ['key' => 'feature_four_text',       'value' => 'Happy Customers',                         'type' => 'text', 'group' => 'homepage', 'label' => 'Feature Four'],
             ['key' => 'reviews_section_title',   'value' => 'What Customers Say',                      'type' => 'text', 'group' => 'homepage', 'label' => 'Reviews Title'],
             ['key' => 'reviews_section_subtitle','value' => 'Trusted by customers across Sri Lanka',   'type' => 'text', 'group' => 'homepage', 'label' => 'Reviews Subtitle'],
-            ['key' => 'final_cta_title',         'value' => 'Do not miss out — grab yours now!',       'type' => 'text', 'group' => 'homepage', 'label' => 'Final CTA Title'],
-            ['key' => 'final_cta_subtitle',      'value' => 'Instant delivery. Best prices in Sri Lanka.', 'type' => 'text', 'group' => 'homepage', 'label' => 'Final CTA Subtitle'],
+            ['key' => 'final_cta_title',         'value' => 'Don\'t miss out — shop the collection now!', 'type' => 'text', 'group' => 'homepage', 'label' => 'Final CTA Title'],
+            ['key' => 'final_cta_subtitle',      'value' => 'Fast Sri Lanka-wide delivery & genuine quality guarantee.', 'type' => 'text', 'group' => 'homepage', 'label' => 'Final CTA Subtitle'],
             ['key' => 'final_cta_button_text',   'value' => 'Browse Store',                            'type' => 'text', 'group' => 'homepage', 'label' => 'Final CTA Button Text'],
             ['key' => 'final_cta_button_link',   'value' => '/products',                               'type' => 'text', 'group' => 'homepage', 'label' => 'Final CTA Button Link'],
 
@@ -70,7 +73,7 @@ class SiteSettingSeeder extends Seeder
             ['key' => 'show_new_arrivals_link',  'value' => '1', 'type' => 'boolean', 'group' => 'appearance', 'label' => 'Show New Arrivals Link'],
 
             // ── Footer ────────────────────────────────────────────────
-            ['key' => 'footer_tagline',   'value' => 'Your one-stop shop for everything trendy.', 'type' => 'text', 'group' => 'footer', 'label' => 'Footer Tagline'],
+            ['key' => 'footer_tagline',   'value' => 'Sri Lanka\'s leading display screen & electronics store.', 'type' => 'text', 'group' => 'footer', 'label' => 'Footer Tagline'],
             ['key' => 'footer_copyright', 'value' => '© 2024 DISPLAY LANKA.LK. All rights reserved.', 'type' => 'text', 'group' => 'footer', 'label' => 'Footer Copyright'],
             ['key' => 'facebook_url',     'value' => '#', 'type' => 'text', 'group' => 'social', 'label' => 'Facebook URL'],
             ['key' => 'twitter_url',      'value' => '#', 'type' => 'text', 'group' => 'social', 'label' => 'Twitter URL'],

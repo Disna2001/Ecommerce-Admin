@@ -67,8 +67,8 @@
                             <i class="fas {{ $stock_id ? 'fa-pen-nib' : 'fa-plus' }} text-xs sm:text-sm"></i>
                         </div>
                         <div>
-                            <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">Architecture: {{ $stockWorkflowMode === 'edit' ? 'Modification' : 'Creation' }}</p>
-                            <h3 class="text-lg sm:text-2xl font-black tracking-tight text-slate-900">{{ $stock_id ? 'Refine Product Profile' : 'New Product Intake' }}</h3>
+                            <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1">Stock Ledger</p>
+                            <h3 class="text-lg sm:text-2xl font-black tracking-tight text-slate-900">{{ $stock_id ? 'Edit Product' : 'New Product Intake' }}</h3>
                         </div>
                     </div>
                     <div class="hidden sm:block h-10 w-px bg-slate-200 mx-2"></div>
@@ -80,7 +80,7 @@
                 <div class="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                     <div class="flex items-center gap-3">
                         <div class="text-left sm:text-right">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Stock Health</p>
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Projected Status</p>
                             <p class="text-[11px] font-black text-slate-900 uppercase">{{ $this->projectedStockHealth }}</p>
                         </div>
                         <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
@@ -94,17 +94,17 @@
             </div>
 
             <!-- Workflow Stepper -->
-            <div class="px-4 sm:px-8 py-4 bg-white border-b border-slate-50 overflow-x-auto custom-scrollbar shrink-0">
-                <div class="flex flex-nowrap items-center gap-3 p-1.5 rounded-[1.5rem] bg-slate-100/50 border border-slate-200/60 w-max">
+            <div class="px-4 sm:px-8 py-3 bg-white border-b border-slate-100 overflow-x-auto custom-scrollbar shrink-0">
+                <div class="flex items-center gap-2 w-full max-w-4xl">
                     @foreach($stockSteps as $stepKey => $step)
                         <button type="button" wire:click="setStockFormStep('{{ $stepKey }}')" 
-                            class="group relative flex items-center gap-3 rounded-xl px-4 sm:px-5 py-2 sm:py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all duration-300 {{ $stockFormStep === $stepKey ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600' }} shrink-0">
-                            <span class="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg text-[9px] sm:text-[10px] font-black transition-all duration-300 {{ $stockFormStep === $stepKey ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300' }}">{{ $loop->iteration }}</span>
-                            <span>{{ $step['label'] }}</span>
-                            @if($stockFormStep === $stepKey)
-                                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 h-1 w-4 rounded-full bg-slate-900"></div>
-                            @endif
+                            class="flex-1 group relative flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all duration-200 {{ $stockFormStep === $stepKey ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60' }} shrink-0">
+                            <span class="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold transition-colors {{ $stockFormStep === $stepKey ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600' }}">{{ $loop->iteration }}</span>
+                            <span class="truncate">{{ $step['label'] }}</span>
                         </button>
+                        @if(!$loop->last)
+                            <i class="fas fa-chevron-right text-[10px] text-slate-300"></i>
+                        @endif
                     @endforeach
                 </div>
             </div>
@@ -119,15 +119,15 @@
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md"><i class="fas fa-id-card text-xs"></i></div>
                                     <div>
-                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Core Identity</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nomenclature & Catalog Placement</p>
+                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Basic Details</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Name and where this item sits in your catalog.</p>
                                     </div>
                                 </div>
                                 <div class="space-y-6">
                                     <div class="grid gap-6 md:grid-cols-2">
                                         <div class="space-y-2">
                                             <div class="flex items-center justify-between px-1">
-                                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">SKU Protocol</label>
+                                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">SKU</label>
                                                 <button type="button" wire:click="generateSku" class="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors"><i class="fas fa-wand-magic-sparkles mr-1"></i> Auto</button>
                                             </div>
                                             <input type="text" wire:model="sku" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
@@ -151,19 +151,19 @@
                                         <div class="space-y-2">
                                             <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</label>
                                             <select wire:model="status" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
-                                                <option value="active">Operational</option>
-                                                <option value="inactive">Draft Mode</option>
+                                                <option value="active">Active</option>
+                                                <option value="inactive">Draft</option>
                                                 <option value="discontinued">Archived</option>
                                             </select>
                                         </div>
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Warehouse Bin</label>
-                                            <input type="text" wire:model="location" placeholder="e.g. A-12-04" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Warehouse Location</label>
+                                            <input type="text" wire:model="location" placeholder="e.g. Rack A-12" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                         </div>
                                     </div>
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between px-1">
-                                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Technical Narrative</label>
+                                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Description</label>
                                             <button type="button" wire:click="generateAiDescription" class="text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-800 transition-colors"><i class="fas fa-sparkles mr-1"></i> AI Description</button>
                                         </div>
                                         <textarea wire:model="description" rows="5" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-4 text-[13px] font-medium text-slate-600 shadow-inner focus:bg-white focus:ring-0 resize-none leading-relaxed"></textarea>
@@ -172,14 +172,14 @@
                             </div>
                         </div>
 
-                        <!-- Classification & AI Features -->
+                        <!-- Classification & Attributes -->
                         <div class="space-y-8">
                             <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md"><i class="fas fa-layer-group text-xs"></i></div>
                                     <div>
                                         <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Classification</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sourcing & Governance Metadata</p>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category, make, brand, and supplier.</p>
                                     </div>
                                 </div>
                                 <div class="space-y-6">
@@ -209,7 +209,7 @@
                                             </select>
                                         </div>
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Brand Identity</label>
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Brand</label>
                                             <select wire:model.live="brand_id" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                                 <option value="">Select Brand</option>
                                                 @foreach($brands as $brand)<option value="{{ $brand->id }}">{{ $brand->name }}</option>@endforeach
@@ -217,7 +217,7 @@
                                         </div>
                                     </div>
                                     <div class="space-y-2">
-                                        <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Main Supplier</label>
+                                        <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Supplier</label>
                                         <select wire:model="supplier_id" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                             <option value="">Select Supplier</option>
                                             @foreach($suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach
@@ -225,7 +225,7 @@
                                     </div>
                                     <div class="grid gap-6 md:grid-cols-2">
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Warranty Policy</label>
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Warranty</label>
                                             <select wire:model="warranty_id" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                                 <option value="">No Warranty</option>
                                                 @foreach($warranties as $warranty)<option value="{{ $warranty->id }}">{{ $warranty->name }} ({{ $warranty->duration }} mo)</option>@endforeach
@@ -247,8 +247,8 @@
                                     <div class="flex items-center gap-3 mb-6">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-200 text-slate-600"><i class="fas fa-bolt text-[10px]"></i></div>
                                         <div>
-                                            <p class="text-xs font-black text-slate-900 uppercase tracking-widest leading-none">Rapid Config</p>
-                                            <p class="mt-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Inject missing records on-the-fly</p>
+                                            <p class="text-xs font-black text-slate-900 uppercase tracking-widest leading-none">Quick Add</p>
+                                            <p class="mt-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Add missing categories, brands, or warranties.</p>
                                         </div>
                                     </div>
                                     <div class="grid gap-4">
@@ -274,14 +274,14 @@
 
                 @if($stockFormStep === 'inventory')
                     <div class="grid gap-6 lg:gap-12 lg:grid-cols-2">
-                        <!-- Commercials & Stock -->
+                        <!-- Pricing & Stock -->
                         <div class="space-y-8">
                             <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md"><i class="fas fa-coins text-xs"></i></div>
                                     <div>
-                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Commercial Setup</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pricing, Volumes & Profitability</p>
+                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Pricing & Stock</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Set quantities, cost, and selling price.</p>
                                     </div>
                                 </div>
                                 <div class="space-y-6">
@@ -292,14 +292,14 @@
                                             @error('quantity') <p class="text-[9px] font-black text-rose-500 uppercase px-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Critical Alert Threshold</label>
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Reorder Level</label>
                                             <input type="number" wire:model="reorder_level" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                             @error('reorder_level') <p class="text-[9px] font-black text-rose-500 uppercase px-1">{{ $message }}</p> @enderror
                                         </div>
                                     </div>
                                     <div class="grid gap-6 md:grid-cols-2">
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Acquisition Cost (Unit)</label>
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cost Price (per unit)</label>
                                             <div class="relative">
                                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-300">Rs.</span>
                                                 <input type="number" step="0.01" wire:model="unit_price" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 pl-12 pr-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
@@ -308,7 +308,7 @@
                                         </div>
                                         <div class="space-y-2">
                                             <div class="flex items-center justify-between px-1">
-                                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Retail Listing Price</label>
+                                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Selling Price</label>
                                                 <button type="button" wire:click="getAiPricingSuggestion" class="text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-800 transition-colors"><i class="fas fa-sparkles mr-1"></i> AI Suggest</button>
                                             </div>
                                             <div class="relative">
@@ -319,7 +319,7 @@
                                         </div>
                                     </div>
                                     <div class="space-y-2">
-                                        <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Wholesale Protocol Price</label>
+                                        <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Wholesale Price</label>
                                         <div class="relative">
                                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-300">Rs.</span>
                                             <input type="number" step="0.01" wire:model="wholesale_price" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 pl-12 pr-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
@@ -332,18 +332,18 @@
                                         <div class="relative z-10">
                                             <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
                                                 <div>
-                                                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Commercial Analytics</p>
-                                                    <p class="text-sm font-black tracking-tight">Projected Operational Earnings</p>
+                                                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Profit Margins</p>
+                                                    <p class="text-sm font-black tracking-tight">Estimated Margin</p>
                                                 </div>
                                                 <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white"><i class="fas fa-chart-pie text-xs"></i></div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-8">
                                                 <div>
-                                                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Net Margin / Unit</p>
+                                                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Profit per Unit</p>
                                                     <p class="text-2xl font-black tracking-tighter">Rs {{ number_format($this->marginAmount, 2) }}</p>
                                                 </div>
                                                 <div>
-                                                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Markup Strategy</p>
+                                                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Margin</p>
                                                     <p class="text-2xl font-black tracking-tighter text-emerald-400">{{ number_format($this->marginPercent, 1) }}%</p>
                                                 </div>
                                             </div>
@@ -359,8 +359,8 @@
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md"><i class="fas fa-microchip text-xs"></i></div>
                                     <div>
-                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Technical Profile</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Model Specifications & Identification</p>
+                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Model & Specifications</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Model details, dimensions, and variant info.</p>
                                     </div>
                                 </div>
                                 <div class="space-y-6">
@@ -379,17 +379,17 @@
                                     </div>
                                     <div class="grid gap-6 md:grid-cols-2">
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Color Profile</label>
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Color</label>
                                             <input type="text" wire:model="color" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                         </div>
                                         <div class="space-y-2">
-                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Size / Dimension</label>
+                                            <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Size</label>
                                             <input type="text" wire:model="size" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                         </div>
                                     </div>
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between px-1">
-                                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weight Protocol (KG)</label>
+                                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weight (kg)</label>
                                         </div>
                                         <input type="number" step="0.01" wire:model="weight" class="w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
                                     </div>
@@ -402,8 +402,8 @@
                                         <div class="flex items-center gap-4">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md"><i class="fas fa-map-location-dot text-xs"></i></div>
                                             <div>
-                                                <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Storefront Mapping</h4>
-                                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Public Catalog Overrides</p>
+                                                <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Storefront Overrides</h4>
+                                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Override display category or brand for the online store.</p>
                                             </div>
                                         </div>
                                         <button 
@@ -421,14 +421,14 @@
                                                 <div class="space-y-2">
                                                     <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Public Category</label>
                                                     <select wire:model="target_category_id" class="w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-900 shadow-sm focus:ring-0">
-                                                        <option value="">Same as Registry</option>
+                                                        <option value="">Same as Category</option>
                                                         @foreach($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach
                                                     </select>
                                                 </div>
                                                 <div class="space-y-2">
                                                     <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Public Brand</label>
                                                     <select wire:model="target_brand_id" class="w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-900 shadow-sm focus:ring-0">
-                                                        <option value="">Same as Registry</option>
+                                                        <option value="">Same as Brand</option>
                                                         @foreach($brands as $brand)<option value="{{ $brand->id }}">{{ $brand->name }}</option>@endforeach
                                                     </select>
                                                 </div>
@@ -450,7 +450,7 @@
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md"><i class="fas fa-panorama text-xs"></i></div>
                                     <div>
                                         <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Image Gallery</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">High-Fidelity Product Visuals</p>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Product photos for storefront and admin.</p>
                                     </div>
                                 </div>
                                 
@@ -478,7 +478,7 @@
                                             </div>
                                             <div class="absolute bottom-2 left-2 right-2">
                                                 <div class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-center shadow-sm">
-                                                    <p class="text-[7px] font-black text-emerald-600 uppercase tracking-widest">Ready to Sync</p>
+                                                    <p class="text-[7px] font-black text-emerald-600 uppercase tracking-widest">Ready to upload</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -499,8 +499,8 @@
                                 <div class="flex items-center gap-4 mb-8">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md"><i class="fas fa-video text-xs"></i></div>
                                     <div>
-                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Motion Assets</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Product Demonstrations & Video Clips</p>
+                                        <h4 class="text-base font-black text-slate-900 uppercase tracking-tight">Product Videos</h4>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Upload demo videos or clip previews.</p>
                                     </div>
                                 </div>
 
@@ -510,8 +510,8 @@
                                             <div class="flex items-center gap-4">
                                                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm"><i class="fas fa-play text-[10px]"></i></div>
                                                 <div>
-                                                    <p class="text-[11px] font-black text-slate-900 uppercase tracking-tight">Legacy Clip #{{ $index + 1 }}</p>
-                                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Persistent Storage</p>
+                                                    <p class="text-[11px] font-black text-slate-900 uppercase tracking-tight">Saved Video #{{ $index + 1 }}</p>
+                                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Uploaded</p>
                                                 </div>
                                             </div>
                                             <button type="button" wire:click="removeCurrentVideo({{ $index }})" class="h-8 w-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-300 hover:text-rose-500 transition-all shadow-sm"><i class="fas fa-trash-alt text-[10px]"></i></button>
@@ -525,8 +525,8 @@
                                                     <i class="fas fa-video text-[10px]"></i>
                                                 </div>
                                                 <div>
-                                                    <p class="text-[11px] font-black text-emerald-900 uppercase tracking-tight">New Staged Asset</p>
-                                                    <p class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Protocol: Video Ready</p>
+                                                    <p class="text-[11px] font-black text-emerald-900 uppercase tracking-tight">New Video</p>
+                                                    <p class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Ready to upload</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2">
@@ -540,7 +540,7 @@
 
                                     <label class="flex cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-100 bg-slate-50/50 p-6 transition-all hover:border-slate-900 hover:bg-white group">
                                         <i class="fas fa-film text-slate-300 group-hover:text-slate-900 transition-colors"></i>
-                                        <span class="text-[10px] font-black text-slate-400 group-hover:text-slate-900 uppercase tracking-widest">Upload Motion Protocol</span>
+                                        <span class="text-[10px] font-black text-slate-400 group-hover:text-slate-900 uppercase tracking-widest">Upload Video</span>
                                         <input type="file" wire:model="tempVideos" multiple class="hidden" accept="video/*">
                                     </label>
                                 </div>
@@ -551,7 +551,7 @@
 
                 @if($stockFormStep === 'review')
                     <div class="grid gap-6 lg:gap-12 lg:grid-cols-2">
-                        <!-- Technical Summary -->
+                        <!-- Summary -->
                         <div class="space-y-8">
                              <div class="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-10 shadow-sm">
                                 <div class="flex items-center gap-4 sm:gap-6 mb-6 sm:mb-12">
@@ -559,35 +559,35 @@
                                         <i class="fas fa-microscope text-lg sm:text-2xl"></i>
                                     </div>
                                     <div>
-                                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mb-2">Protocol: Review</p>
-                                        <h3 class="text-xl sm:text-3xl font-black tracking-tight text-slate-900">Technical Audit</h3>
+                                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mb-2">Final Review</p>
+                                        <h3 class="text-xl sm:text-3xl font-black tracking-tight text-slate-900">Product Summary</h3>
                                     </div>
                                 </div>
 
                                 <div class="space-y-10">
                                      <div class="grid gap-8 md:grid-cols-2">
                                          <div>
-                                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Display Nomenclature</p>
+                                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Product Name</p>
                                              <p class="text-sm font-black text-slate-900 uppercase tracking-tight">{{ $name }}</p>
                                          </div>
                                          <div>
-                                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Asset SKU</p>
+                                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">SKU</p>
                                              <p class="text-sm font-black text-slate-900 uppercase tracking-tight">{{ $sku }}</p>
                                          </div>
                                      </div>
 
                                      <div class="p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] bg-slate-50 border border-slate-100">
-                                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Registry Placement</p>
+                                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Categories & Attributes</p>
                                          <div class="flex flex-wrap gap-2 sm:gap-4">
                                              <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $categories->find($category_id)?->name ?? 'General' }}</span>
                                              <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $brands->find($brand_id)?->name ?? 'Universal' }}</span>
-                                             <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $makes->find($make_id)?->name ?? 'Premium' }}</span>
+                                             <span class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-[10px] font-black text-slate-900 uppercase tracking-tight shadow-sm">{{ $makes->find($make_id)?->name ?? 'Standard' }}</span>
                                          </div>
                                      </div>
 
                                      <div>
-                                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Narrative Summary</p>
-                                         <p class="text-xs font-medium text-slate-500 leading-relaxed italic line-clamp-4">"{{ $description ?: 'No description provided for this technical asset.' }}"</p>
+                                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Description</p>
+                                         <p class="text-xs font-medium text-slate-500 leading-relaxed italic line-clamp-4">"{{ $description ?: 'No description provided for this product.' }}"</p>
                                      </div>
                                 </div>
                              </div>
@@ -601,8 +601,8 @@
                                     <div class="flex items-center gap-4 mb-6 sm:mb-12">
                                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white shadow-xl"><i class="fas fa-radar text-lg"></i></div>
                                         <div>
-                                            <p class="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Impact Analysis</p>
-                                            <h4 class="text-xl font-black tracking-tight">Operational Projection</h4>
+                                            <p class="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Summary</p>
+                                            <h4 class="text-xl font-black tracking-tight">Financial Overview</h4>
                                         </div>
                                     </div>
 
@@ -610,17 +610,17 @@
                                         <div class="grid gap-6 sm:gap-10 md:grid-cols-2">
                                             <div class="space-y-6">
                                                 <div class="flex justify-between border-b border-white/10 pb-4">
-                                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Acquisition</span>
+                                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Cost Price</span>
                                                     <span class="text-sm font-black tracking-tight">Rs {{ number_format($unit_price, 2) }}</span>
                                                 </div>
                                                 <div class="flex justify-between border-b border-white/10 pb-4">
-                                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Retail Price</span>
+                                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Selling Price</span>
                                                     <span class="text-sm font-black tracking-tight text-emerald-400">Rs {{ number_format($selling_price, 2) }}</span>
                                                 </div>
                                             </div>
                                             <div class="space-y-6">
                                                 <div class="flex justify-between border-b border-white/10 pb-4">
-                                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Net Margin</span>
+                                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-tight">Margin</span>
                                                     <span class="text-sm font-black tracking-tight">+{{ number_format($this->marginPercent, 1) }}%</span>
                                                 </div>
                                                 <div class="flex justify-between">
@@ -634,10 +634,10 @@
 
                                 <div class="mt-8 sm:mt-12 flex flex-col items-center justify-center p-4 sm:p-8 border-t border-white/10">
                                      <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-4 rounded-[2rem] bg-white px-6 sm:px-16 py-4 sm:py-6 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
-                                        <i class="fas fa-rocket text-sm opacity-50"></i>
-                                        Synchronize Registry
+                                        <i class="fas fa-check text-sm opacity-50"></i>
+                                        Save Product
                                      </button>
-                                     <p class="mt-4 text-[9px] font-bold text-white/40 uppercase tracking-widest text-center">By synchronizing, you commit these changes to the master inventory</p>
+                                     <p class="mt-4 text-[9px] font-bold text-white/40 uppercase tracking-widest text-center">Saving will update inventory levels and product details in the catalog.</p>
                                 </div>
                             </div>
                         </div>
@@ -653,7 +653,7 @@
                 <div class="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
                     @if($stockFormStep !== 'catalog')
                          <button type="button" wire:click="setStockFormStep('{{ array_keys($stockSteps)[array_search($stockFormStep, array_keys($stockSteps)) - 1] }}')" class="flex-1 sm:flex-initial text-center rounded-2xl border border-slate-200 bg-white px-4 sm:px-8 py-3.5 sm:py-4 text-[10px] font-black text-slate-900 uppercase tracking-widest transition-all hover:border-slate-900 shadow-sm">
-                            <span>Previous</span> <span class="hidden sm:inline">Protocol</span>
+                            <span>Previous</span>
                          </button>
                     @endif
                     
@@ -665,7 +665,7 @@
                     @else
                          <button type="submit" class="flex-1 sm:flex-initial flex items-center justify-center gap-3 rounded-2xl bg-emerald-600 px-6 sm:px-10 py-3.5 sm:py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             <i class="fas fa-check text-[10px] opacity-50"></i>
-                            <span>Finalize</span> <span class="hidden sm:inline">Synchronization</span>
+                            <span>Save Product</span>
                          </button>
                     @endif
                 </div>

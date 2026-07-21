@@ -1,146 +1,130 @@
 <div class="space-y-6">
     @if (session()->has('message'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{{ session('message') }}</div>
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">{{ session('message') }}</div>
     @endif
 
     @if (session()->has('error'))
-        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{{ session('error') }}</div>
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">{{ session('error') }}</div>
     @endif
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <!-- Content Header & Actions -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Catalog Setup</p>
-                <h2 class="mt-2 text-2xl font-bold text-slate-900">Category Management</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Organize products into clearer category groups so storefront filtering and inventory management stay clean.</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Catalog Setup</p>
+                <h2 class="mt-1 text-xl font-bold text-slate-900">Category Management</h2>
+                <p class="mt-1 text-xs text-slate-500">Organize products into category groups for intuitive storefront navigation and filtering.</p>
             </div>
 
-            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                <i class="fas fa-plus"></i>
+            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">
+                <i class="fas fa-plus text-xs"></i>
                 <span>New Category</span>
             </button>
         </div>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-4">
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total Categories</p>
-                <p class="mt-2 text-3xl font-black text-slate-900">{{ $totalCategories }}</p>
-            </div>
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Active</p>
-                <p class="mt-2 text-3xl font-black text-emerald-700">{{ $activeCategories }}</p>
-            </div>
-            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">With Products</p>
-                <p class="mt-2 text-3xl font-black text-indigo-700">{{ $categoriesWithProducts }}</p>
-            </div>
-            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">Empty Groups</p>
-                <p class="mt-2 text-3xl font-black text-amber-700">{{ $emptyCategories }}</p>
-            </div>
+        <!-- Consistent Stat Cards KPI Row -->
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <x-admin.dashboard.stat-card label="Total Categories" :value="$totalCategories" icon="fa-tags" tone="indigo" />
+            <x-admin.dashboard.stat-card label="Active" :value="$activeCategories" icon="fa-circle-check" tone="emerald" />
+            <x-admin.dashboard.stat-card label="With Products" :value="$categoriesWithProducts" icon="fa-boxes-stacked" tone="slate" />
+            <x-admin.dashboard.stat-card label="Empty Groups" :value="$emptyCategories" icon="fa-folder-open" tone="amber" />
         </div>
     </div>
 
+    <!-- Search & Guidance Grid -->
     <div class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <label class="block text-sm font-medium text-slate-700">Search Categories</label>
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Search Categories</label>
             <div class="relative mt-2">
-                <i class="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by category name or description..." class="w-full rounded-2xl border-slate-200 pl-11 text-sm shadow-none focus:ring-0">
+                <i class="fas fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by category name or description..." class="w-full rounded-lg border-slate-200 pl-9 text-xs font-semibold shadow-xs focus:border-slate-900 focus:ring-0">
             </div>
         </div>
 
-        <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start gap-4">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                    <i class="fas fa-layer-group"></i>
-                </div>
-                <div>
-                    <h3 class="text-xl font-semibold text-slate-900">Category Guidance</h3>
-                    <p class="mt-1 text-sm text-slate-500">Keep names short, descriptions useful, and avoid duplicate groups that confuse storefront filtering.</p>
-                </div>
-            </div>
-        </div>
+        <x-admin.catalog.guidance-panel 
+            title="Category Guidance" 
+            tip="Keep category names clear and concise. Avoid overlapping or duplicate categories so customer search and catalog filtering stay intuitive." 
+            icon="fa-layer-group" 
+        />
     </div>
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <table class="min-w-full divide-y divide-slate-100">
+                <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     <tr>
-                        <th class="px-6 py-4">Category</th>
-                        <th class="px-6 py-4">Slug</th>
-                        <th class="px-6 py-4">Description</th>
-                        <th class="px-6 py-4">Products</th>
-                        <th class="px-6 py-4">Actions</th>
+                        <th class="px-6 py-3.5">Category</th>
+                        <th class="px-6 py-3.5">Slug</th>
+                        <th class="px-6 py-3.5">Description</th>
+                        <th class="px-6 py-3.5">Products</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 bg-white text-xs">
                     @forelse($categories as $category)
-                        <tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
                             <td class="px-6 py-4">
-                                <p class="text-sm font-semibold text-slate-900">{{ $category->name }}</p>
-                                <p class="mt-1 text-xs text-slate-400">ID #{{ $category->id }}</p>
+                                <p class="font-bold text-slate-900">{{ $category->name }}</p>
+                                <p class="text-[10px] font-medium text-slate-400">ID #{{ $category->id }}</p>
                             </td>
-                            <td class="px-6 py-4 text-sm text-slate-500">{{ $category->slug }}</td>
-                            <td class="px-6 py-4 text-sm text-slate-500">{{ \Illuminate\Support\Str::limit($category->description, 80) ?: 'No description added.' }}</td>
+                            <td class="px-6 py-4 font-mono text-[11px] text-slate-500">{{ $category->slug }}</td>
+                            <td class="px-6 py-4 text-slate-500">{{ \Illuminate\Support\Str::limit($category->description, 80) ?: 'No description added.' }}</td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">{{ $category->stocks_count }}</span>
+                                <span class="inline-flex rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">{{ $category->stocks_count }}</span>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="flex flex-wrap gap-2">
-                                    <button wire:click="edit({{ $category->id }})" class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">
-                                        <i class="fas fa-pen"></i> Edit
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button wire:click="edit({{ $category->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 shadow-xs">
+                                        <i class="fas fa-pen text-[10px] text-slate-400"></i> Edit
                                     </button>
-                                    <button wire:click="delete({{ $category->id }})" onclick="confirm('Delete this category?') || event.stopImmediatePropagation()" class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
-                                        <i class="fas fa-trash"></i> Delete
+                                    <button wire:click="delete({{ $category->id }})" onclick="confirm('Delete this category?') || event.stopImmediatePropagation()" class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 shadow-xs">
+                                        <i class="fas fa-trash text-[10px]"></i> Delete
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-6 py-16 text-center text-sm text-slate-500">No categories found.</td></tr>
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-slate-400 font-medium">No categories found matching your search.</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        @if($categories->hasPages())
+            <div class="px-6 py-4 border-t border-slate-100">
+                {{ $categories->links() }}
+            </div>
+        @endif
     </div>
 
-    <div>{{ $categories->links() }}</div>
-
+    <!-- Category Modal -->
     @if($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-start justify-center px-4 py-8">
-                <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" wire:click="closeModal"></div>
-                <div class="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-                    <form wire:submit="store">
-                        <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Category Window</p>
-                                    <h3 class="mt-2 text-2xl font-bold text-slate-900">{{ $category_id ? 'Edit Category' : 'Add New Category' }}</h3>
-                                </div>
-                                <button type="button" wire:click="closeModal" class="rounded-full border border-slate-200 p-3 text-slate-500 transition hover:bg-white hover:text-slate-700"><i class="fas fa-xmark"></i></button>
-                            </div>
-                        </div>
-                        <div class="space-y-5 px-6 py-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Category Name</label>
-                                <input type="text" wire:model="name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                @error('name') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700">Description</label>
-                                <textarea wire:model="description" rows="4" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none"></textarea>
-                                @error('description') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-                            <button type="button" wire:click="closeModal" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">Cancel</button>
-                            <button type="submit" class="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">{{ $category_id ? 'Update Category' : 'Save Category' }}</button>
-                        </div>
-                    </form>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <h3 class="text-base font-bold text-slate-900">{{ $category_id ? 'Edit Category' : 'New Category' }}</h3>
+                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
                 </div>
+
+                <form wire:submit.prevent="store" class="space-y-4 text-xs">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Category Name</label>
+                        <input type="text" wire:model="name" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                        @error('name') <span class="text-rose-500">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Description</label>
+                        <textarea wire:model="description" rows="3" class="w-full rounded-lg border-slate-200 px-3 py-2 font-medium text-slate-900 focus:ring-0"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" wire:click="closeModal" class="rounded-lg border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800 shadow-xs">{{ $category_id ? 'Update Category' : 'Create Category' }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

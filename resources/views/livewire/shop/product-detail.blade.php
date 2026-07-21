@@ -9,13 +9,17 @@
     </div>
 
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <!-- Breadcrumb Protocol -->
-        <nav class="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-            <a href="/" class="hover:text-[var(--primary)] transition-colors">Matrix</a>
+        <!-- Breadcrumb -->
+        <nav class="mb-6 sm:mb-8 flex items-center flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+            <a href="/" class="hover:text-[var(--primary)] transition-colors">Home</a>
             <i class="fas fa-chevron-right text-[8px]"></i>
-            <a href="{{ url('/products') }}" class="hover:text-[var(--primary)] transition-colors">Registry</a>
+            <a href="{{ url('/products') }}" class="hover:text-[var(--primary)] transition-colors">Products</a>
+            @if($product->category)
+                <i class="fas fa-chevron-right text-[8px]"></i>
+                <a href="{{ url('/products?category='.$product->category->id) }}" class="hover:text-[var(--primary)] transition-colors">{{ $product->category->name }}</a>
+            @endif
             <i class="fas fa-chevron-right text-[8px]"></i>
-            <span class="text-slate-900 dark:text-white">{{ $product->name }}</span>
+            <span class="text-slate-900 dark:text-white truncate max-w-xs sm:max-w-md">{{ $product->name }}</span>
         </nav>
         <div class="grid gap-12 lg:grid-cols-[1fr_0.8fr]">
             <div class="space-y-8">

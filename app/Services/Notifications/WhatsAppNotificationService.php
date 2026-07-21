@@ -5,47 +5,121 @@ namespace App\Services\Notifications;
 use App\Models\NotificationOutbox;
 use App\Models\Order;
 use App\Models\SiteSetting;
+use App\Models\WhatsAppSession;
+use App\Services\WhatsAppBridgeService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WhatsAppNotificationService
 {
+    public function sendRawWhatsAppMessage(string $phone, string $body): bool
+    {
+        $normalizedPhone = $this->normalizePhone($phone);
+        if (!$normalizedPhone) {
+            return false;
+        }
+
+        // Try Baileys bridge first if session is connected
+        $session = WhatsAppSession::singleton();
+        if ($session->isConnected()) {
+            try {
+                $bridge = app(WhatsAppBridgeService::class);
+                return $bridge->sendMessage($normalizedPhone, $body);
+            } catch (\Throwable $e) {
+                Log::warning('Baileys bridge sendRawMessage failed: ' . $e->getMessage(), ['phone' => $phone]);
+            }
+        }
+
+        if (!SiteSetting::get('whatsapp_enabled', false)) {
+            return false;
+        }
+
+        $endpoint = SiteSetting::get('whatsapp_api_url');
+        $token    = SiteSetting::get('whatsapp_api_key');
+        $provider = SiteSetting::get('whatsapp_provider', 'custom');
+
+        if (!$endpoint) {
+            return false;
+        }
+
+        try {
+            $response = match ($provider) {
+                'meta_cloud' => $this->sendMetaCloudMessage($endpoint, $token, $normalizedPhone, $body),
+                default => Http::withHeaders(array_filter([
+                        'Authorization' => $token ? 'Bearer ' . $token : null,
+                    ]))
+                    ->acceptJson()
+                    ->post($endpoint, [
+                        'provider' => $provider,
+                        'to'      => $normalizedPhone,
+                        'message' => $body,
+                    ]),
+            };
+
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::warning('Raw WhatsApp dispatch failed: ' . $e->getMessage(), ['phone' => $phone]);
+            return false;
+        }
+    }
+
     public function sendOrderUpdate(Order $order, string $stage, ?string $message = null, ?int $outboxId = null): bool
     {
         $outbox = $outboxId ? NotificationOutbox::find($outboxId) : null;
+        $phone  = $this->normalizePhone($order->customer_phone);
+        $body   = $message ?: $this->resolveTemplateMessage($order, $stage);
 
+        if (!$phone) {
+            $this->markOutboxAsFailed($outbox, 'Customer phone number is missing.');
+            return false;
+        }
+
+        // ── Baileys bridge (highest priority when connected) ──────────────────
+        $session = WhatsAppSession::singleton();
+        if ($session->isConnected()) {
+            try {
+                $bridge   = app(WhatsAppBridgeService::class);
+                $success  = $bridge->sendMessage($phone, $body);
+                if ($success) {
+                    $this->markOutboxAsSent($outbox);
+                    return true;
+                }
+                $this->markOutboxAsFailed($outbox, 'Baileys bridge send returned failure.');
+                return false;
+            } catch (\Throwable $e) {
+                Log::warning('Baileys bridge order update failed: ' . $e->getMessage(), ['order_id' => $order->id]);
+            }
+        }
+
+        // ── Fallback: Meta Cloud API / Custom proxy ────────────────────────────
         if (!SiteSetting::get('whatsapp_enabled', false)) {
             $this->markOutboxAsSkipped($outbox, 'WhatsApp notifications are disabled.');
             return false;
         }
 
         $endpoint = SiteSetting::get('whatsapp_api_url');
-        $token = SiteSetting::get('whatsapp_api_key');
+        $token    = SiteSetting::get('whatsapp_api_key');
         $provider = SiteSetting::get('whatsapp_provider', 'custom');
-        $phone = $this->normalizePhone($order->customer_phone);
 
-        if (!$endpoint || !$phone) {
-            $this->markOutboxAsFailed($outbox, 'WhatsApp endpoint or customer phone number is missing.');
+        if (!$endpoint) {
+            $this->markOutboxAsFailed($outbox, 'WhatsApp endpoint is missing.');
             return false;
         }
-
-        $body = $message ?: $this->resolveTemplateMessage($order, $stage);
 
         try {
             $response = match ($provider) {
                 'meta_cloud' => $this->sendMetaCloudMessage($endpoint, $token, $phone, $body),
-                default => $this->sendWebhookMessage($endpoint, $token, $order, $stage, $phone, $body),
+                default      => $this->sendWebhookMessage($endpoint, $token, $order, $stage, $phone, $body),
             };
 
             if ($response->failed()) {
                 $this->markOutboxAsFailed($outbox, 'WhatsApp provider returned HTTP ' . $response->status() . '.');
                 Log::warning('WhatsApp notification request failed.', [
                     'order_id' => $order->id,
-                    'stage' => $stage,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
+                    'stage'    => $stage,
+                    'status'   => $response->status(),
+                    'body'     => $response->body(),
                 ]);
-
                 return false;
             }
 
@@ -56,10 +130,9 @@ class WhatsAppNotificationService
             $this->markOutboxAsFailed($outbox, $e->getMessage());
             Log::warning('WhatsApp notification dispatch failed.', [
                 'order_id' => $order->id,
-                'stage' => $stage,
-                'error' => $e->getMessage(),
+                'stage'    => $stage,
+                'error'    => $e->getMessage(),
             ]);
-
             return false;
         }
     }
@@ -114,7 +187,7 @@ class WhatsAppNotificationService
             ]);
     }
 
-    protected function normalizePhone(?string $phone): ?string
+    public function normalizePhone(?string $phone): ?string
     {
         if (!$phone) {
             return null;

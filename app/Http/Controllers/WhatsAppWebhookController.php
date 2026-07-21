@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessWhatsAppMessageJob;
 use App\Models\NotificationOutbox;
 use App\Models\SiteSetting;
+use App\Models\WhatsAppConversation;
+use App\Models\WhatsAppMessage;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -32,15 +36,105 @@ class WhatsAppWebhookController extends Controller
 
     public function receive(Request $request): Response
     {
+        // Signature verification if configured
+        if (!$this->verifySignature($request)) {
+            Log::warning('WhatsApp webhook signature verification failed.');
+            return response('Invalid Signature', 401);
+        }
+
+        $notificationService = app(WhatsAppNotificationService::class);
+
         foreach (($request->input('entry') ?? []) as $entry) {
             foreach (($entry['changes'] ?? []) as $change) {
-                foreach (($change['value']['statuses'] ?? []) as $status) {
-                    $this->syncStatus($status, $change['value'] ?? []);
+                $value = $change['value'] ?? [];
+                
+                // Status updates (sent, delivered, read, failed)
+                foreach (($value['statuses'] ?? []) as $status) {
+                    $this->syncStatus($status, $value);
+                }
+
+                // Inbound Messages
+                $contacts = $value['contacts'] ?? [];
+                foreach (($value['messages'] ?? []) as $inboundMsg) {
+                    $this->handleInboundMessage($inboundMsg, $contacts, $notificationService);
                 }
             }
         }
 
         return response('EVENT_RECEIVED', 200);
+    }
+
+    protected function handleInboundMessage(array $inboundMsg, array $contacts, WhatsAppNotificationService $notificationService): void
+    {
+        $rawFrom = (string) Arr::get($inboundMsg, 'from', '');
+        $phone = $notificationService->normalizePhone($rawFrom);
+        $providerMsgId = (string) Arr::get($inboundMsg, 'id', '');
+        
+        $body = (string) Arr::get($inboundMsg, 'text.body', 
+            Arr::get($inboundMsg, 'button.text', 
+            Arr::get($inboundMsg, 'interactive.button_reply.title', '')));
+
+        if (!filled($phone) || !filled($body)) {
+            return;
+        }
+
+        // Deduplication check
+        if (filled($providerMsgId) && WhatsAppMessage::where('provider_message_id', $providerMsgId)->exists()) {
+            return;
+        }
+
+        // Customer Name from Profile
+        $customerName = null;
+        foreach ($contacts as $contact) {
+            if ((string) Arr::get($contact, 'wa_id') === preg_replace('/[^\d]/', '', $rawFrom)) {
+                $customerName = Arr::get($contact, 'profile.name');
+                break;
+            }
+        }
+
+        // Upsert Conversation
+        $conversation = WhatsAppConversation::firstOrCreate(
+            ['phone_number' => $phone],
+            [
+                'customer_name' => $customerName,
+                'status' => 'bot_active',
+                'last_message_at' => now(),
+            ]
+        );
+
+        if ($customerName && !$conversation->customer_name) {
+            $conversation->update(['customer_name' => $customerName]);
+        }
+
+        $conversation->update(['last_message_at' => now()]);
+
+        // Create Message
+        $message = WhatsAppMessage::create([
+            'conversation_id' => $conversation->id,
+            'direction' => 'inbound',
+            'sender_type' => 'customer',
+            'content' => $body,
+            'message_type' => 'text',
+            'provider_message_id' => $providerMsgId,
+        ]);
+
+        // Dispatch background job for AI processing
+        ProcessWhatsAppMessageJob::dispatch($message->id);
+    }
+
+    protected function verifySignature(Request $request): bool
+    {
+        $signatureHeader = $request->header('x-hub-signature-256');
+        $verifyToken = SiteSetting::get('whatsapp_webhook_verify_token');
+
+        if (!filled($signatureHeader) || !filled($verifyToken)) {
+            return true; // If signature header is not set by provider or verify token not enforcing HMAC, allow
+        }
+
+        $expectedHash = hash_hmac('sha256', $request->getContent(), $verifyToken);
+        $providedHash = str_replace('sha256=', '', $signatureHeader);
+
+        return hash_equals($expectedHash, $providedHash);
     }
 
     protected function syncStatus(array $status, array $value): void

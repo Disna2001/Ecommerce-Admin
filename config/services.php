@@ -51,4 +51,10 @@ return [
         'redirect'      => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    'whatsapp_bridge' => [
+        'url'     => env('WHATSAPP_BRIDGE_URL', 'http://127.0.0.1:3000'),
+        'secret'  => env('WHATSAPP_BRIDGE_SECRET', ''),
+        'timeout' => env('WHATSAPP_BRIDGE_TIMEOUT', 8),
+    ],
+
 ];

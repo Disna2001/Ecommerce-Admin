@@ -93,40 +93,40 @@
 
     .admin-topbar {
         position: fixed;
-        top: 0.9rem;
-        left: 1rem;
-        right: 1rem;
+        top: 0.5rem;
+        left: 0.75rem;
+        right: 0.75rem;
         z-index: 50;
-        height: 72px;
+        height: 54px;
         border: 1px solid var(--admin-navbar-border);
         background: var(--admin-navbar);
         color: var(--admin-navbar-text);
-        backdrop-filter: blur(32px);
-        -webkit-backdrop-filter: blur(32px);
-        border-radius: 2rem;
-        box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 0.85rem;
+        box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.25);
     }
 
     .admin-topbar__inner {
         height: 100%;
-        padding: 0 1.1rem;
+        padding: 0 0.85rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1rem;
+        gap: 0.75rem;
     }
 
     .admin-sidebar {
         position: fixed;
-        top: 5.8rem;
-        left: 1rem;
+        top: 4.25rem;
+        left: 0.75rem;
         z-index: 45;
-        width: 19rem;
-        height: calc(100vh - 6.8rem);
+        width: 14.5rem;
+        height: calc(100vh - 5rem);
         background: var(--admin-sidebar);
         border: 1px solid var(--admin-sidebar-border);
-        border-radius: 2.5rem;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        border-radius: 1rem;
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
         overflow: hidden;
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
@@ -318,12 +318,12 @@
     .admin-main {
         position: relative;
         min-height: 100vh;
-        padding-top: 6.8rem;
+        padding-top: 4.5rem;
         transition: padding-left 0.3s ease;
     }
 
     .admin-content {
-        padding: 1rem 1.1rem 1.25rem;
+        padding: 0.75rem 1rem 1.25rem;
     }
 
     .admin-page-wrap {
@@ -833,7 +833,7 @@
         }
 
         .main-content-with-sidebar {
-            padding-left: 19.5rem;
+            padding-left: 16rem;
         }
 
         .main-content-full {

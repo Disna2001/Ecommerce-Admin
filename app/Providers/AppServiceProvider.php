@@ -33,8 +33,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Livewire page navigation can make Vite's CSS preload tags look unused,
-        // which creates noisy browser warnings without improving much here.
         Vite::usePreloadTagAttributes(false);
 
         View::composer('layouts.shop', function ($view) {
@@ -42,7 +40,10 @@ class AppServiceProvider extends ServiceProvider
         });
         View::share('currentTenant', app(TenantManager::class)->current());
 
-        // Define admin menu gate
+        Gate::before(function ($user, $ability) {
+            return ($user->hasRole('Admin') || $user->hasRole('Super Admin')) ? true : null;
+        });
+
         Gate::define('view-admin-menu', function ($user) {
             return $user->hasRole('Admin')
                 || $user->hasRole('Super Admin')
@@ -58,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
                     'view stock movements',
                     'view system health',
                     'view site management',
+                    'view whatsapp conversations',
                 ]);
         });
 
@@ -159,7 +161,7 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->safeHasTable('permissions') && $this->safeHasTable('roles') && $this->safeHasTable('role_has_permissions')) {
             try {
-                Cache::remember('core_permissions_synced_v3', 3600, function () {
+                Cache::remember('core_permissions_synced_v5', 3600, function () {
                     $corePermissions = [
                         'view dashboard', 'view orders', 'manage orders', 'verify payments',
                         'view inventory', 'manage inventory', 'view supply chain', 'manage supply chain',
@@ -168,10 +170,9 @@ class AppServiceProvider extends ServiceProvider
                         'create roles', 'edit roles', 'delete roles', 'view settings',
                         'edit settings', 'view activity logs', 'view notification outbox',
                         'view stock movements', 'view system health', 'view site management',
-                        'manage site management',
+                        'manage site management', 'view whatsapp conversations',
                     ];
 
-                    // Ensure all permissions exist
                     foreach ($corePermissions as $permissionName) {
                         try {
                             Permission::firstOrCreate([
@@ -179,12 +180,9 @@ class AppServiceProvider extends ServiceProvider
                                 'guard_name' => 'web',
                             ]);
                         } catch (\Throwable) {
-                            // already exists — safe to ignore
                         }
                     }
 
-                    // Assign each permission individually only if not already assigned
-                    // This avoids the bulk INSERT that triggers UNIQUE violations
                     foreach (['Admin', 'Super Admin'] as $roleName) {
                         try {
                             $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
@@ -197,11 +195,9 @@ class AppServiceProvider extends ServiceProvider
                                         $role->givePermissionTo($permissionName);
                                     }
                                 } catch (\Throwable) {
-                                    // duplicate — already assigned, skip
                                 }
                             }
                         } catch (\Throwable) {
-                            // role sync failed — skip this role
                         }
                     }
 
@@ -237,5 +233,6 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('admin.system-health-manager', \App\Livewire\Admin\SystemHealthManager::class);
         Livewire::component('admin.site-management.review-manager',\App\Livewire\Admin\SiteManagement\ReviewManager::class);
         Livewire::component('admin.system-settings-manager', \App\Livewire\Admin\SystemSettingsManager::class);
+        Livewire::component('admin.whats-app-conversations-manager', \App\Livewire\Admin\WhatsAppConversationsManager::class);
     }
 }

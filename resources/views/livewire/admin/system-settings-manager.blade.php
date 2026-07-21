@@ -1,33 +1,28 @@
 <div class="space-y-6">
-    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm overflow-hidden relative">
-        <div class="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-slate-50 opacity-50"></div>
-        <div class="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-                <p class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">System Infrastructure</p>
-                <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900">Control Center</h1>
-                <p class="mt-2 max-w-xl text-sm font-medium leading-relaxed text-slate-500">Orchestrate your commerce ecosystem, configure intelligence protocols, and manage global service integrations from a unified bridge.</p>
-            </div>
-            <div class="flex items-center gap-3">
-                 <button wire:click="save" class="group relative flex items-center gap-3 rounded-2xl bg-slate-900 px-8 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                    <i class="fas fa-save text-[10px] opacity-50 group-hover:opacity-100 transition-opacity"></i>
-                    Deploy Configurations
-                </button>
-            </div>
+    <!-- Top Action Strip (Description & Global Save Scope) -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-slate-200">
+        <p class="text-xs text-slate-500 font-medium">Configure core store parameters, communications, integrations, and maintenance.</p>
+        <div class="flex items-center gap-3 self-start sm:self-auto">
+            <span class="text-[11px] font-medium text-slate-400 hidden sm:inline">Applies across all categories</span>
+            <button wire:click="save" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">
+                <i class="fas fa-save text-xs"></i>
+                <span>Save Settings</span>
+            </button>
         </div>
     </div>
 
     @if($saved)
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-700 animate-in fade-in slide-in-from-top-2">
-            <i class="fas fa-check-circle mr-2"></i> System parameters have been successfully propagated.
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+            <i class="fas fa-check-circle mr-1.5"></i> All system settings saved successfully.
         </div>
     @endif
 
     @if($errors->any())
-        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold text-rose-700 animate-in fade-in slide-in-from-top-2">
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">
             <div class="flex items-center gap-2">
-                <i class="fas fa-exclamation-circle text-rose-500 mr-1"></i> Configuration validation failed. Please check the following fields:
+                <i class="fas fa-exclamation-circle text-rose-500"></i> Validation failed. Please review the highlighted fields below:
             </div>
-            <ul class="list-disc list-inside pl-6 mt-2 text-xs font-semibold text-rose-600 space-y-0.5">
+            <ul class="list-disc list-inside pl-5 mt-1.5 text-xs text-rose-600 space-y-0.5 font-normal">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -35,113 +30,172 @@
         </div>
     @endif
 
-    <div class="grid min-w-0 gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
-        <!-- Sidebar Navigation -->
+    <div class="grid min-w-0 gap-6 xl:grid-cols-[270px_minmax(0,1fr)]">
+        <!-- Sidebar Navigation Rail (3 Grouped Categories) -->
         <div class="space-y-6">
-            <div class="rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-sm">
-                <nav class="flex flex-col gap-1.5">
-                    <p class="mb-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Environment</p>
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                <nav class="flex flex-col gap-5 text-xs">
                     
-                    @foreach([
-                        'hosting' => ['Core Systems', 'fa-server', 'sky'],
-                        'communications' => ['Communications', 'fa-envelope-open-text', 'indigo'],
-                        'billing' => ['Commerce & Print', 'fa-receipt', 'emerald'],
-                        'whatsapp' => ['WhatsApp Meta', 'fa-comment-dots', 'amber'],
-                        'ai' => ['Intelligence', 'fa-brain', 'rose'],
-                        'maintenance' => ['Maintenance & Recovery', 'fa-shield-halved', 'rose'],
-                        'api_keys' => ['API Credentials', 'fa-key', 'slate'],
-                    ] as $tab => [$label, $icon, $color])
-                        <button type="button" wire:click="$set('activeTab', '{{ $tab }}')" class="group flex items-center justify-between rounded-2xl px-4 py-4 transition-all {{ $activeTab === $tab ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                            <div class="flex items-center gap-4">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-xl {{ $activeTab === $tab ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white group-hover:text-'.$color.'-500' }} transition-colors"><i class="fas {{ $icon }} text-xs"></i></div>
-                                <span class="text-sm font-bold">{{ $label }}</span>
-                            </div>
-                            <i class="fas fa-chevron-right text-[10px] opacity-20"></i>
-                        </button>
-                    @endforeach
-
-                    <div class="my-6 border-t border-slate-100"></div>
-                    <p class="mb-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Security</p>
-                    
-                    <a href="{{ route('admin.users') }}" class="group flex items-center justify-between rounded-2xl px-4 py-4 text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900">
-                        <div class="flex items-center gap-4">
-                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-400 group-hover:bg-white transition-colors"><i class="fas fa-user-shield text-xs"></i></div>
-                            <span class="text-sm font-bold">Access Control</span>
+                    <!-- Group 1: Store Setup -->
+                    <div class="space-y-1.5">
+                        <div class="px-2">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-900">Store Setup</p>
+                            <p class="text-[10px] font-medium text-slate-400">Domain, currency, and billing</p>
                         </div>
-                        <i class="fas fa-external-link-alt text-[10px] opacity-20"></i>
+                        <div class="space-y-1 font-semibold">
+                            <button type="button" wire:click="$set('activeTab', 'hosting')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'hosting' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'hosting' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-server text-[10px]"></i></div>
+                                    <span>Core Systems</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+
+                            <button type="button" wire:click="$set('activeTab', 'billing')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'billing' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'billing' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-receipt text-[10px]"></i></div>
+                                    <span>Commerce & Print</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Group 2: Communications -->
+                    <div class="space-y-1.5">
+                        <div class="px-2">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-900">Communications</p>
+                            <p class="text-[10px] font-medium text-slate-400">Email dispatch and WhatsApp</p>
+                        </div>
+                        <div class="space-y-1 font-semibold">
+                            <button type="button" wire:click="$set('activeTab', 'communications')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'communications' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'communications' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-envelope-open-text text-[10px]"></i></div>
+                                    <span>Communications (Mail)</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+
+                            <button type="button" wire:click="$set('activeTab', 'whatsapp')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'whatsapp' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'whatsapp' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-comment-dots text-[10px]"></i></div>
+                                    <span>WhatsApp Meta</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Group 3: Integrations & Advanced -->
+                    <div class="space-y-1.5">
+                        <div class="px-2">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-900">Integrations & Advanced</p>
+                            <p class="text-[10px] font-medium text-slate-400">AI, API keys, and backups</p>
+                        </div>
+                        <div class="space-y-1 font-semibold">
+                            <button type="button" wire:click="$set('activeTab', 'ai')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'ai' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'ai' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-brain text-[10px]"></i></div>
+                                    <span>AI Assistant</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+
+                            <button type="button" wire:click="$set('activeTab', 'api_keys')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'api_keys' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'api_keys' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-key text-[10px]"></i></div>
+                                    <span>API Credentials</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+
+                            <button type="button" wire:click="$set('activeTab', 'maintenance')" class="w-full group flex items-center justify-between rounded-lg px-3 py-2 transition-all {{ $activeTab === 'maintenance' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-md {{ $activeTab === 'maintenance' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-shield-halved text-[10px]"></i></div>
+                                    <span>Maintenance & Backup</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-2"></div>
+                    <a href="{{ route('admin.users') }}" class="group flex items-center justify-between rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold transition-all">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500"><i class="fas fa-user-shield text-[10px]"></i></div>
+                            <span>Access Control</span>
+                        </div>
+                        <i class="fas fa-external-link-alt text-[9px] opacity-40"></i>
                     </a>
                 </nav>
             </div>
-
-            @if($activeTab === 'hosting')
-                 <div class="rounded-[2rem] border border-slate-200 bg-slate-900 p-8 text-white shadow-2xl">
-                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">System Status</p>
-                    <div class="mt-6 flex items-center gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400"><i class="fas fa-check-double"></i></div>
-                        <div>
-                            <p class="text-xs font-bold opacity-60">Engine Performance</p>
-                            <p class="text-xl font-black">Optimized</p>
-                        </div>
-                    </div>
-                </div>
-            @endif
         </div>
 
         <!-- Workspace Content -->
         <div class="min-w-0">
-            <div class="rounded-[2.5rem] border border-slate-200 bg-white p-2 shadow-sm">
-                <div class="rounded-[2rem] bg-slate-50/50 p-8 min-h-[600px]">
-                    @if($activeTab === 'communications')
-                        <x-admin.settings.tab-communications 
-                            :mail_mailer="$mail_mailer"
-                            :mail_from_name="$mail_from_name"
-                            :mail_from_address="$mail_from_address"
-                            :order_notification_email="$order_notification_email"
-                            :support_notification_email="$support_notification_email"
-                            :mail_smtp_host="$mail_smtp_host"
-                            :mail_smtp_port="$mail_smtp_port"
-                            :mail_smtp_encryption="$mail_smtp_encryption"
-                            :mail_smtp_username="$mail_smtp_username"
-                            :mail_smtp_password="$mail_smtp_password"
-                            :test_email_recipient="$test_email_recipient"
-                            :onesignal_enabled="$onesignal_enabled"
-                            :onesignal_app_id="$onesignal_app_id"
-                            :onesignal_rest_api_key="$onesignal_rest_api_key"
-                        />
-                    @elseif($activeTab === 'hosting')
-                        <x-admin.settings.tab-hosting />
-                    @elseif($activeTab === 'billing')
-                        <x-admin.settings.tab-billing
-                            :billing-profiles="$billing_profiles"
-                            :billing-default-profiles="$billing_default_profiles"
-                            :billing-preview-company="$billingPreviewCompany"
-                            :billing-preview-documents="$billingPreviewDocuments"
-                            :printer-catalog="$printerCatalog"
-                            :currency="$currency_symbol"
-                        />
-                    @elseif($activeTab === 'api_keys')
-                        <x-admin.settings.tab-api-keys />
-                    @elseif($activeTab === 'whatsapp')
-                        <x-admin.settings.tab-whatsapp 
-                            :app_public_url="$app_public_url" 
-                            :whatsapp_enabled="$whatsapp_enabled" 
-                            :whatsapp_provider="$whatsapp_provider" 
-                            :whatsapp_chat_enabled="$whatsapp_chat_enabled" 
-                        />
-                    @elseif($activeTab === 'ai')
-                        <x-admin.settings.tab-ai :ai-model="$ai_model" />
-                    @elseif($activeTab === 'maintenance')
-                        <x-admin.settings.tab-maintenance :backup-file="$backupFile" :maintenance-mode="$maintenance_mode" />
-                    @endif
-                </div>
+            <div class="min-h-[500px]">
+                @if($activeTab === 'communications')
+                    <x-admin.settings.tab-communications 
+                        :mail_mailer="$mail_mailer"
+                        :mail_from_name="$mail_from_name"
+                        :mail_from_address="$mail_from_address"
+                        :order_notification_email="$order_notification_email"
+                        :support_notification_email="$support_notification_email"
+                        :mail_smtp_host="$mail_smtp_host"
+                        :mail_smtp_port="$mail_smtp_port"
+                        :mail_smtp_encryption="$mail_smtp_encryption"
+                        :mail_smtp_username="$mail_smtp_username"
+                        :mail_smtp_password="$mail_smtp_password"
+                        :test_email_recipient="$test_email_recipient"
+                        :onesignal_enabled="$onesignal_enabled"
+                        :onesignal_app_id="$onesignal_app_id"
+                        :onesignal_rest_api_key="$onesignal_rest_api_key"
+                    />
+                @elseif($activeTab === 'hosting')
+                    <x-admin.settings.tab-hosting />
+                @elseif($activeTab === 'billing')
+                    <x-admin.settings.tab-billing
+                        :billing-profiles="$billing_profiles"
+                        :billing-default-profiles="$billing_default_profiles"
+                        :billing-preview-company="$billingPreviewCompany"
+                        :billing-preview-documents="$billingPreviewDocuments"
+                        :printer-catalog="$printerCatalog"
+                        :currency="$currency_symbol"
+                    />
+                @elseif($activeTab === 'api_keys')
+                    <x-admin.settings.tab-api-keys />
+                @elseif($activeTab === 'whatsapp')
+                    <x-admin.settings.tab-whatsapp 
+                        :app_public_url="$app_public_url" 
+                        :whatsapp_enabled="$whatsapp_enabled" 
+                        :whatsapp_provider="$whatsapp_provider" 
+                        :whatsapp_chat_enabled="$whatsapp_chat_enabled" 
+                        :whatsapp_bot_enabled="$whatsapp_bot_enabled"
+                        :test-bot-messages="$testBotMessages"
+                        :test-bot-input="$testBotInput"
+                        :bridge-state="$bridgeState"
+                        :bridge-phone="$bridgePhone"
+                        :bridge-qr-image="$bridgeQrImage"
+                        :bridge-pairing="$bridgePairing"
+                        :show-disconnect-confirm="$showDisconnectConfirm"
+                    />
+                @elseif($activeTab === 'ai')
+                    <x-admin.settings.tab-ai :ai-model="$ai_model" />
+                @elseif($activeTab === 'maintenance')
+                    <x-admin.settings.tab-maintenance :backup-file="$backupFile" :maintenance-mode="$maintenance_mode" />
+                @endif
             </div>
         </div>
     </div>
 
-    <div wire:loading class="fixed bottom-8 right-8 z-[60]">
-        <div class="flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-white shadow-2xl shadow-slate-400">
-            <div class="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
-            <span class="text-[10px] font-black uppercase tracking-widest">Applying Changes...</span>
+    <div wire:loading class="fixed bottom-6 right-6 z-50">
+        <div class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-lg">
+            <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+            <span>Saving Settings...</span>
         </div>
     </div>
 </div>

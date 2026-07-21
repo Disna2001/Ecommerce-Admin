@@ -31,12 +31,12 @@ class AdminController extends Controller
         return view('admin.item-types');
     }
 
-    public function itemQualityLevels() // NEW METHOD
+    public function itemQualityLevels()
     {
         return view('admin.item-quality-levels');
     }
 
-    public function makes() // NEW METHOD
+    public function makes()
     {
         return view('admin.makes');
     }
@@ -55,6 +55,7 @@ class AdminController extends Controller
     {
         return view('admin.settings');
     }
+
     public function invoices()
     {
         return view('admin.invoices');
@@ -90,4 +91,8 @@ class AdminController extends Controller
         return view('admin.system-health');
     }
 
+    public function whatsappConversations()
+    {
+        return view('admin.whatsapp-conversations');
+    }
 }

@@ -3,42 +3,50 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class SiteManagementController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        return view('admin.site-management.index');
+        return view('admin.site-management.studio');
     }
 
-    public function appearance()
+    public function appearance(): RedirectResponse
     {
-        return view('admin.site-management.appearance');
+        return redirect()->route('admin.site-management.index', ['tab' => 'theme'])
+            ->with('warning', 'Notice: The Appearance tab has been consolidated into the unified Storefront Studio tool.');
     }
 
-    public function banners()
+    public function banners(): RedirectResponse
     {
-        return view('admin.site-management.banners');
+        return redirect()->route('admin.site-management.index', ['tab' => 'banners'])
+            ->with('warning', 'Notice: Banner management has been consolidated into the unified Storefront Studio tool.');
     }
 
-    public function discounts()
+    public function discounts(): RedirectResponse
     {
-        return view('admin.site-management.discounts');
+        return redirect()->route('admin.site-management.index', ['tab' => 'discounts'])
+            ->with('warning', 'Notice: Discount management has been consolidated into the unified Storefront Studio tool.');
     }
 
-    public function automatedDiscounts()
+    public function automatedDiscounts(): RedirectResponse
     {
-        return view('admin.site-management.automated-discounts');
+        return redirect()->route('admin.site-management.index', ['tab' => 'discounts'])
+            ->with('warning', 'Notice: Automated Discount Hub has been consolidated into the unified Storefront Studio tool.');
     }
 
-    public function displayItems()
+    public function displayItems(): RedirectResponse
     {
-        return view('admin.site-management.display-items');
+        return redirect()->route('admin.site-management.index', ['tab' => 'pages'])
+            ->with('warning', 'Notice: Display items management has been consolidated into the unified Storefront Studio tool.');
     }
 
-    public function reviews()
+    public function reviews(): RedirectResponse
     {
-        return view('admin.site-management.reviews');
+        return redirect()->route('admin.site-management.index', ['tab' => 'reviews'])
+            ->with('warning', 'Notice: Review moderation has been consolidated into the unified Storefront Studio tool.');
     }
 }

@@ -1,39 +1,32 @@
 <div class="space-y-6">
-    <!-- Bulk Operations Bar -->
-    <div class="flex flex-col gap-4 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-white shadow-lg shadow-slate-200">
-                <i class="fas fa-layer-group text-[10px]"></i>
-                <span class="text-xs font-black uppercase tracking-wider">{{ $inventoryQuickFilter }} Protocol</span>
-            </div>
-            <label class="group inline-flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black text-slate-400 transition-colors hover:bg-slate-100 uppercase tracking-widest">
-                <input type="checkbox" wire:model.live="showLowStockOnly" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-0 transition-all">
-                <span class="group-hover:text-slate-900">Critical Stock Only</span>
-            </label>
-            <div class="h-6 w-px bg-slate-100"></div>
-            <button type="button" wire:click="selectVisibleLabels" class="inline-flex items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 py-2 text-[10px] font-black text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-900 shadow-sm uppercase tracking-widest">
-                <i class="fas fa-check-double text-indigo-500"></i>
-                <span>Select Page</span>
-            </button>
-            @if(count($selectedStockIds) > 0)
-                <button type="button" wire:click="clearSelectedLabels" class="inline-flex items-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-2 text-[10px] font-black text-rose-500 transition-all hover:bg-rose-100 uppercase tracking-widest">
-                    <i class="fas fa-xmark"></i>
-                    <span>Reset ({{ count($selectedStockIds) }})</span>
+    <!-- Sticky Contextual Bulk Actions Bar (Visible ONLY when 1+ items selected) -->
+    @if(count($selectedStockIds) > 0)
+        <div class="sticky top-20 z-30 flex items-center justify-between gap-4 rounded-xl border border-indigo-200 bg-indigo-50/95 p-3 shadow-md backdrop-blur-md transition-all">
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs">
+                    <i class="fas fa-layer-group text-[10px]"></i>
+                    <span>Bulk Actions ({{ count($selectedStockIds) }} Selected)</span>
+                </span>
+                <button type="button" wire:click="selectVisibleLabels" class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors">
+                    <i class="fas fa-check-double text-[10px]"></i>
+                    <span>Select Page</span>
                 </button>
-            @endif
-        </div>
-        <div class="flex items-center gap-4">
+                <button type="button" wire:click="clearSelectedLabels" class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors">
+                    <i class="fas fa-xmark text-[10px]"></i>
+                    <span>Deselect All</span>
+                </button>
+            </div>
             <div class="flex items-center gap-2">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page Density</span>
-                <select wire:model.live="perPage" class="rounded-xl border-slate-100 bg-slate-50 px-3 py-1.5 text-xs font-bold shadow-none focus:ring-0">
-                    <option value="10">10 Rows</option>
-                    <option value="25">25 Rows</option>
-                    <option value="50">50 Rows</option>
-                    <option value="100">100 Rows</option>
+                <span class="text-xs font-semibold text-slate-600">Rows:</span>
+                <select wire:model.live="perPage" class="rounded-lg border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold focus:ring-0">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
                 </select>
             </div>
         </div>
-    </div>
+    @endif
 
     <!-- Inventory Ledger Table -->
     <!-- Inventory Ledger Table (Desktop Only) -->

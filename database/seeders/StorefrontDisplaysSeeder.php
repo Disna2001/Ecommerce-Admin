@@ -253,13 +253,6 @@ class StorefrontDisplaysSeeder extends Seeder
         // 10. Seed/update display replacement stocks
         foreach ($displaysToCreate as $idx => $data) {
             $prodImages = [];
-            if (!empty($images)) {
-                $imgCount = count($images);
-                $prodImages[] = $images[$idx % $imgCount];
-                if ($imgCount > 1) {
-                    $prodImages[] = $images[($idx + 1) % $imgCount];
-                }
-            }
 
             Stock::updateOrCreate(
                 ['item_code' => $data['item_code']],
@@ -299,13 +292,13 @@ class StorefrontDisplaysSeeder extends Seeder
             );
         }
 
-        // 11. Ensure existing products (Samsung A20, Netflix) are storefront-enabled
-        $samsungA20 = Stock::find(2);
-        if ($samsungA20) {
-            $samsungA20->update([
+        // 11. Ensure existing products (Samsung S20, Samsung A20, Netflix) are storefront-enabled
+        $samsungS20 = Stock::find(1);
+        if ($samsungS20) {
+            $samsungS20->update([
                 'storefront_enabled' => true,
-                'storefront_quantity' => 13,
-                'quantity' => max(7, $samsungA20->quantity),
+                'storefront_quantity' => 10,
+                'quantity' => max(10, $samsungS20->quantity),
             ]);
         }
 
@@ -324,8 +317,8 @@ class StorefrontDisplaysSeeder extends Seeder
         $dealSkus = ['SKU-APL-IP11-DISP', 'SKU-XIA-RN12P-DISP', 'SKU-DLK-NET-1M'];
 
         $featuredIds = Stock::whereIn('sku', $featuredSkus)->pluck('id')->all();
-        if ($samsungA20) {
-            $featuredIds[] = 2; // Also feature Samsung A20
+        if ($samsungS20) {
+            $featuredIds[] = 1; // Also feature Samsung S20
         }
 
         $newArrivalsIds = Stock::whereIn('sku', $newArrivalSkus)->pluck('id')->all();

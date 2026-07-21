@@ -2,55 +2,37 @@
 
 @php
     $selectedClasses = [
-        'resend' => 'border-indigo-500 bg-indigo-50/50 ring-4 ring-indigo-500/10',
-        'smtp' => 'border-slate-500 bg-slate-50/50 ring-4 ring-slate-500/10',
-        'sendgrid' => 'border-sky-500 bg-sky-50/50 ring-4 ring-sky-500/10',
-        'mailgun' => 'border-rose-500 bg-rose-50/50 ring-4 ring-rose-500/10',
-        'brevo' => 'border-amber-500 bg-amber-50/50 ring-4 ring-amber-500/10',
-    ];
-    $iconSelectedClasses = [
-        'resend' => 'bg-indigo-500 text-white',
-        'smtp' => 'bg-slate-500 text-white',
-        'sendgrid' => 'bg-sky-500 text-white',
-        'mailgun' => 'bg-rose-500 text-white',
-        'brevo' => 'bg-amber-500 text-white',
-    ];
-    $iconUnselectedClasses = [
-        'resend' => 'bg-white text-slate-400 group-hover:text-indigo-500',
-        'smtp' => 'bg-white text-slate-400 group-hover:text-slate-500',
-        'sendgrid' => 'bg-white text-slate-400 group-hover:text-sky-500',
-        'mailgun' => 'bg-white text-slate-400 group-hover:text-rose-500',
-        'brevo' => 'bg-white text-slate-400 group-hover:text-amber-500',
-    ];
-    $checkBadgeClasses = [
-        'resend' => 'bg-indigo-500',
-        'smtp' => 'bg-slate-500',
-        'sendgrid' => 'bg-sky-500',
-        'mailgun' => 'bg-rose-500',
-        'brevo' => 'bg-amber-500',
+        'resend' => 'border-indigo-500 bg-indigo-50/50 ring-2 ring-indigo-500/20',
+        'smtp' => 'border-slate-800 bg-slate-50/50 ring-2 ring-slate-800/20',
+        'sendgrid' => 'border-sky-500 bg-sky-50/50 ring-2 ring-sky-500/20',
+        'mailgun' => 'border-rose-500 bg-rose-50/50 ring-2 ring-rose-500/20',
+        'brevo' => 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-500/20',
     ];
 @endphp
 
-<div class="space-y-8">
-    <div class="flex items-center gap-4">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner"><i class="fas fa-envelope-open-text text-lg"></i></div>
+<div class="space-y-6">
+    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+            <i class="fas fa-envelope-open-text text-sm"></i>
+        </div>
         <div>
-            <h3 class="text-xl font-black text-slate-900 tracking-tight">Communications Bridge</h3>
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Email Transport & Alert Routing</p>
+            <h3 class="text-base font-bold text-slate-900">Communications</h3>
+            <p class="text-xs text-slate-500">Configure email dispatch, SMTP settings, notification recipients, and push alerts.</p>
         </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-3">
-        <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-            <div class="flex items-center justify-between px-2">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Direct Connect: Mail Infrastructure</p>
+    <div class="grid gap-6 lg:grid-cols-3 text-xs font-semibold">
+        <!-- Sender Details -->
+        <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h4 class="font-bold text-slate-900 text-sm">Sender Details</h4>
                 <div class="flex items-center gap-2">
                     <span class="h-2 w-2 rounded-full {{ $mail_mailer !== 'log' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300' }}"></span>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $mail_mailer === 'log' ? 'OFFLINE' : 'BRIDGE ACTIVE' }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $mail_mailer === 'log' ? 'Offline' : 'Active' }}</span>
                 </div>
             </div>
             
-            <div class="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+            <div class="grid gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
                 @foreach([
                     'resend' => ['Resend', 'fa-bolt'],
                     'smtp' => ['Standard SMTP', 'fa-server'],
@@ -59,136 +41,132 @@
                     'brevo' => ['Brevo SMTP', 'fa-envelope'],
                 ] as $key => [$name, $icon])
                     <button type="button" wire:click="$set('mail_mailer', '{{ $key }}')" 
-                        class="group relative flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all {{ $mail_mailer === $key ? $selectedClasses[$key] : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl {{ $mail_mailer === $key ? $iconSelectedClasses[$key] : $iconUnselectedClasses[$key] }} transition-colors shadow-sm">
-                            <i class="fas {{ $icon }} text-sm"></i>
+                        class="group relative flex flex-col gap-2 rounded-lg border-2 p-3 transition-all text-left {{ $mail_mailer === $key ? $selectedClasses[$key] : 'border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white' }}">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $mail_mailer === $key ? 'bg-slate-900 text-white' : 'bg-white text-slate-400' }} shadow-xs">
+                            <i class="fas {{ $icon }} text-xs"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-black {{ $mail_mailer === $key ? 'text-slate-900' : 'text-slate-500' }}">{{ $name }}</p>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">{{ $mail_mailer === $key ? 'SELECTED' : 'AVAILABLE' }}</p>
+                            <p class="text-xs font-bold {{ $mail_mailer === $key ? 'text-slate-900' : 'text-slate-600' }}">{{ $name }}</p>
                         </div>
-                        @if($mail_mailer === $key)
-                            <div class="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full text-white text-[8px] {{ $checkBadgeClasses[$key] }}"><i class="fas fa-check"></i></div>
-                        @endif
                     </button>
                 @endforeach
             </div>
 
-            <div class="grid gap-6 mt-8 {{ ($mail_mailer !== 'smtp' && $mail_mailer !== 'log') ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2' }}">
-
+            <div class="grid gap-4 mt-4 {{ ($mail_mailer !== 'smtp' && $mail_mailer !== 'log') ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2' }}">
                 @if($mail_mailer !== 'smtp' && $mail_mailer !== 'log')
-                    <div class="space-y-1.5 animate-in fade-in slide-in-from-top-2">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">API Key / Secret</label>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">API Key / Secret</label>
                         <div class="relative" x-data="{ show: false }">
-                            <input :type="show ? 'text' : 'password'" wire:model="mail_api_key" placeholder="Enter your {{ ucfirst($mail_mailer) }} API Key" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
-                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-indigo-600 transition-colors">
+                            <input :type="show ? 'text' : 'password'" wire:model="mail_api_key" placeholder="Enter API Key" class="w-full rounded-lg border-slate-200 px-3 py-2 pr-9 font-semibold text-slate-900 focus:ring-0">
+                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-600">
                                 <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
                         </div>
                     </div>
                 @endif
 
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name</label>
-                    <input type="text" wire:model="mail_from_name" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Sender Display Name</label>
+                    <input type="text" wire:model="mail_from_name" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                 </div>
 
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Address</label>
-                    <input type="email" wire:model="mail_from_address" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Sender Address</label>
+                    <input type="email" wire:model="mail_from_address" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                 </div>
             </div>
         </div>
 
-        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Alert Routing</p>
-            <div class="space-y-4">
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Commerce Notifications</label>
-                    <input type="email" wire:model="order_notification_email" placeholder="orders@yourcompany.com" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all">
+        <!-- Notification Emails -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+            <h4 class="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">Notification Emails</h4>
+            <div class="space-y-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Order Notifications</label>
+                    <input type="email" wire:model="order_notification_email" placeholder="orders@yourcompany.com" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                 </div>
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Support Alerts</label>
-                    <input type="email" wire:model="support_notification_email" placeholder="support-alerts@yourcompany.com" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-sky-500 focus:ring-0 transition-all">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Support Alerts</label>
+                    <input type="email" wire:model="support_notification_email" placeholder="support@yourcompany.com" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                 </div>
-                <p class="text-[10px] font-medium text-slate-400 leading-relaxed italic">Internal system alerts will be dispatched to these addresses immediately upon triggering.</p>
+                <p class="text-[11px] font-medium text-slate-500 leading-relaxed">Internal system alerts and order notifications will be sent to these addresses.</p>
             </div>
         </div>
 
-        <!-- OneSignal Push Integration -->
-        <div class="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between px-2">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OneSignal Push alerts</p>
+        <!-- Push Notifications -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h4 class="font-bold text-slate-900 text-sm">Push Notifications</h4>
                 <button type="button" wire:click="$set('onesignal_enabled', {{ !$onesignal_enabled ? 'true' : 'false' }})" 
-                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $onesignal_enabled ? 'bg-indigo-600' : 'bg-slate-200' }}">
-                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $onesignal_enabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $onesignal_enabled ? 'bg-indigo-600' : 'bg-slate-200' }}">
+                    <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $onesignal_enabled ? 'translate-x-4' : 'translate-x-0' }}"></span>
                 </button>
             </div>
 
-            <div class="space-y-4">
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">OneSignal App ID</label>
-                    <input type="text" wire:model="onesignal_app_id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
-                        class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all"
+            <div class="space-y-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">OneSignal App ID</label>
+                    <input type="text" wire:model="onesignal_app_id" placeholder="App ID..." 
+                        class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0"
                         {{ !$onesignal_enabled ? 'disabled' : '' }}>
                 </div>
                 
-                <div class="space-y-1.5">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">REST API Key</label>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">REST API Key</label>
                     <div class="relative" x-data="{ show: false }">
-                        <input :type="show ? 'text' : 'password'" wire:model="onesignal_rest_api_key" placeholder="Enter REST API Key" 
-                            class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all"
+                        <input :type="show ? 'text' : 'password'" wire:model="onesignal_rest_api_key" placeholder="API Key..." 
+                            class="w-full rounded-lg border-slate-200 px-3 py-2 pr-9 font-semibold text-slate-900 focus:ring-0"
                             {{ !$onesignal_enabled ? 'disabled' : '' }}>
-                        <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-indigo-600 transition-colors"
+                        <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-600"
                             {{ !$onesignal_enabled ? 'disabled' : '' }}>
                             <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                         </button>
                     </div>
                 </div>
 
-                <p class="text-[10px] font-medium text-slate-400 leading-relaxed italic">Automatically forwards real-time push alerts to registered customer devices when orders are placed or updated.</p>
+                <p class="text-[11px] font-medium text-slate-500 leading-relaxed">Sends real-time push notifications to registered devices for order updates.</p>
             </div>
         </div>
 
         @if($mail_mailer === 'smtp')
-        <div class="lg:col-span-2 space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-            <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SMTP Gateway Authentication</p>
-            <div class="grid gap-6 md:grid-cols-3">
-                <div class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hostname</label>
-                        <input type="text" wire:model="mail_smtp_host" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+        <!-- SMTP Settings -->
+        <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+            <h4 class="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">SMTP Settings</h4>
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="space-y-3">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Hostname</label>
+                        <input type="text" wire:model="mail_smtp_host" placeholder="smtp.mailtrap.io" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                     </div>
-                    <div class="grid gap-4 grid-cols-2">
-                        <div class="space-y-1.5">
-                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Port</label>
-                            <input type="text" wire:model="mail_smtp_port" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                    <div class="grid gap-2 grid-cols-2">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Port</label>
+                            <input type="text" wire:model="mail_smtp_port" placeholder="587" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                         </div>
-                        <div class="space-y-1.5">
-                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Security</label>
-                            <input type="text" wire:model="mail_smtp_encryption" placeholder="tls" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Encryption</label>
+                            <input type="text" wire:model="mail_smtp_encryption" placeholder="tls" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                         </div>
                     </div>
                 </div>
-                <div class="space-y-4 md:col-span-2">
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div class="space-y-1.5">
-                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Username / API Key</label>
-                            <input type="text" wire:model="mail_smtp_username" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
+                <div class="space-y-3 sm:col-span-2">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Username</label>
+                            <input type="text" wire:model="mail_smtp_username" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                         </div>
-                        <div class="space-y-1.5">
-                            <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Password / Secret</label>
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Password</label>
                             <div class="relative" x-data="{ show: false }">
-                                <input :type="show ? 'text' : 'password'" wire:model="mail_smtp_password" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-5 py-3 pr-12 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-0 transition-all">
-                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-indigo-600 transition-colors">
+                                <input :type="show ? 'text' : 'password'" wire:model="mail_smtp_password" class="w-full rounded-lg border-slate-200 px-3 py-2 pr-9 font-semibold text-slate-900 focus:ring-0">
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-600">
                                     <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div class="rounded-2xl bg-slate-900/5 p-4 border border-slate-100">
-                         <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Security Advisory</p>
-                         <p class="text-[10px] leading-relaxed text-slate-400">Ensure your SMTP credentials have restricted scopes. For SES or Mailgun, use IAM policies that only allow 'SendRawEmail' actions.</p>
+                    <div class="rounded-lg bg-slate-50 p-3 border border-slate-100 text-slate-600 text-[11px] font-medium leading-relaxed">
+                        Ensure your SMTP credentials have standard sending privileges. For AWS SES or Mailgun, use dedicated IAM API keys.
                     </div>
                 </div>
             </div>
@@ -196,23 +174,23 @@
         @endif
     </div>
 
-    <div class="rounded-[2.5rem] bg-indigo-600 p-8 text-white shadow-2xl shadow-indigo-100 overflow-hidden relative group">
-        <div class="absolute right-0 top-0 -mr-12 -mt-12 h-48 w-48 rounded-full bg-white/10 transition-transform group-hover:scale-150"></div>
-        <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div class="space-y-1">
-                <h4 class="text-xl font-black">Live Connectivity Test</h4>
-                <p class="text-xs font-medium text-indigo-100">Validate your bridge configuration with a real-time dispatch test.</p>
+    <!-- Live Test Email -->
+    <div class="rounded-xl bg-slate-900 p-6 text-white shadow-xs space-y-3 text-xs">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h4 class="text-sm font-bold">Send Test Email</h4>
+                <p class="text-xs text-slate-400 font-medium mt-0.5">Send a test email to verify your mail server configuration.</p>
             </div>
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <input type="email" wire:model="test_email_recipient" placeholder="Enter recipient email..." class="min-w-[280px] rounded-2xl border-transparent bg-white/10 px-6 py-4 text-sm font-bold text-white placeholder-white/40 shadow-inner backdrop-blur-md focus:bg-white focus:text-indigo-900 focus:ring-0 transition-all">
-                <button wire:click="sendTestEmail" type="button" class="group flex items-center justify-center gap-3 rounded-2xl bg-white px-8 py-4 text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <input type="email" wire:model="test_email_recipient" placeholder="Recipient email..." class="rounded-lg border-transparent bg-white/10 px-3 py-2 text-xs font-semibold text-white placeholder-white/40 focus:ring-0">
+                <button wire:click="sendTestEmail" type="button" class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors shadow-xs">
                     <span wire:loading.remove wire:target="sendTestEmail">
-                        <i class="fas fa-paper-plane text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
-                        Initiate Test
+                        <i class="fas fa-paper-plane text-xs"></i>
+                        Send Test Email
                     </span>
                     <span wire:loading wire:target="sendTestEmail">
                         <i class="fas fa-spinner fa-spin text-xs"></i>
-                        Dispatching...
+                        Sending...
                     </span>
                 </button>
             </div>

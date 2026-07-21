@@ -141,7 +141,7 @@
                         ['url' => '/#categories', 'label' => $layout['navCategoriesLabel']],
                         ['url' => '/#deals', 'label' => $layout['navDealsLabel'], 'condition' => $layout['showDealsLink']],
                         ['url' => route('track-order'), 'label' => $layout['navTrackLabel']],
-                        ['url' => route('help-center'), 'label' => $layout['navHelpLabel']]
+                        ['url' => route('contact'), 'label' => $layout['navHelpLabel']]
                     ] as $nav)
                         @if(!isset($nav['condition']) || $nav['condition'])
                             <a href="{{ $nav['url'] }}" class="relative group py-1">
@@ -171,7 +171,7 @@
                         ['url' => '/#categories', 'label' => $layout['navCategoriesLabel'], 'icon' => 'fa-tags'],
                         ['url' => '/#deals', 'label' => $layout['navDealsLabel'], 'condition' => $layout['showDealsLink'], 'icon' => 'fa-fire'],
                         ['url' => route('track-order'), 'label' => $layout['navTrackLabel'], 'icon' => 'fa-truck-fast'],
-                        ['url' => route('help-center'), 'label' => $layout['navHelpLabel'], 'icon' => 'fa-headset']
+                        ['url' => route('contact'), 'label' => $layout['navHelpLabel'], 'icon' => 'fa-headset']
                     ] as $nav)
                         @if(!isset($nav['condition']) || $nav['condition'])
                             <a href="{{ $nav['url'] }}" class="flex items-center gap-4 rounded-2xl p-4 text-xs font-black uppercase tracking-widest text-slate-600 transition-colors hover:bg-slate-50 hover:text-[var(--primary)] dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white">

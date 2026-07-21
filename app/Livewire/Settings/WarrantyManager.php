@@ -40,6 +40,8 @@ class WarrantyManager extends Component
             'warranties' => $warranties,
             'totalWarranties' => Warranty::count(),
             'activeWarranties' => Warranty::where('status', 'active')->count(),
+            'warrantiesWithProducts' => Warranty::has('stocks')->count(),
+            'avgDuration' => round(Warranty::avg('duration') ?? 0),
         ]);
     }
 

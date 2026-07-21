@@ -35,6 +35,7 @@ class ItemTypeManager extends Component
             'itemTypes' => $itemTypes,
             'totalTypes' => ItemType::count(),
             'activeTypes' => ItemType::where('status', 'active')->count(),
+            'typesWithProducts' => ItemType::has('stocks')->count(),
         ]);
     }
 

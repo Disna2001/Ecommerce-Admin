@@ -16,13 +16,14 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
     @if($faviconPath)<link rel="icon" href="{{ Storage::url($faviconPath) }}">@endif
     @if($logoPath)<link rel="preload" as="image" href="{{ Storage::url($logoPath) }}">@endif
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&family=outfit:wght@400;500;600;700;800&family=plus-jakarta-sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     @vite(['resources/css/app.css','resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @livewireStyles
     <style>
-        :root { --primary: {{ $primaryColor }}; --secondary: {{ $secondaryColor }}; --accent: {{ $accentColor }}; --site-text: {{ $textColor ?? '#111827' }}; --site-bg: {{ $bgColor ?? '#f8fafc' }}; --nav-bg: {{ $navBgColor ?? '#ffffff' }}; }
-        body { font-family: 'Figtree', sans-serif; scroll-behavior: smooth; }
+        :root { --primary: {{ $primaryColor }}; --secondary: {{ $secondaryColor }}; --accent: {{ $accentColor }}; --site-text: {{ $textColor ?? '#111827' }}; --site-bg: {{ $bgColor ?? '#f8fafc' }}; --nav-bg: {{ $navBgColor ?? '#ffffff' }}; --heading-font: '{{ $headingFont }}', sans-serif; --body-font: '{{ $bodyFont }}', sans-serif; }
+        body { font-family: var(--body-font), sans-serif; scroll-behavior: smooth; }
+        h1, h2, h3, h4, h5, h6 { font-family: var(--heading-font), sans-serif; }
         .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.15), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.14), transparent 24%), var(--site-bg); color: var(--site-text); }
         .dark .shell { background: radial-gradient(circle at top left, rgba(109,40,217,.28), transparent 28%), radial-gradient(circle at top right, rgba(6,182,212,.18), transparent 22%), #0f1020; color: #f5f3ff; }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); }
@@ -38,96 +39,126 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
     <div id="site-progress" class="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-0 opacity-0 transition-[width,opacity] duration-300" style="background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));"></div>
     <livewire:storefront.header-bar />
 
-    <main class="px-4 {{ $isApp ? 'pb-16' : 'pb-24 lg:pb-16' }} space-y-12">
-        <!-- Hero Protocol -->
+    <main class="px-4 {{ $isApp ? 'pb-12' : 'pb-20 lg:pb-12' }} space-y-6 sm:space-y-8">
+        @include('storefront.partials.page-sections', ['sections' => app(\App\Services\Storefront\StorefrontLayoutService::class)->editorSectionsFor('home'), 'slot' => 'before'])
+
+        <!-- Hero Protocol (Compact Marketplace Two-Column Layout) -->
         @if(($heroSlideshowEnabled ?? true) && ($heroBanners ?? collect())->isNotEmpty())
             <section x-data="{ activeSlide: 0, slidesCount: {{ $heroBanners->count() }} }" 
                      @if($heroSlideshowAutoplay ?? true)
                      x-init="setInterval(() => { activeSlide = (activeSlide + 1) % slidesCount }, 7000)"
                      @endif
-                     class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative shadow-2xl">
-                
-                @foreach($heroBanners as $index => $banner)
-                    <div x-show="activeSlide === {{ $index }}" 
-                         x-transition:enter="transition ease-out duration-1000"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-500"
-                         x-transition:leave-start="opacity-100 scale-100"
-                         x-transition:leave-end="opacity-0 scale-105"
-                         class="relative z-10 px-6 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24"
-                         style="background: {{ $banner->bg_color ?: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}; color: {{ $banner->text_color ?: '#ffffff' }}">
-                         
-                         <div class="absolute inset-0 opacity-15" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;1&quot; fill-rule=&quot;evenodd&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;3&quot;/%3E%3Ccircle cx=&quot;13&quot; cy=&quot;13&quot; r=&quot;3&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
-                         
-                         <div class="relative z-10 grid gap-10 sm:gap-16 lg:grid-cols-2 lg:items-center">
-                             <div class="text-left">
-                                 @if($banner->subtitle)
-                                     <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 border border-white/20">
-                                         <span class="relative flex h-2 w-2">
-                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                         </span>
-                                         {{ $banner->subtitle }}
-                                     </div>
-                                 @endif
-                                 
-                                 <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
-                                     {{ $banner->title }}
-                                 </h1>
-                                 
-                                 @if($banner->caption)
-                                     <p class="mt-8 text-lg leading-relaxed opacity-90 max-w-xl">
-                                         {{ $banner->caption }}
-                                     </p>
-                                 @endif
-                                 
-                                 @if($banner->button_text)
-                                     <div class="mt-10">
-                                         <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
-                                            class="inline-flex items-center justify-center gap-4 rounded-full bg-white px-10 py-4 sm:py-5 text-xs font-black uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-white/25 group"
-                                            style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
-                                             <span>{{ $banner->button_text }}</span>
-                                             <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
-                                         </a>
-                                     </div>
-                                 @endif
-                             </div>
-
-                             @if($banner->image_path)
-                                 <div class="relative group">
-                                     <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
-                                     <div class="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/10 shadow-2xl p-2 sm:p-4">
-                                         <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title }}" class="h-[250px] sm:h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
-                                     </div>
-                                 </div>
-                             @endif
-                         </div>
-                    </div>
-                @endforeach
-
-                <!-- Slide indicators -->
-                @if($heroBanners->count() > 1)
-                    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-2.5">
+                     class="mx-auto mt-2 max-w-7xl">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                    <!-- Left Hero Banner (8 Cols) -->
+                    <div class="lg:col-span-8 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
                         @foreach($heroBanners as $index => $banner)
-                            <button @click="activeSlide = {{ $index }}" 
-                                    class="h-2 rounded-full transition-all duration-300"
-                                    :class="activeSlide === {{ $index }} ? 'w-8 bg-white' : 'w-2 bg-white/40'"></button>
+                            <div x-show="activeSlide === {{ $index }}" 
+                                 x-transition:enter="transition ease-out duration-1000"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-500"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-105"
+                                 class="relative z-10 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 flex flex-col justify-between min-h-[300px] sm:min-h-[360px]"
+                                 style="background: {{ $banner->bg_color ?: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' }}; color: {{ $banner->text_color ?: '#ffffff' }}">
+                                 
+                                 <div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;1&quot; fill-rule=&quot;evenodd&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;3&quot;/%3E%3Ccircle cx=&quot;13&quot; cy=&quot;13&quot; r=&quot;3&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+                                 
+                                 <div class="relative z-10 space-y-4 max-w-xl text-left">
+                                     @if($banner->subtitle)
+                                         <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-[10px] font-black uppercase tracking-[0.25em] border border-white/20">
+                                             <span class="relative flex h-2 w-2">
+                                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                 <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                             </span>
+                                             {{ $banner->subtitle }}
+                                         </div>
+                                     @endif
+                                     
+                                     <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
+                                         {{ $banner->title }}
+                                     </h1>
+                                     
+                                     @if($banner->caption)
+                                         <p class="text-xs sm:text-sm leading-relaxed opacity-90">
+                                             {{ $banner->caption }}
+                                         </p>
+                                     @endif
+                                     
+                                     @if($banner->button_text)
+                                         <div class="pt-2">
+                                             <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
+                                                class="inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-3 text-xs font-black uppercase tracking-widest shadow-xl transition-all duration-300 hover:scale-105 group"
+                                                style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
+                                                 <span>{{ $banner->button_text }}</span>
+                                                 <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                                             </a>
+                                         </div>
+                                     @endif
+                                 </div>
+
+                                 @if($banner->image_path)
+                                     <div class="mt-4 lg:mt-0 lg:absolute lg:right-6 lg:bottom-6 w-full lg:w-60 overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-xl p-2">
+                                         <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title }}" class="h-32 sm:h-44 w-full rounded-xl object-cover transition-transform duration-700 hover:scale-105">
+                                     </div>
+                                 @endif
+                            </div>
                         @endforeach
+
+                        @if($heroBanners->count() > 1)
+                            <div class="absolute bottom-4 left-6 z-20 flex gap-2">
+                                @foreach($heroBanners as $index => $banner)
+                                    <button @click="activeSlide = {{ $index }}" 
+                                            class="h-1.5 rounded-full transition-all duration-300"
+                                            :class="activeSlide === {{ $index }} ? 'w-6 bg-white' : 'w-2 bg-white/40'"></button>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
-                @endif
+
+                    <!-- Right Stacked Promo Tiles (4 Cols) -->
+                    <div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4 sm:gap-6">
+                        <a wire:navigate href="{{ url('/products?sort=newest') }}" class="flex-1 group relative overflow-hidden rounded-[2rem] bg-slate-900 p-6 text-white shadow-xl hover:scale-[1.02] transition-all border border-slate-800 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="rounded-full bg-indigo-500/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-indigo-300 border border-indigo-400/30">
+                                    New In
+                                </span>
+                                <i class="fas fa-arrow-right text-xs text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black tracking-tight text-white group-hover:text-amber-300 transition-colors">New Arrivals</h3>
+                                <p class="text-xs text-slate-400 mt-1">Fresh display assemblies in stock</p>
+                            </div>
+                        </a>
+
+                        <a wire:navigate href="{{ url('/products') }}" class="flex-1 group relative overflow-hidden rounded-[2rem] bg-slate-800 p-6 text-white shadow-xl hover:scale-[1.02] transition-all border border-slate-700 flex flex-col justify-between" style="background:linear-gradient(135deg, #1e293b 0%, #334155 100%)">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="rounded-full bg-amber-500/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-amber-300 border border-amber-400/30">
+                                    Popular
+                                </span>
+                                <i class="fas fa-arrow-right text-xs text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black tracking-tight text-white group-hover:text-cyan-300 transition-colors">Best Sellers</h3>
+                                <p class="text-xs text-slate-400 mt-1">Top rated replacement modules</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </section>
         @else
-            <!-- Static Hero Fallback -->
-            <section class="mx-auto mt-4 max-w-7xl rounded-[3rem] overflow-hidden relative" style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(135deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
-                @if($heroSurface !== 'minimal')
-                    <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;1&quot; fill-rule=&quot;evenodd&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;3&quot;/%3E%3Ccircle cx=&quot;13&quot; cy=&quot;13&quot; r=&quot;3&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
-                @endif
-                
-                <div class="relative z-10 px-6 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24">
-                    <div class="{{ $heroLayout === 'centered' ? 'mx-auto max-w-4xl text-center' : 'grid gap-10 sm:gap-16 lg:grid-cols-2 lg:items-center' }}">
-                        <div class="{{ $heroLayout === 'centered' ? '' : 'text-left' }}">
-                            <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] mb-8 {{ $heroSurface !== 'minimal' ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 text-slate-500' }}">
+            <!-- Static Marketplace Hero Fallback (Two-Column Layout) -->
+            <section class="mx-auto mt-2 max-w-7xl">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                    <!-- Main Hero Banner (Left 8 Cols) -->
+                    <div class="lg:col-span-8 rounded-[2.5rem] overflow-hidden relative shadow-2xl p-6 sm:p-10 text-white flex flex-col justify-between min-h-[300px] sm:min-h-[360px]" style="background:{{ $heroSurface === 'minimal' ? 'transparent' : 'linear-gradient(135deg, '.$heroBgFrom.' 0%, '.$heroBgTo.' 100%)' }}">
+                        @if($heroSurface !== 'minimal')
+                            <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;1&quot; fill-rule=&quot;evenodd&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;3&quot;/%3E%3Ccircle cx=&quot;13&quot; cy=&quot;13&quot; r=&quot;3&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+                        @endif
+
+                        <div class="relative z-10 space-y-4 max-w-xl text-left">
+                            <div class="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[10px] font-black uppercase tracking-[0.25em] {{ $heroSurface !== 'minimal' ? 'bg-white/10 text-white border border-white/20' : 'bg-slate-100 text-slate-500' }}">
                                 <span class="relative flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -135,94 +166,157 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
                                 {{ $siteTagline }}
                             </div>
                             
-                            <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] text-slate-900 {{ $heroSurface !== 'minimal' ? 'text-white' : '' }} tracking-tight">
+                            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-slate-900 {{ $heroSurface !== 'minimal' ? 'text-white' : '' }}">
                                 {{ $heroTitle }}
-                                <span class="block mt-2 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary)] bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">{{ $heroHighlight }}</span>
+                                <span class="block mt-1 bg-gradient-to-r {{ $heroSurface !== 'minimal' ? 'from-amber-300 via-cyan-200 to-amber-300' : 'from-[var(--primary)] via-[var(--accent)] to-[var(--primary)]' }} bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x">{{ $heroHighlight }}</span>
                             </h1>
                             
-                            <p class="mt-8 text-lg leading-relaxed {{ $heroSurface !== 'minimal' ? 'text-white/80' : 'text-slate-600' }} max-w-xl {{ $heroLayout === 'centered' ? 'mx-auto' : '' }}">
+                            <p class="text-xs sm:text-sm leading-relaxed {{ $heroSurface !== 'minimal' ? 'text-white/80' : 'text-slate-600' }}">
                                 {{ $heroSubtitle }} <span class="font-bold {{ $heroSurface !== 'minimal' ? 'text-white' : 'text-slate-900' }}">{{ $heroMicrocopy }}</span>
                             </p>
                             
-                            <div class="mt-10 flex flex-col sm:flex-row flex-wrap items-center gap-4 sm:gap-6 {{ $heroLayout === 'centered' ? 'justify-center' : '' }}">
-                                <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-4 rounded-full px-10 py-4 sm:py-5 text-xs font-black text-white uppercase tracking-[0.25em] shadow-2xl transition-all duration-300 hover:scale-[1.05] hover:shadow-indigo-500/40 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
+                            <div class="pt-2 flex flex-wrap items-center gap-4">
+                                <a wire:navigate href="{{ $heroBtnLink === '#' ? url('/products') : url($heroBtnLink) }}" class="inline-flex items-center justify-center gap-3 rounded-full px-7 py-3 text-xs font-black text-white uppercase tracking-widest shadow-xl transition-all duration-300 hover:scale-105 group" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">
                                     <span>{{ $heroBtnText }}</span>
                                     <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
                                 </a>
                                 @guest
-                                    <a wire:navigate href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border px-10 py-4 sm:py-5 text-xs font-black uppercase tracking-[0.25em] transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm hover:shadow-lg' }}">
+                                    <a wire:navigate href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full border px-6 py-3 text-xs font-black uppercase tracking-widest transition-all duration-300 hover:bg-white/10 {{ $heroSurface !== 'minimal' ? 'border-white/30 text-white' : 'border-slate-200 text-slate-900 bg-white shadow-sm' }}">
                                         Onboard Now
                                     </a>
                                 @endguest
                             </div>
                         </div>
 
-                        @if($heroImagePath && $heroLayout !== 'centered')
-                            <div class="relative group">
-                                <div class="absolute -inset-4 bg-white/10 rounded-[3rem] blur-2xl transition-all group-hover:blur-3xl"></div>
-                                <div class="relative overflow-hidden rounded-[2.5rem] border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-2xl' : 'border-slate-200 bg-white shadow-xl' }} p-2 sm:p-4">
-                                    <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-[250px] sm:h-[450px] w-full rounded-[2rem] object-cover transition-transform duration-700 group-hover:scale-105">
-                                </div>
+                        @if($heroImagePath)
+                            <div class="mt-4 lg:mt-0 lg:absolute lg:right-6 lg:bottom-6 w-full lg:w-56 overflow-hidden rounded-2xl border {{ $heroSurface !== 'minimal' ? 'border-white/20 bg-white/10 shadow-xl' : 'border-slate-200 bg-white shadow-md' }} p-2">
+                                <img src="{{ Storage::url($heroImagePath) }}" alt="{{ $heroTitle }}" class="h-32 sm:h-44 w-full rounded-xl object-cover transition-transform duration-700 hover:scale-105">
                             </div>
                         @endif
+                    </div>
+
+                    <!-- Right Stacked Promo Tiles (4 Cols) -->
+                    <div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4 sm:gap-6">
+                        <a wire:navigate href="{{ url('/products?sort=newest') }}" class="flex-1 group relative overflow-hidden rounded-[2rem] bg-slate-900 p-6 text-white shadow-xl hover:scale-[1.02] transition-all border border-slate-800 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="rounded-full bg-indigo-500/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-indigo-300 border border-indigo-400/30">
+                                    New In
+                                </span>
+                                <i class="fas fa-arrow-right text-xs text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black tracking-tight text-white group-hover:text-amber-300 transition-colors">New Arrivals</h3>
+                                <p class="text-xs text-slate-400 mt-1">Fresh display assemblies in stock</p>
+                            </div>
+                        </a>
+
+                        <a wire:navigate href="{{ url('/products') }}" class="flex-1 group relative overflow-hidden rounded-[2rem] bg-slate-800 p-6 text-white shadow-xl hover:scale-[1.02] transition-all border border-slate-700 flex flex-col justify-between" style="background:linear-gradient(135deg, #1e293b 0%, #334155 100%)">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="rounded-full bg-amber-500/20 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-amber-300 border border-amber-400/30">
+                                    Popular
+                                </span>
+                                <i class="fas fa-arrow-right text-xs text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black tracking-tight text-white group-hover:text-cyan-300 transition-colors">Best Sellers</h3>
+                                <p class="text-xs text-slate-400 mt-1">Top rated replacement modules</p>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </section>
         @endif
 
-        <!-- Category Pulse -->
+        <!-- Dense Category Icon Grid -->
         <section id="categories" class="mx-auto max-w-7xl px-4">
-            <div class="mb-8 flex items-end justify-between">
+            <div class="mb-4 flex items-end justify-between">
                 <div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{{ $categoryStripTitle }}</p>
-                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Browse Registry</h2>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">{{ $categoryStripTitle }}</p>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $categoryH2 }}</h2>
                 </div>
-                <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">See Ledger <i class="fas fa-arrow-right ml-2"></i></a>
+                <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    {{ $categorySeeAll }} <i class="fas fa-arrow-right ml-1 text-[8px]"></i>
+                </a>
             </div>
             
-            <div class="{{ $categoryStripStyle === 'cards' ? 'grid gap-6 sm:grid-cols-2 xl:grid-cols-4' : 'flex gap-4 overflow-x-auto pb-4 custom-scrollbar' }}">
-                <a wire:navigate href="{{ url('/products') }}" class="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] p-8 text-white min-h-[160px] min-w-[240px] shadow-xl transition-all hover:scale-[1.02]" style="background:linear-gradient(135deg, var(--primary), var(--secondary))">
-                    <i class="fas fa-grid-2 text-3xl opacity-20 absolute -right-4 -top-4"></i>
-                    <p class="text-[10px] font-black uppercase tracking-widest text-white/60">Global</p>
-                    <span class="text-lg font-black uppercase tracking-tight">Full Catalog</span>
-                </a>
-                
-                @foreach($categories as $category)
-                    <a wire:navigate href="{{ url('/products?category='.$category->id) }}" class="premium-card group relative flex flex-col justify-between p-8 min-h-[160px] min-w-[240px]">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white transition-colors group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900">
-                            <i class="fas {{ ($categoryIcons[$category->id] ?? 'fa-tag') }} text-sm"></i>
+            @if($categories->isNotEmpty())
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                    <a wire:navigate href="{{ url('/products') }}" class="group flex flex-col items-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-lg transition-all text-center">
+                        <div class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm mb-2 group-hover:scale-105 transition-transform">
+                            <i class="fas fa-layer-group text-lg"></i>
                         </div>
-                        <div>
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Classification</p>
-                            <span class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ $category->name }}</span>
-                        </div>
+                        <span class="text-[11px] font-black uppercase tracking-tight text-slate-900 dark:text-white line-clamp-1">
+                            {{ $categoryAllLabel }}
+                        </span>
                     </a>
-                @endforeach
-            </div>
+                    
+                    @foreach($categories as $category)
+                        <a wire:navigate href="{{ url('/products?category='.$category->id) }}" class="group flex flex-col items-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-lg transition-all text-center">
+                            <div class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all mb-2">
+                                <i class="fas {{ ($categoryIcons[$category->id] ?? 'fa-tag') }} text-base"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200 line-clamp-1 group-hover:text-indigo-600">
+                                {{ $category->name }}
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <!-- Dense Intentional Category Grid Fallback -->
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                    <a wire:navigate href="{{ url('/products') }}" class="group flex flex-col items-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-lg transition-all text-center">
+                        <div class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm mb-2 group-hover:scale-105 transition-transform">
+                            <i class="fas fa-layer-group text-lg"></i>
+                        </div>
+                        <span class="text-[11px] font-black uppercase tracking-tight text-slate-900 dark:text-white line-clamp-1">
+                            {{ $categoryAllLabel }}
+                        </span>
+                    </a>
+
+                    @foreach([
+                        ['Displays', 'fa-mobile-screen-button'],
+                        ['Touch Glass', 'fa-hand-pointer'],
+                        ['Batteries', 'fa-battery-full'],
+                        ['Charging ICs', 'fa-bolt'],
+                        ['Flex Cables', 'fa-plug'],
+                        ['Repair Tools', 'fa-screwdriver-wrench'],
+                        ['Accessories', 'fa-shield-halved']
+                    ] as [$placeholderName, $icon])
+                        <a wire:navigate href="{{ url('/products') }}" class="group flex flex-col items-center p-3 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 hover:shadow-md transition-all text-center">
+                            <div class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all mb-2">
+                                <i class="fas {{ $icon }} text-base"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 line-clamp-1 group-hover:text-indigo-600">
+                                {{ $placeholderName }}
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </section>
 
         <!-- Promo Strip Protocol -->
         @if(($promoBanners ?? collect())->isNotEmpty())
             @foreach($promoBanners as $banner)
-                <section class="mx-auto mt-8 max-w-7xl">
-                    <div class="card rounded-[2rem] px-6 py-6 sm:px-8 shadow-xl transition-all hover:scale-[1.01]" 
+                <section class="mx-auto max-w-7xl">
+                    <div class="card rounded-[2rem] px-6 py-5 sm:px-8 shadow-md transition-all hover:scale-[1.01]" 
                          style="background: {{ $banner->bg_color ?: 'linear-gradient(120deg, var(--primary), var(--secondary))' }}; color: {{ $banner->text_color ?: '#ffffff' }}">
-                        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div class="max-w-3xl">
                                 @if($banner->subtitle)
-                                    <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em]">{{ $banner->subtitle }}</span>
+                                    <span class="inline-flex rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em]">{{ $banner->subtitle }}</span>
                                 @endif
-                                <h2 class="mt-4 text-2xl font-black sm:text-3xl" style="color: {{ $banner->text_color ?: '#ffffff' }}">{{ $banner->title }}</h2>
+                                <h2 class="mt-2 text-xl font-black sm:text-2xl" style="color: {{ $banner->text_color ?: '#ffffff' }}">{{ $banner->title }}</h2>
                                 @if($banner->caption)
-                                    <p class="mt-3 max-w-2xl text-sm leading-7 opacity-80">{{ $banner->caption }}</p>
+                                    <p class="mt-1 max-w-2xl text-xs leading-5 opacity-80">{{ $banner->caption }}</p>
                                 @endif
                             </div>
                             @if($banner->button_text)
                                 <a wire:navigate href="{{ url($banner->button_link ?: '/products') }}" 
-                                   class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold shadow-lg hover:scale-105 transition-transform"
+                                   class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold shadow-md hover:scale-105 transition-transform shrink-0"
                                    style="color: {{ $banner->bg_color ?: 'var(--primary)' }}">
                                     {{ $banner->button_text }}
-                                    <i class="fas fa-arrow-right text-xs"></i>
+                                    <i class="fas fa-arrow-right text-[10px]"></i>
                                 </a>
                             @endif
                         </div>
@@ -231,17 +325,17 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
             @endforeach
         @elseif($promoStripEnabled)
             <!-- Static Promo Strip Fallback -->
-            <section class="mx-auto mt-8 max-w-7xl">
-                <div class="card rounded-[2rem] px-6 py-6 text-white sm:px-8" style="background:linear-gradient(120deg, {{ $promoStripFrom }}, {{ $promoStripTo }})">
-                    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <section class="mx-auto max-w-7xl">
+                <div class="card rounded-[2rem] px-6 py-5 text-white sm:px-8 shadow-md" style="background:linear-gradient(120deg, {{ $promoStripFrom }}, {{ $promoStripTo }})">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="max-w-3xl">
-                            <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em]">{{ $promoStripBadge }}</span>
-                            <h2 class="mt-4 text-2xl font-black sm:text-3xl">{{ $promoStripTitle }}</h2>
-                            <p class="mt-3 max-w-2xl text-sm leading-7 text-white/80">{{ $promoStripText }}</p>
+                            <span class="inline-flex rounded-full bg-white/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em]">{{ $promoStripBadge }}</span>
+                            <h2 class="mt-2 text-xl font-black sm:text-2xl">{{ $promoStripTitle }}</h2>
+                            <p class="mt-1 max-w-2xl text-xs leading-5 text-white/80">{{ $promoStripText }}</p>
                         </div>
-                        <a wire:navigate href="{{ url($promoStripButtonLink) }}" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-900">
+                        <a wire:navigate href="{{ url($promoStripButtonLink) }}" class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-slate-900 shadow-md shrink-0">
                             {{ $promoStripButtonText }}
-                            <i class="fas fa-arrow-right text-xs"></i>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>
@@ -250,41 +344,22 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
 
         @if(($personalizedRecommendations ?? collect())->isNotEmpty())
             <section class="mx-auto max-w-7xl px-4">
-                <div class="mb-10 flex items-end justify-between">
+                <div class="mb-4 flex items-end justify-between">
                     <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">Curated Intelligence</p>
-                        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Personalized Ledger</h2>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-1">Picked For You</p>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Recommended For You</h2>
                     </div>
                 </div>
-                <div class="grid gap-4 sm:gap-8 grid-cols-2 xl:grid-cols-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
                     @foreach($personalizedRecommendations as $product)
-                        <article class="premium-card group overflow-hidden flex flex-col h-full">
-                            <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">
-                                <div class="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 rounded-full px-2.5 sm:px-3 py-1 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, var(--primary), var(--secondary))">For You</div>
-                                <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1.5rem] sm:rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
-                                    @if($product->primary_image_url)
-                                        <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
-                                    @endif
-                                </div>
-                            </a>
-                            <div class="p-4 sm:p-6 pt-3 sm:pt-5 flex flex-col flex-1">
-                                <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 sm:mb-2">{{ $product->brand->name ?? 'Premium Item' }}</p>
-                                <h3 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight mb-2 sm:mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
-                                <div class="mt-auto flex items-center justify-between gap-2 sm:gap-4">
-                                    <p class="text-sm sm:text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price ?? $product->selling_price, 2) }}</p>
-                                    <button type="button" class="shop-cart-btn h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110 shrink-0" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
-                                        <i class="fas fa-plus text-[10px] sm:text-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </article>
+                        @include('storefront.partials.product-card', ['product' => $product, 'badge' => 'For You'])
                     @endforeach
                 </div>
             </section>
         @endif
 
         @php
-            $railGridClass = 'grid gap-4 sm:gap-8 grid-cols-2 xl:grid-cols-4';
+            $railGridClass = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4';
             $sectionSubtitles = [
                 'deals' => $dealsSubtitle,
                 'featured' => $featuredSubtitle,
@@ -299,87 +374,67 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
         ])) as [$sectionId,$sectionTitle,$items,$badge])
             @if($items->isNotEmpty())
                 <section id="{{ $sectionId }}" class="mx-auto max-w-7xl px-4">
-                    <div class="mb-10 flex items-end justify-between">
+                    <div class="mb-4 flex items-end justify-between">
                         <div>
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-2">{{ $badge }}</p>
-                            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ $sectionTitle }}</h2>
+                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-1">{{ $badge }}</p>
+                            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $sectionTitle }}</h2>
                         </div>
-                        <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">View All <i class="fas fa-arrow-right ml-2"></i></a>
+                        <a wire:navigate href="{{ url('/products') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                            View All <i class="fas fa-arrow-right ml-1 text-[8px]"></i>
+                        </a>
                     </div>
                     <div class="{{ $railGridClass }}">
                         @foreach($items as $product)
-                            <article class="premium-card group overflow-hidden flex flex-col h-full">
-                                <a wire:navigate href="{{ url('/products/'.$product->id) }}" class="relative block overflow-hidden p-2 sm:p-3 pb-0">
-                                    <div class="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 flex flex-col gap-1.5 sm:gap-2">
-                                        <div class="rounded-full px-2.5 sm:px-3 py-1 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg" style="background:linear-gradient(90deg, #f97316, #ef4444)">{{ $badge }}</div>
-                                        @if($showRailStockStatus)
-                                            <div class="rounded-full px-2.5 sm:px-3 py-1 text-[7px] sm:text-[8px] font-black uppercase tracking-[0.2em] shadow-sm {{ $product->quantity <= 0 ? 'bg-slate-900 text-white' : 'bg-white text-slate-900' }}">
-                                                {{ $product->quantity <= 0 ? 'Exhausted' : 'In Registry' }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="flex h-36 sm:h-64 items-center justify-center rounded-[1.5rem] sm:rounded-[2.2rem] bg-slate-50 dark:bg-slate-900/50 p-4 sm:p-8 overflow-hidden">
-                                        @if($product->primary_image_url)
-                                            <img src="{{ $product->primary_image_sources['fallback'] ?? $product->primary_image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110">
-                                        @else
-                                            <i class="fas fa-box-open text-2xl sm:text-4xl text-slate-200"></i>
-                                        @endif
-                                    </div>
-                                </a>
-                                <div class="p-4 sm:p-6 pt-3 sm:pt-5 flex flex-col flex-1">
-                                    <p class="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 sm:mb-2">{{ $product->brand->name ?? 'Registry Item' }}</p>
-                                    <h3 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight mb-2 sm:mb-4 group-hover:text-[var(--primary)] transition-colors line-clamp-2">{{ $product->name }}</h3>
-                                    <div class="mt-auto flex items-center justify-between gap-2 sm:gap-4">
-                                        <div>
-                                            <p class="text-sm sm:text-xl font-black text-slate-900 dark:text-white">Rs {{ number_format($product->final_price, 2) }}</p>
-                                            @if($product->discount_badge)<p class="text-[8px] sm:text-[10px] text-slate-400 line-through">Rs {{ number_format($product->selling_price, 2) }}</p>@endif
-                                        </div>
-                                        <button type="button" class="shop-cart-btn h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-white shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-110 shrink-0" style="background:linear-gradient(90deg, var(--primary), var(--secondary))" data-id="{{ $product->id }}">
-                                            <i class="fas fa-shopping-cart text-[10px] sm:text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </article>
+                            @include('storefront.partials.product-card', ['product' => $product, 'badge' => $badge])
                         @endforeach
                     </div>
                 </section>
             @endif
         @endforeach
 
-        <!-- Critical Review Registry -->
-        <section id="reviews" class="mx-auto max-w-7xl px-4 py-12">
-            <div class="text-center mb-12">
-                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--primary)] mb-3">Public Audit</p>
-                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">{{ $reviewsSectionTitle }}</h2>
-                <p class="mt-4 text-sm sm:text-base text-slate-500 max-w-2xl mx-auto">{{ $reviewsSectionSubtitle }}</p>
+        <!-- Compressed Critical Review Registry -->
+        <section id="reviews" class="mx-auto max-w-7xl px-4 py-4">
+            <div class="text-center mb-6">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-1">{{ $reviewsEyebrow }}</p>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $reviewsSectionTitle }}</h2>
+                <p class="mt-1 text-xs text-slate-400 max-w-xl mx-auto">{{ $reviewsSectionSubtitle }}</p>
             </div>
-            <div class="grid gap-8 md:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-3">
                 @forelse($reviews as $review)
-                    <article class="premium-card p-10 flex flex-col justify-between">
+                    <article class="premium-card p-6 flex flex-col justify-between !rounded-2xl">
                         <div>
-                            <div class="flex gap-1 mb-6">
+                            <div class="flex gap-1 mb-3">
                                 @for($i=0;$i<5;$i++)<i class="fas fa-star text-[10px] {{ $i < $review->rating ? 'text-amber-400' : 'text-slate-200' }}"></i>@endfor
                             </div>
-                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $review->body ?: $review->title }}"</p>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $review->body ?: $review->title }}"</p>
                         </div>
-                        <div class="mt-8 pt-8 border-t border-slate-50 dark:border-white/5 flex items-center gap-4">
-                            <div class="h-10 w-10 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">
+                        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">
                                 {{ strtoupper(substr($review->user->name ?? 'V', 0, 1) ?: 'V') }}
                             </div>
                             <div>
-                                <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $review->user->name ?? 'Verified Auditor' }}</p>
-                                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Verified Purchase</p>
+                                <p class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ $review->user->name ?? 'Verified Buyer' }}</p>
+                                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Verified Purchase</p>
                             </div>
                         </div>
                     </article>
                 @empty
-                    @foreach([['Exceptional logistics and item integrity.','Kumari P.'],['Strategic pricing and flawless registration process.','Dilan S.'],['Premium interface and rapid administrative support.','Ruwani M.']] as [$text,$name])
-                        <article class="premium-card p-10">
-                            <div class="flex gap-1 mb-6 text-amber-400">@for($i=0;$i<5;$i++)<i class="fas fa-star text-[10px]"></i>@endfor</div>
-                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $text }}"</p>
-                            <div class="mt-8 pt-8 border-t border-slate-50 dark:border-white/5 flex items-center gap-4">
-                                <div class="h-10 w-10 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">{{ strtoupper(substr($name, 0, 1)) }}</div>
-                                <div><p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ $name }}</p></div>
+                    @foreach([
+                        ['Ordered a replacement screen for my Samsung and it arrived the next day. Fit perfectly — exactly as described.', 'Kumari P.'],
+                        ['Best prices I found anywhere in Sri Lanka. The part was genuine and support actually picked up the phone when I called.', 'Dilan S.'],
+                        ['Bought an iPhone display assembly. Easy to install and the quality is clearly original. Will order again.', 'Ruwani M.'],
+                    ] as [$text, $name])
+                        <article class="premium-card p-6 flex flex-col justify-between !rounded-2xl">
+                            <div>
+                                <div class="flex gap-1 mb-3 text-amber-400">@for($i=0;$i<5;$i++)<i class="fas fa-star text-[10px]"></i>@endfor</div>
+                                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic">"{{ $text }}"</p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-black">{{ strtoupper(substr($name, 0, 1)) }}</div>
+                                <div>
+                                    <p class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ $name }}</p>
+                                    <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Verified Purchase</p>
+                                </div>
                             </div>
                         </article>
                     @endforeach
@@ -387,18 +442,20 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
             </div>
         </section>
 
-        <!-- Final Protocol CTA -->
+        <!-- Compressed Final CTA -->
         <section class="mx-auto max-w-7xl px-4">
-            <div class="relative rounded-[3.5rem] px-8 py-20 text-center text-white overflow-hidden shadow-2xl" style="background:linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))">
-                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-white/60 mb-6">Execution Phase</p>
-                    <h2 class="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tight mb-6">{{ $finalCtaTitle }}</h2>
-                    <p class="mx-auto max-w-2xl text-lg text-white/80 mb-12">{{ $finalCtaSubtitle }}</p>
-                    <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex w-full sm:w-auto justify-center items-center gap-4 rounded-full bg-white px-12 py-4 sm:py-5 text-xs font-black text-slate-900 uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition-all group">
-                        {{ $finalCtaButtonText }}
-                        <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
-                    </a>
+            <div class="relative rounded-[2.5rem] px-6 py-8 sm:px-10 sm:py-10 text-center text-white overflow-hidden shadow-xl" style="background:linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+                <div class="relative z-10 space-y-3">
+                    <p class="text-[9px] font-black uppercase tracking-[0.4em] text-white/70">{{ $finalCtaEyebrow }}</p>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">{{ $finalCtaTitle }}</h2>
+                    <p class="mx-auto max-w-xl text-xs sm:text-sm text-white/80">{{ $finalCtaSubtitle }}</p>
+                    <div class="pt-2">
+                        <a wire:navigate href="{{ url($finalCtaButtonLink) }}" class="inline-flex items-center gap-3 rounded-full bg-white px-8 py-3.5 text-xs font-black text-slate-900 uppercase tracking-widest shadow-lg hover:scale-105 transition-all group">
+                            <span>{{ $finalCtaButtonText }}</span>
+                            <i class="fas fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -425,19 +482,19 @@ $isApp = str_contains(request()->userAgent(), 'DisplayLankaApp');
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">System</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">{{ $footerColShop }}</h3>
                     <nav class="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest text-slate-400">
                         <a wire:navigate href="{{ url('/products') }}" class="hover:text-white transition-colors">{{ $navProductsLabel }}</a>
-                        <a wire:navigate href="{{ route('track-order') }}" class="hover:text-white transition-colors">Track Shipment</a>
-                        <a wire:navigate href="{{ route('login') }}" class="hover:text-white transition-colors">Authentication</a>
+                        <a wire:navigate href="{{ route('track-order') }}" class="hover:text-white transition-colors">Track Your Order</a>
+                        <a wire:navigate href="{{ route('login') }}" class="hover:text-white transition-colors">{{ $footerLinkSignin }}</a>
                     </nav>
                 </div>
                 <div>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">Governance</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">{{ $footerColLegal }}</h3>
                     <nav class="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-                        <a wire:navigate href="{{ route('privacy-policy') }}" class="hover:text-white transition-colors">Privacy Protocol</a>
+                        <a wire:navigate href="{{ route('privacy-policy') }}" class="hover:text-white transition-colors">{{ $footerLinkPrivacy }}</a>
                         <a wire:navigate href="{{ route('terms-and-conditions') }}" class="hover:text-white transition-colors">Terms of Service</a>
-                        <a wire:navigate href="{{ route('refund-policy') }}" class="hover:text-white transition-colors">Refund Charter</a>
+                        <a wire:navigate href="{{ route('refund-policy') }}" class="hover:text-white transition-colors">{{ $footerLinkRefund }}</a>
                     </nav>
                 </div>
                 <div>

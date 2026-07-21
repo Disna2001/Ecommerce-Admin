@@ -3,19 +3,24 @@
 namespace App\Livewire\Admin;
 
 use App\Models\SiteSetting;
+use App\Models\WhatsAppConversation;
+use App\Models\WhatsAppSession;
 use App\Services\AuditLogService;
 use App\Services\Billing\BillCustomizationService;
+use App\Services\Operations\SystemDataService;
+use App\Services\WhatsAppBotService;
+use App\Services\WhatsAppBridgeService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
-use Spatie\Permission\Models\Permission;
-use App\Services\Operations\SystemDataService;
 use Livewire\WithFileUploads;
+use Spatie\Permission\Models\Permission;
 
 class SystemSettingsManager extends Component
 {
     use WithFileUploads;
 
     public string $activeTab = 'communications';
+
     public $backupFile;
 
     public bool $saved = false;
@@ -104,7 +109,7 @@ class SystemSettingsManager extends Component
 
     public string $billing_preview_receipt_item_two_name = 'Service Fee';
 
-    // WhatsApp
+    // WhatsApp Integration
     public bool $whatsapp_enabled = false;
 
     public string $whatsapp_provider = 'meta_cloud';
@@ -127,7 +132,33 @@ class SystemSettingsManager extends Component
 
     public string $whatsapp_chat_message = '';
 
-    // AI
+    // WhatsApp AI Bot
+    public bool $whatsapp_bot_enabled = false;
+
+    public string $whatsapp_bot_persona_prompt = 'You are the official WhatsApp customer service assistant for Display Lanka, Sri Lanka\'s leading display screen and electronics store.';
+
+    public bool $whatsapp_bot_inherit_ai_persona = true;
+
+    public string $whatsapp_bot_business_hours_start = '08:30';
+
+    public string $whatsapp_bot_business_hours_end = '17:30';
+
+    public string $whatsapp_bot_outside_hours_message = 'Our office is currently closed. We will reply to your message during standard business hours.';
+
+    public string $whatsapp_bot_escalation_keywords = 'human, agent, person, support, help, representative, manager';
+
+    public string $whatsapp_bot_fallback_message = 'Thank you for reaching out. One of our support representatives will be with you shortly.';
+
+    public int $whatsapp_bot_max_auto_replies = 3;
+
+    // Interactive Test/Preview Chat Widget State
+    public array $testBotMessages = [];
+
+    public string $testBotInput = '';
+
+    public string $testBotPhone = '+94702615076';
+
+    // AI Configuration
     public bool $ai_enabled = true;
 
     public string $ai_provider = 'openai';
@@ -147,14 +178,25 @@ class SystemSettingsManager extends Component
     public string $ai_prompt_context = 'You are a helpful business assistant specializing in retail, sales tracking, and inventory management.';
 
     public string $ai_goal_text = 'Help the team manage sales, stock levels, and operational decisions quickly.';
-    
+
     // OneSignal Push Notification settings
     public bool $onesignal_enabled = false;
+
     public string $onesignal_app_id = '';
+
     public string $onesignal_rest_api_key = '';
 
     public bool $maintenance_mode = false;
+
     public string $maintenance_secret = 'admin-bypass';
+
+    // ── WhatsApp Bridge (Baileys QR pairing) ─────────────────────────────────
+    public string $bridgeState      = 'disconnected'; // connecting | connected | disconnected | unreachable
+    public string $bridgePhone      = '';
+    public string $bridgeQrImage    = '';   // base64 PNG data URL
+    public bool   $bridgePairing    = false; // true while QR is being displayed
+    public bool   $showDisconnectConfirm = false;
+
 
     public function mount(BillCustomizationService $billCustomizationService): void
     {
@@ -167,6 +209,10 @@ class SystemSettingsManager extends Component
             'whatsapp_enabled', 'whatsapp_provider', 'whatsapp_phone_number', 'whatsapp_api_url',
             'whatsapp_api_key', 'whatsapp_webhook_verify_token', 'whatsapp_order_template', 'whatsapp_payment_template',
             'whatsapp_chat_enabled', 'whatsapp_chat_number', 'whatsapp_chat_message',
+            'whatsapp_bot_enabled', 'whatsapp_bot_persona_prompt', 'whatsapp_bot_inherit_ai_persona',
+            'whatsapp_bot_business_hours_start', 'whatsapp_bot_business_hours_end',
+            'whatsapp_bot_outside_hours_message', 'whatsapp_bot_escalation_keywords',
+            'whatsapp_bot_fallback_message', 'whatsapp_bot_max_auto_replies',
             'ai_enabled', 'ai_provider', 'ai_model', 'ai_api_key',
             'ai_sales_tracking_enabled', 'ai_inventory_guidance_enabled', 'ai_management_guidance_enabled',
             'ai_prompt_context', 'ai_goal_text', 'custom_integrations_api_key',
@@ -176,7 +222,13 @@ class SystemSettingsManager extends Component
         foreach ($keys as $key) {
             $value = SiteSetting::get($key);
             if (! is_null($value)) {
-                $this->$key = $value;
+                if (is_bool($this->$key)) {
+                    $this->$key = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                } elseif (is_int($this->$key)) {
+                    $this->$key = (int) $value;
+                } else {
+                    $this->$key = (string) $value;
+                }
             }
         }
 
@@ -187,17 +239,120 @@ class SystemSettingsManager extends Component
         $this->maintenance_mode = app()->isDownForMaintenance();
     }
 
+    public function sendTestBotMessage(WhatsAppBotService $botService): void
+    {
+        if (! filled(trim($this->testBotInput))) {
+            return;
+        }
+
+        $userText = trim($this->testBotInput);
+        $this->testBotInput = '';
+
+        $this->testBotMessages[] = [
+            'role' => 'user',
+            'content' => $userText,
+            'timestamp' => now()->format('H:i'),
+        ];
+
+        $dummyConversation = new WhatsAppConversation([
+            'phone_number' => $this->testBotPhone ?: '+94702615076',
+            'customer_name' => 'Admin Preview User',
+            'status' => 'bot_active',
+        ]);
+
+        $aiResult = $botService->generateReply($dummyConversation, $userText);
+
+        $this->testBotMessages[] = [
+            'role' => 'bot',
+            'content' => $aiResult['reply'] ?? 'No response generated.',
+            'tool_calls' => $aiResult['tool_calls'] ?? null,
+            'timestamp' => now()->format('H:i'),
+        ];
+    }
+
+    public function clearTestBotMessages(): void
+    {
+        $this->testBotMessages = [];
+    }
+
+    // ── WhatsApp Bridge Pairing ───────────────────────────────────────────────
+
+    public function initBridgeState(WhatsAppBridgeService $bridge): void
+    {
+        $status = $bridge->getStatus();
+        $this->bridgeState = $status['state'] ?? 'disconnected';
+        $this->bridgePhone = $status['phone_number'] ?? '';
+    }
+
+    public function startPairing(WhatsAppBridgeService $bridge): void
+    {
+        $qr = $bridge->getQr();
+
+        if ($qr && isset($qr['image'])) {
+            $this->bridgeQrImage = $qr['image'];
+            $this->bridgePairing = true;
+            $this->bridgeState   = 'connecting';
+        } else {
+            // Bridge already connected — just refresh status
+            $this->refreshBridgeStatus($bridge);
+        }
+    }
+
+    public function refreshBridgeStatus(WhatsAppBridgeService $bridge): void
+    {
+        $status = $bridge->getStatus();
+        $this->bridgeState = $status['state'] ?? 'disconnected';
+        $this->bridgePhone = $status['phone_number'] ?? '';
+
+        if ($this->bridgeState === 'connected') {
+            $this->bridgePairing  = false;
+            $this->bridgeQrImage  = '';
+        }
+    }
+
+    public function refreshQr(WhatsAppBridgeService $bridge): void
+    {
+        $qr = $bridge->getQr();
+        if ($qr && isset($qr['image'])) {
+            $this->bridgeQrImage = $qr['image'];
+        }
+    }
+
+    public function confirmDisconnect(): void
+    {
+        $this->showDisconnectConfirm = true;
+    }
+
+    public function cancelDisconnect(): void
+    {
+        $this->showDisconnectConfirm = false;
+    }
+
+    public function disconnectBridge(WhatsAppBridgeService $bridge): void
+    {
+        $bridge->logout();
+        $this->bridgeState          = 'disconnected';
+        $this->bridgePhone          = '';
+        $this->bridgePairing        = false;
+        $this->bridgeQrImage        = '';
+        $this->showDisconnectConfirm = false;
+        $this->dispatch('notify', type: 'info', message: 'WhatsApp account disconnected.');
+    }
+
+
     public function save(AuditLogService $auditLogService, BillCustomizationService $billCustomizationService): void
     {
         $this->validate($this->rules());
 
         foreach ($this->textKeys() as $key) {
-            SiteSetting::set($key, $this->$key, 'text', $this->groupFor($key));
+            SiteSetting::set($key, (string) $this->$key, 'text', $this->groupFor($key));
         }
 
         foreach ($this->booleanKeys() as $key) {
             SiteSetting::set($key, $this->$key ? '1' : '0', 'boolean', $this->groupFor($key));
         }
+
+        SiteSetting::set('whatsapp_bot_max_auto_replies', (string) $this->whatsapp_bot_max_auto_replies, 'text', 'whatsapp');
 
         $normalizedProfiles = array_values(array_map(
             fn (array $profile) => $billCustomizationService->normalizeProfile($profile),
@@ -235,6 +390,7 @@ class SystemSettingsManager extends Component
                 'app_public_url' => $this->app_public_url,
                 'force_https' => $this->force_https,
                 'whatsapp_enabled' => $this->whatsapp_enabled,
+                'whatsapp_bot_enabled' => $this->whatsapp_bot_enabled,
                 'whatsapp_webhook_ready' => filled($this->whatsapp_webhook_verify_token),
                 'ai_enabled' => $this->ai_enabled,
                 'ai_model' => $this->ai_model,
@@ -345,6 +501,16 @@ class SystemSettingsManager extends Component
             'whatsapp_chat_number' => 'nullable|string|max:50',
             'whatsapp_chat_message' => 'nullable|string|max:1000',
 
+            'whatsapp_bot_enabled' => 'nullable|boolean',
+            'whatsapp_bot_persona_prompt' => 'nullable|string|max:4000',
+            'whatsapp_bot_inherit_ai_persona' => 'nullable|boolean',
+            'whatsapp_bot_business_hours_start' => 'nullable|string|max:20',
+            'whatsapp_bot_business_hours_end' => 'nullable|string|max:20',
+            'whatsapp_bot_outside_hours_message' => 'nullable|string|max:1000',
+            'whatsapp_bot_escalation_keywords' => 'nullable|string|max:1000',
+            'whatsapp_bot_fallback_message' => 'nullable|string|max:1000',
+            'whatsapp_bot_max_auto_replies' => 'nullable|integer|min:1|max:10',
+
             'ai_provider' => 'nullable|string|max:50',
             'ai_model' => 'nullable|string|max:100',
             'ai_api_key' => 'nullable|string|max:255',
@@ -354,35 +520,6 @@ class SystemSettingsManager extends Component
             'onesignal_enabled' => 'nullable|boolean',
             'onesignal_app_id' => 'nullable|string|max:100',
             'onesignal_rest_api_key' => 'nullable|string|max:100',
-
-            'billing_profiles' => 'nullable|array',
-            'billing_profiles.*.id' => 'required|string|max:100',
-            'billing_profiles.*.name' => 'required|string|max:120',
-            'billing_profiles.*.bill_type' => 'required|in:invoice_pdf,pos_receipt,any',
-            'billing_profiles.*.output_mode' => 'required|in:pdf,browser_print,either,raw_printer',
-            'billing_profiles.*.paper_size' => 'required|in:a4,letter,thermal_80,thermal_58',
-            'billing_profiles.*.orientation' => 'required|in:portrait,landscape',
-            'billing_profiles.*.device_match' => 'required|in:any,desktop,tablet,mobile',
-            'billing_profiles.*.input_match' => 'required|in:any,keyboard_scanner,touch,manual',
-            'billing_profiles.*.printer_match' => 'nullable|string|max:120',
-            'billing_profiles.*.copies' => 'nullable|integer|min:1|max:5',
-            'billing_profiles.*.font_scale' => 'nullable|numeric|min:0.7|max:1.4',
-            'billing_profiles.*.header_note' => 'nullable|string|max:255',
-            'billing_profiles.*.footer_note' => 'nullable|string|max:255',
-            'billing_default_profiles.invoice_pdf' => 'nullable|string|max:100',
-            'billing_default_profiles.pos_receipt' => 'nullable|string|max:100',
-            'printer_catalog' => 'nullable|array',
-            'printer_catalog.*.id' => 'required|string|max:100',
-            'printer_catalog.*.alias' => 'required|string|max:120',
-            'printer_catalog.*.queue_name' => 'nullable|string|max:160',
-            'printer_catalog.*.ip_address' => 'nullable|string|max:120',
-            'printer_catalog.*.port' => 'nullable|integer|min:1|max:65535',
-            'printer_catalog.*.connection_type' => 'required|in:usb,network,shared,virtual',
-            'printer_catalog.*.bill_types' => 'required|array|min:1',
-            'printer_catalog.*.bill_types.*' => 'required|in:invoice_pdf,pos_receipt,any',
-            'printer_catalog.*.paper_size' => 'required|in:a4,letter,thermal_80,thermal_58',
-            'printer_catalog.*.device_scope' => 'required|in:counter,backoffice,shared',
-            'printer_catalog.*.notes' => 'nullable|string|max:255',
         ];
     }
 
@@ -397,6 +534,8 @@ class SystemSettingsManager extends Component
             'whatsapp_provider', 'whatsapp_phone_number', 'whatsapp_api_url', 'whatsapp_api_key', 'whatsapp_webhook_verify_token',
             'whatsapp_order_template', 'whatsapp_payment_template',
             'whatsapp_chat_number', 'whatsapp_chat_message',
+            'whatsapp_bot_persona_prompt', 'whatsapp_bot_business_hours_start', 'whatsapp_bot_business_hours_end',
+            'whatsapp_bot_outside_hours_message', 'whatsapp_bot_escalation_keywords', 'whatsapp_bot_fallback_message',
             'ai_provider', 'ai_model', 'ai_api_key', 'ai_prompt_context', 'ai_goal_text', 'custom_integrations_api_key',
             'onesignal_app_id', 'onesignal_rest_api_key',
         ];
@@ -408,6 +547,8 @@ class SystemSettingsManager extends Component
             'force_https',
             'whatsapp_enabled',
             'whatsapp_chat_enabled',
+            'whatsapp_bot_enabled',
+            'whatsapp_bot_inherit_ai_persona',
             'ai_enabled',
             'ai_sales_tracking_enabled',
             'ai_inventory_guidance_enabled',
@@ -443,218 +584,6 @@ class SystemSettingsManager extends Component
 
     public function render()
     {
-        $statusCards = [
-            'email_ready' => filled($this->mail_from_address) && filled($this->mail_mailer) && ($this->mail_mailer !== 'smtp' || filled($this->mail_smtp_host)),
-            'whatsapp_enabled' => $this->whatsapp_enabled,
-            'whatsapp_ready' => $this->whatsapp_enabled && filled($this->whatsapp_api_url) && filled($this->whatsapp_api_key) && filled($this->whatsapp_webhook_verify_token),
-            'ai_enabled' => $this->ai_enabled,
-            'ai_ready' => $this->ai_enabled && filled($this->ai_provider) && filled($this->ai_model) && filled($this->ai_api_key),
-            'ops_contacts_ready' => filled($this->order_notification_email) && filled($this->support_notification_email),
-            'hosting_ready' => filled($this->app_public_url) && filled($this->app_timezone) && filled($this->app_locale),
-            'business_ready' => filled($this->support_email) && filled($this->support_phone) && filled($this->company_address),
-            'billing_ready' => count($this->billing_profiles) > 0 && filled($this->billing_default_profiles['invoice_pdf'] ?? null) && filled($this->billing_default_profiles['pos_receipt'] ?? null),
-        ];
-
-        $checklist = [
-            ['label' => 'Public URL and HTTPS', 'ready' => filled($this->app_public_url) && $this->force_https],
-            ['label' => 'Storefront support contacts', 'ready' => filled($this->support_email) && filled($this->support_phone)],
-            ['label' => 'Mail sender and ops alerts', 'ready' => $statusCards['email_ready'] && $statusCards['ops_contacts_ready']],
-            ['label' => 'Timezone and locale', 'ready' => filled($this->app_timezone) && filled($this->app_locale)],
-            ['label' => 'Currency display', 'ready' => filled($this->currency_code) && filled($this->currency_symbol)],
-            ['label' => 'Bill profiles and printer routing', 'ready' => $statusCards['billing_ready']],
-        ];
-
-        $billingPreviewCompany = [
-            'name' => $this->app_public_url !== '' ? parse_url($this->app_public_url, PHP_URL_HOST) ?: config('app.name') : config('app.name'),
-            'display_name' => SiteSetting::get('site_name', config('app.name', 'Display Lanka')),
-            'email' => $this->support_email ?: $this->mail_from_address ?: 'support@example.com',
-            'phone' => $this->support_phone ?: '+94 70 000 0000',
-            'address' => $this->company_address ?: 'Colombo, Sri Lanka',
-            'tax_id' => $this->company_tax_id ?: 'Pending',
-            'currency_symbol' => $this->currency_symbol ?: 'Rs',
-            'logo_url' => ($logoPath = SiteSetting::get('logo_path', '')) ? \Storage::disk('public')->url($logoPath) : '',
-        ];
-
-        $billingPreviewDocuments = [
-            'invoice' => [
-                'number' => 'INV-2026-0042',
-                'date' => now()->format('M d, Y'),
-                'due_date' => now()->addDays(2)->format('M d, Y'),
-                'status' => $this->billing_preview_invoice_status,
-                'payment_method' => 'PayHere',
-                'customer_name' => $this->billing_preview_invoice_customer_name,
-                'customer_email' => $this->billing_preview_invoice_customer_email,
-                'customer_phone' => $this->billing_preview_invoice_customer_phone,
-                'customer_address' => $this->billing_preview_invoice_customer_address,
-                'items' => [
-                    ['name' => $this->billing_preview_invoice_item_one_name, 'description' => $this->billing_preview_invoice_item_one_description, 'quantity' => 1, 'price' => 2490.00, 'discount' => 0, 'tax' => 0, 'total' => 2490.00],
-                    ['name' => $this->billing_preview_invoice_item_two_name, 'description' => $this->billing_preview_invoice_item_two_description, 'quantity' => 1, 'price' => 1290.00, 'discount' => 0, 'tax' => 0, 'total' => 1290.00],
-                ],
-                'subtotal' => 3780.00,
-                'tax_amount' => 0.00,
-                'discount_amount' => 0.00,
-                'total' => 3780.00,
-                'amount_paid' => $this->billing_preview_invoice_status === 'paid' ? 3780.00 : 0.00,
-                'balance_due' => $this->billing_preview_invoice_status === 'paid' ? 0.00 : 3780.00,
-                'notes' => 'Digital delivery completed to the customer email.',
-                'terms' => 'Valid for the purchased digital product only. Keep this invoice for support requests.',
-            ],
-            'receipt' => [
-                'number' => 'POS-0138',
-                'status' => $this->billing_preview_receipt_status,
-                'customer_name' => $this->billing_preview_receipt_customer_name,
-                'customer_phone' => $this->billing_preview_receipt_customer_phone,
-                'payment_method' => 'Cash',
-                'items' => [
-                    ['name' => $this->billing_preview_receipt_item_one_name, 'quantity' => 1, 'price' => 3500.00, 'total' => 3500.00],
-                    ['name' => $this->billing_preview_receipt_item_two_name, 'quantity' => 1, 'price' => 150.00, 'total' => 150.00],
-                ],
-                'total' => 3650.00,
-                'notes' => 'Thank you for shopping with us.',
-            ],
-        ];
-
-        return view('livewire.admin.system-settings-manager', [
-            'permissionCount' => Permission::count(),
-            'statusCards' => $statusCards,
-            'billingPreviewCompany' => $billingPreviewCompany,
-            'billingPreviewDocuments' => $billingPreviewDocuments,
-            'integrationSummary' => [
-                'enabled_channels' => collect([
-                    $this->whatsapp_enabled ? 'WhatsApp' : null,
-                    filled($this->mail_from_address) ? 'Email' : null,
-                    $this->ai_enabled ? 'AI' : null,
-                    $this->onesignal_enabled ? 'Push' : null,
-                ])->filter()->values()->all(),
-                'configured_secrets' => collect([
-                    $this->mail_smtp_password,
-                    $this->mail_api_key,
-                    $this->mail_api_secret,
-                    $this->whatsapp_api_key,
-                    $this->ai_api_key,
-                    $this->custom_integrations_api_key,
-                    $this->onesignal_rest_api_key,
-                ])->filter(fn ($value) => filled($value))->count(),
-            ],
-            'checklist' => $checklist,
-            'printerCatalog' => $this->printer_catalog,
-        ]);
-    }
-
-    public function addBillingProfile(BillCustomizationService $billCustomizationService, string $billType = 'invoice_pdf'): void
-    {
-        $this->billing_profiles[] = $billCustomizationService->normalizeProfile([
-            'id' => 'profile-'.str()->lower(str()->random(8)),
-            'name' => $billType === 'pos_receipt' ? 'New POS Receipt Profile' : 'New Invoice PDF Profile',
-            'bill_type' => $billType,
-            'output_mode' => $billType === 'pos_receipt' ? 'browser_print' : 'pdf',
-            'paper_size' => $billType === 'pos_receipt' ? 'thermal_80' : 'a4',
-            'printer_match' => $billType === 'pos_receipt' ? 'Counter Thermal' : 'Office A4',
-        ]);
-    }
-
-    public function removeBillingProfile(int $index): void
-    {
-        if (! isset($this->billing_profiles[$index])) {
-            return;
-        }
-
-        $removedId = $this->billing_profiles[$index]['id'] ?? null;
-        unset($this->billing_profiles[$index]);
-        $this->billing_profiles = array_values($this->billing_profiles);
-
-        foreach (['invoice_pdf', 'pos_receipt'] as $billType) {
-            if (($this->billing_default_profiles[$billType] ?? null) === $removedId) {
-                $this->billing_default_profiles[$billType] = $this->billing_profiles[0]['id'] ?? '';
-            }
-        }
-    }
-
-    public function resetBillingProfiles(BillCustomizationService $billCustomizationService): void
-    {
-        $this->billing_profiles = $billCustomizationService->defaultProfiles();
-        $this->billing_default_profiles = $billCustomizationService->defaultAssignments();
-    }
-
-    public function addPrinter(BillCustomizationService $billCustomizationService): void
-    {
-        $this->printer_catalog[] = $billCustomizationService->normalizePrinter([
-            'id' => 'printer-'.str()->lower(str()->random(8)),
-            'alias' => 'New Printer',
-            'bill_types' => ['pos_receipt'],
-            'paper_size' => 'thermal_80',
-            'device_scope' => 'counter',
-            'connection_type' => 'usb',
-        ]);
-    }
-
-    public function removePrinter(int $index): void
-    {
-        if (! isset($this->printer_catalog[$index])) {
-            return;
-        }
-
-        $removedAlias = $this->printer_catalog[$index]['alias'] ?? null;
-        unset($this->printer_catalog[$index]);
-        $this->printer_catalog = array_values($this->printer_catalog);
-
-        if ($removedAlias) {
-            foreach ($this->billing_profiles as $profileIndex => $profile) {
-                if (($profile['printer_match'] ?? '') === $removedAlias) {
-                    $this->billing_profiles[$profileIndex]['printer_match'] = '';
-                }
-            }
-        }
-    }
-
-    public function resetPrinterCatalog(BillCustomizationService $billCustomizationService): void
-    {
-        $this->printer_catalog = $billCustomizationService->defaultPrinterCatalog();
-    }
-
-    public function downloadBackup(SystemDataService $systemDataService)
-    {
-        try {
-            $path = $systemDataService->createBackup();
-            return response()->download($path)->deleteFileAfterSend(true);
-        } catch (\Throwable $e) {
-            $this->dispatch('notify', type: 'error', message: 'Backup failed: ' . $e->getMessage());
-        }
-    }
-
-    public function restoreBackup(SystemDataService $systemDataService)
-    {
-        $this->validate([
-            'backupFile' => 'required|file|mimes:zip|max:51200', // 50MB max
-        ]);
-
-        try {
-            $path = $this->backupFile->getRealPath();
-            $systemDataService->restoreBackup($path);
-            
-            $this->dispatch('notify', type: 'success', message: 'System state restored successfully.');
-            return redirect(route('admin.settings')); // Refresh entire state
-        } catch (\Throwable $e) {
-            $this->dispatch('notify', type: 'error', message: 'Restoration failed: ' . $e->getMessage());
-        }
-    }
-
-    public function toggleMaintenanceMode()
-    {
-        try {
-            if ($this->maintenance_mode) {
-                \Illuminate\Support\Facades\Artisan::call('up');
-                $this->maintenance_mode = false;
-                $this->dispatch('notify', type: 'success', message: 'System is now LIVE and accessible to all users.');
-            } else {
-                \Illuminate\Support\Facades\Artisan::call('down', [
-                    '--secret' => $this->maintenance_secret,
-                ]);
-                $this->maintenance_mode = true;
-                $this->dispatch('notify', type: 'warning', message: 'System is now in MAINTENANCE mode. Bypass secret: ' . $this->maintenance_secret);
-            }
-        } catch (\Throwable $e) {
-            $this->dispatch('notify', type: 'error', message: 'Failed to toggle maintenance mode: ' . $e->getMessage());
-        }
+        return view('livewire.admin.system-settings-manager');
     }
 }

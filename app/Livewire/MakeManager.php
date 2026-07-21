@@ -47,7 +47,10 @@ class MakeManager extends Component
             ->paginate($this->perPage);
 
         return view('livewire.make-manager', [
-            'makes' => $makes
+            'makes' => $makes,
+            'totalMakes' => Make::count(),
+            'activeMakes' => Make::where('is_active', true)->count(),
+            'makesWithProducts' => Make::has('stocks')->count(),
         ]);
     }
 

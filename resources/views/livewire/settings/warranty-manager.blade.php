@@ -1,169 +1,168 @@
 <div class="space-y-6">
     @if (session()->has('message'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{{ session('message') }}</div>
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">{{ session('message') }}</div>
     @endif
 
     @if (session()->has('error'))
-        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{{ session('error') }}</div>
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">{{ session('error') }}</div>
     @endif
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+    <!-- Content Header & Actions -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Coverage Workspace</p>
-                <h2 class="mt-2 text-2xl font-bold text-slate-900">Warranty Management</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Maintain manufacturer, store, and extended warranty plans with clearer duration and coverage details.</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Catalog Setup</p>
+                <h2 class="mt-1 text-xl font-bold text-slate-900">Warranty Management</h2>
+                <p class="mt-1 text-xs text-slate-500">Define warranty policies and coverage terms for products.</p>
             </div>
 
-            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                <i class="fas fa-shield-halved"></i>
+            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">
+                <i class="fas fa-plus text-xs"></i>
                 <span>New Warranty</span>
             </button>
         </div>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total Warranties</p>
-                <p class="mt-2 text-3xl font-black text-slate-900">{{ $totalWarranties }}</p>
-            </div>
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Active Warranties</p>
-                <p class="mt-2 text-3xl font-black text-emerald-700">{{ $activeWarranties }}</p>
-            </div>
-            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">In Use</p>
-                <p class="mt-2 text-3xl font-black text-indigo-700">{{ $warranties->getCollection()->filter(fn($warranty) => $warranty->stocks->count() > 0)->count() }}</p>
-            </div>
+        <!-- Consistent Stat Cards KPI Row -->
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <x-admin.dashboard.stat-card label="Total Warranties" :value="$totalWarranties" icon="fa-shield-halved" tone="indigo" />
+            <x-admin.dashboard.stat-card label="Active Warranties" :value="$activeWarranties" icon="fa-circle-check" tone="emerald" />
+            <x-admin.dashboard.stat-card label="With Products" :value="$warrantiesWithProducts" icon="fa-boxes-stacked" tone="slate" />
+            <x-admin.dashboard.stat-card label="Avg. Duration" :value="$avgDuration . ' mo'" icon="fa-clock" tone="amber" />
         </div>
     </div>
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <label class="block text-sm font-medium text-slate-700">Search</label>
-        <div class="relative mt-2">
-            <i class="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search warranties by name or type..." class="w-full rounded-2xl border-slate-200 pl-11 text-sm shadow-none focus:ring-0">
+    <!-- Search & Guidance Grid -->
+    <div class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Search Warranties</label>
+            <div class="relative mt-2">
+                <i class="fas fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by warranty name or type..." class="w-full rounded-lg border-slate-200 pl-9 text-xs font-semibold shadow-xs focus:border-slate-900 focus:ring-0">
+            </div>
         </div>
+
+        <x-admin.catalog.guidance-panel 
+            title="Warranty Guidance" 
+            tip="Warranty duration should match supplier terms exactly — mismatches here create support disputes later." 
+            icon="fa-shield-halved" 
+        />
     </div>
 
-    <div class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <table class="min-w-full divide-y divide-slate-100">
+                <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     <tr>
-                        <th class="px-6 py-4">Warranty</th>
-                        <th class="px-6 py-4">Coverage</th>
-                        <th class="px-6 py-4">Products</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4">Actions</th>
+                        <th class="px-6 py-3.5">Warranty Tier</th>
+                        <th class="px-6 py-3.5">Type & Duration</th>
+                        <th class="px-6 py-3.5">Coverage Summary</th>
+                        <th class="px-6 py-3.5">Products</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 bg-white text-xs">
                     @forelse($warranties as $warranty)
-                        <tr class="bg-white">
-                            <td class="px-6 py-4 align-top">
-                                <p class="text-sm font-semibold text-slate-900">{{ $warranty->name }}</p>
-                                <p class="mt-1 text-xs uppercase tracking-[0.18em] text-slate-400">{{ ucfirst($warranty->type) }} warranty</p>
-                                <p class="mt-2 text-xs font-medium text-indigo-600">{{ $warranty->duration_text }}</p>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-slate-900">{{ $warranty->name }}</p>
+                                <p class="text-[10px] font-medium text-slate-400">ID #{{ $warranty->id }}</p>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <p class="text-sm text-slate-700">{{ \Illuminate\Support\Str::limit($warranty->coverage ?: 'No coverage description added.', 90) }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ \Illuminate\Support\Str::limit($warranty->terms ?: 'No terms added.', 90) }}</p>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-slate-700 uppercase tracking-wide text-[10px]">{{ ucfirst($warranty->type) }}</p>
+                                <p class="text-[11px] font-bold text-indigo-600 mt-0.5">{{ $warranty->duration }} months</p>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <span class="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
-                                    {{ $warranty->stocks->count() }} linked products
-                                </span>
+                            <td class="px-6 py-4 text-slate-500">{{ \Illuminate\Support\Str::limit($warranty->coverage ?: 'No coverage details added.', 80) }}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">{{ $warranty->stocks->count() }}</span>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <button wire:click="toggleStatus({{ $warranty->id }})" class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $warranty->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                            <td class="px-6 py-4">
+                                <button wire:click="toggleStatus({{ $warranty->id }})" class="inline-flex rounded-md px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider {{ $warranty->status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
                                     {{ ucfirst($warranty->status) }}
                                 </button>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <div class="flex flex-wrap gap-2">
-                                    <button wire:click="edit({{ $warranty->id }})" class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">
-                                        <i class="fas fa-pen"></i>
-                                        <span>Edit</span>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button wire:click="edit({{ $warranty->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 shadow-xs">
+                                        <i class="fas fa-pen text-[10px] text-slate-400"></i> Edit
                                     </button>
-                                    <button wire:click="delete({{ $warranty->id }})" onclick="confirm('Are you sure? This cannot be undone.') || event.stopImmediatePropagation()" class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
-                                        <i class="fas fa-trash"></i>
-                                        <span>Delete</span>
+                                    <button wire:click="delete({{ $warranty->id }})" onclick="confirm('Delete this warranty?') || event.stopImmediatePropagation()" class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 shadow-xs">
+                                        <i class="fas fa-trash text-[10px]"></i> Delete
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-16 text-center text-sm text-slate-500">No warranties match the current search.</td>
+                            <td colspan="6" class="px-6 py-8 text-center text-slate-400 font-medium">No warranties found matching your search.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        @if($warranties->hasPages())
+            <div class="px-6 py-4 border-t border-slate-100">
+                {{ $warranties->links() }}
+            </div>
+        @endif
     </div>
 
-    <div>{{ $warranties->links() }}</div>
-
+    <!-- Warranty Modal -->
     @if($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-start justify-center px-4 py-8">
-                <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" wire:click="closeModal"></div>
-                <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-                    <form wire:submit="store" class="flex max-h-[90vh] flex-col">
-                        <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Warranty Window</p>
-                                    <h3 class="mt-2 text-2xl font-bold text-slate-900">{{ $warranty_id ? 'Edit Warranty' : 'Add New Warranty' }}</h3>
-                                </div>
-                                <button type="button" wire:click="closeModal" class="rounded-full border border-slate-200 p-3 text-slate-500 transition hover:bg-white hover:text-slate-700"><i class="fas fa-xmark"></i></button>
-                            </div>
-                        </div>
-
-                        <div class="flex-1 overflow-y-auto px-6 py-6">
-                            <div class="grid gap-5 md:grid-cols-2">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700">Name</label>
-                                    <input type="text" wire:model="name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                    @error('name') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700">Type</label>
-                                    <select wire:model="type" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                        <option value="manufacturer">Manufacturer Warranty</option>
-                                        <option value="extended">Extended Warranty</option>
-                                        <option value="store">Store Warranty</option>
-                                    </select>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700">Duration (months)</label>
-                                    <input type="number" wire:model="duration" min="1" max="120" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                    @error('duration') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700">Coverage Details</label>
-                                    <textarea wire:model="coverage" rows="4" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none"></textarea>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700">Terms & Conditions</label>
-                                    <textarea wire:model="terms" rows="4" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none"></textarea>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700">Status</label>
-                                    <select wire:model="status" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-                            <button type="button" wire:click="closeModal" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">Cancel</button>
-                            <button type="submit" class="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">{{ $warranty_id ? 'Update Warranty' : 'Save Warranty' }}</button>
-                        </div>
-                    </form>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <h3 class="text-base font-bold text-slate-900">{{ $warranty_id ? 'Edit Warranty' : 'New Warranty' }}</h3>
+                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
                 </div>
+
+                <form wire:submit.prevent="store" class="space-y-4 text-xs">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Warranty Name</label>
+                            <input type="text" wire:model="name" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                            @error('name') <span class="text-rose-500">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Type</label>
+                            <select wire:model="type" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                                <option value="manufacturer">Manufacturer</option>
+                                <option value="extended">Extended</option>
+                                <option value="store">Store Warranty</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Duration (months)</label>
+                        <input type="number" wire:model="duration" min="1" max="120" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                        @error('duration') <span class="text-rose-500">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Coverage Details</label>
+                        <textarea wire:model="coverage" rows="2" class="w-full rounded-lg border-slate-200 px-3 py-2 font-medium text-slate-900 focus:ring-0"></textarea>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Terms & Conditions</label>
+                        <textarea wire:model="terms" rows="2" class="w-full rounded-lg border-slate-200 px-3 py-2 font-medium text-slate-900 focus:ring-0"></textarea>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Status</label>
+                        <select wire:model="status" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" wire:click="closeModal" class="rounded-lg border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800 shadow-xs">{{ $warranty_id ? 'Update Warranty' : 'Create Warranty' }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

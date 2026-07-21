@@ -25,6 +25,7 @@ class AdminPermissionCoverageTest extends TestCase
             'admin.activity-logs' => 'view activity logs',
             'admin.notification-outbox' => 'view notification outbox',
             'admin.system-health' => 'view system health',
+            'admin.whatsapp-conversations' => 'view whatsapp conversations',
         ];
 
         foreach ($routes as $routeName => $permissionName) {

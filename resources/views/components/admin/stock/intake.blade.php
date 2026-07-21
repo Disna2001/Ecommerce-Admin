@@ -60,6 +60,7 @@
                 <div class="relative w-full">
                     <i class="fas fa-barcode absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors"></i>
                     <input type="text" wire:model.defer="scanCode" wire:keydown.enter.prevent="processScan" 
+                        autofocus x-init="$el.focus()"
                         placeholder="Scan barcode to identify existing records or start new intake..." 
                         class="w-full rounded-[2rem] border-slate-100 bg-slate-50/80 pl-16 pr-6 sm:pr-48 py-5 sm:py-6 text-sm font-bold shadow-inner focus:bg-white focus:border-slate-900 focus:ring-0 transition-all">
                 </div>

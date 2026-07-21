@@ -156,7 +156,7 @@ class OrderManager extends Component
     public function focusPaymentReviews(): void
     {
         $this->filterStatus = '';
-        $this->filterPayment = '';
+        $this->filterPayment = 'pending_review';
         $this->resetPage();
     }
 
@@ -423,7 +423,13 @@ class OrderManager extends Component
                 });
             })
             ->when($this->filterStatus, fn (Builder $query) => $query->where('status', $this->filterStatus))
-            ->when($this->filterPayment, fn (Builder $query) => $query->where('payment_status', $this->filterPayment))
+            ->when($this->filterPayment, function (Builder $query) {
+                if ($this->filterPayment === 'pending_review') {
+                    $query->where('payment_review_status', 'pending_review');
+                } else {
+                    $query->where('payment_status', $this->filterPayment);
+                }
+            })
             ->when($this->dateFrom, fn (Builder $query) => $query->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn (Builder $query) => $query->whereDate('created_at', '<=', $this->dateTo))
             ->orderBy($this->sortField, $this->sortDir)

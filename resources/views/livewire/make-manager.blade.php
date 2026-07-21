@@ -1,178 +1,163 @@
 <div class="space-y-6">
     @if (session()->has('message'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{{ session('message') }}</div>
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">{{ session('message') }}</div>
     @endif
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+    <!-- Content Header & Actions -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Brand Origin Workspace</p>
-                <h2 class="mt-2 text-2xl font-bold text-slate-900">Make Management</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Manage manufacturers with clearer country, website, and active state controls for your stock catalog.</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Catalog Setup</p>
+                <h2 class="mt-1 text-xl font-bold text-slate-900">Make Management</h2>
+                <p class="mt-1 text-xs text-slate-500">Manage manufacturer makes to categorize compatible products and equipment.</p>
             </div>
 
-            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                <i class="fas fa-industry"></i>
+            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">
+                <i class="fas fa-plus text-xs"></i>
                 <span>New Make</span>
             </button>
         </div>
 
-        <div class="mt-6 grid gap-4 md:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Visible Results</p>
-                <p class="mt-2 text-3xl font-black text-slate-900">{{ $makes->total() }}</p>
-            </div>
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Active Makes</p>
-                <p class="mt-2 text-3xl font-black text-emerald-700">{{ $makes->getCollection()->where('is_active', true)->count() }}</p>
-            </div>
-            <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Rows Per Page</p>
-                <p class="mt-2 text-3xl font-black text-indigo-700">{{ $perPage }}</p>
-            </div>
+        <!-- Consistent Stat Cards KPI Row -->
+        <div class="mt-6 grid gap-4 sm:grid-cols-3">
+            <x-admin.dashboard.stat-card label="Total Makes" :value="$totalMakes" icon="fa-car" tone="indigo" />
+            <x-admin.dashboard.stat-card label="Active" :value="$activeMakes" icon="fa-circle-check" tone="emerald" />
+            <x-admin.dashboard.stat-card label="With Products" :value="$makesWithProducts" icon="fa-boxes-stacked" tone="slate" />
         </div>
     </div>
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_220px]">
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Search</label>
-                <div class="relative mt-2">
-                    <i class="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by make name, code, or country..." class="w-full rounded-2xl border-slate-200 pl-11 text-sm shadow-none focus:ring-0">
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Page Size</label>
-                <select wire:model.live="perPage" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                    <option value="10">10 per page</option>
-                    <option value="25">25 per page</option>
-                    <option value="50">50 per page</option>
-                    <option value="100">100 per page</option>
-                </select>
+    <!-- Search & Guidance Grid -->
+    <div class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Search Makes</label>
+            <div class="relative mt-2">
+                <i class="fas fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by make name, code, or country..." class="w-full rounded-lg border-slate-200 pl-9 text-xs font-semibold shadow-xs focus:border-slate-900 focus:ring-0">
             </div>
         </div>
+
+        <x-admin.catalog.guidance-panel 
+            title="Make Guidance" 
+            tip="Makes should reflect actual manufacturer names your suppliers use, to keep intake and catalog data aligned." 
+            icon="fa-car" 
+        />
     </div>
 
-    <div class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
+    <!-- Table -->
+    <div class="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <table class="min-w-full divide-y divide-slate-100">
+                <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     <tr>
-                        <th wire:click="sortBy('name')" class="cursor-pointer px-6 py-4">Make</th>
-                        <th wire:click="sortBy('code')" class="cursor-pointer px-6 py-4">Code</th>
-                        <th class="px-6 py-4">Origin</th>
-                        <th class="px-6 py-4">Website</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4">Actions</th>
+                        <th wire:click="sortBy('name')" class="cursor-pointer px-6 py-3.5">Make</th>
+                        <th wire:click="sortBy('code')" class="cursor-pointer px-6 py-3.5">Code</th>
+                        <th class="px-6 py-3.5">Origin</th>
+                        <th class="px-6 py-3.5">Website</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 bg-white text-xs">
                     @forelse($makes as $make)
-                        <tr class="bg-white">
-                            <td class="px-6 py-4 align-top">
-                                <p class="text-sm font-semibold text-slate-900">{{ $make->name }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ \Illuminate\Support\Str::limit($make->description ?: 'No description added.', 90) }}</p>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-slate-900">{{ $make->name }}</p>
+                                <p class="text-[10px] text-slate-400">{{ \Illuminate\Support\Str::limit($make->description ?: 'No description.', 60) }}</p>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">{{ $make->code }}</span>
+                            <td class="px-6 py-4 font-mono text-[11px]">
+                                <span class="inline-flex rounded-md bg-slate-100 px-2.5 py-0.5 font-bold text-slate-700 border border-slate-200">{{ $make->code }}</span>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <p class="text-sm text-slate-700">{{ $make->country_of_origin ?: 'Not set' }}</p>
-                            </td>
-                            <td class="px-6 py-4 align-top">
+                            <td class="px-6 py-4 text-slate-600 font-medium">{{ $make->country_of_origin ?: 'Not set' }}</td>
+                            <td class="px-6 py-4">
                                 @if($make->website)
-                                    <a href="{{ $make->website }}" target="_blank" class="text-sm font-medium text-indigo-600 transition hover:text-indigo-800">Visit website</a>
+                                    <a href="{{ $make->website }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-semibold">Visit website</a>
                                 @else
-                                    <span class="text-sm text-slate-400">No website</span>
+                                    <span class="text-slate-400">No website</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <button wire:click="toggleStatus({{ $make->id }})" class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $make->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                            <td class="px-6 py-4">
+                                <button wire:click="toggleStatus({{ $make->id }})" class="inline-flex rounded-md px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider {{ $make->is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
                                     {{ $make->is_active ? 'Active' : 'Inactive' }}
                                 </button>
                             </td>
-                            <td class="px-6 py-4 align-top">
-                                <div class="flex flex-wrap gap-2">
-                                    <button wire:click="edit({{ $make->id }})" class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">
-                                        <i class="fas fa-pen"></i>
-                                        <span>Edit</span>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button wire:click="edit({{ $make->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 shadow-xs">
+                                        <i class="fas fa-pen text-[10px] text-slate-400"></i> Edit
                                     </button>
-                                    <button wire:click="delete({{ $make->id }})" onclick="confirm('Are you sure? Deleting this make may affect related stocks.') || event.stopImmediatePropagation()" class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">
-                                        <i class="fas fa-trash"></i>
-                                        <span>Delete</span>
+                                    <button wire:click="delete({{ $make->id }})" onclick="confirm('Delete this make?') || event.stopImmediatePropagation()" class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 shadow-xs">
+                                        <i class="fas fa-trash text-[10px]"></i> Delete
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-16 text-center text-sm text-slate-500">No makes match the current filters.</td>
+                            <td colspan="6" class="px-6 py-8 text-center text-slate-400 font-medium">No makes found matching your search.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        @if($makes->hasPages())
+            <div class="px-6 py-4 border-t border-slate-100">
+                {{ $makes->links() }}
+            </div>
+        @endif
     </div>
 
-    <div>{{ $makes->links() }}</div>
-
+    <!-- Make Modal -->
     @if($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-start justify-center px-4 py-8">
-                <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" wire:click="closeModal"></div>
-                <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-                    <form wire:submit="store" class="flex max-h-[90vh] flex-col">
-                        <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Make Window</p>
-                                    <h3 class="mt-2 text-2xl font-bold text-slate-900">{{ $make_id ? 'Edit Make' : 'Add New Make' }}</h3>
-                                </div>
-                                <button type="button" wire:click="closeModal" class="rounded-full border border-slate-200 p-3 text-slate-500 transition hover:bg-white hover:text-slate-700"><i class="fas fa-xmark"></i></button>
-                            </div>
-                        </div>
-
-                        <div class="flex-1 overflow-y-auto px-6 py-6">
-                            <div class="grid gap-5 md:grid-cols-2">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700">Name</label>
-                                    <input type="text" wire:model="name" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                    @error('name') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700">Code</label>
-                                    <input type="text" wire:model="code" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                    @error('code') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700">Country of Origin</label>
-                                    <input type="text" wire:model="country_of_origin" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700">Website</label>
-                                    <input type="url" wire:model="website" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none" placeholder="https://example.com">
-                                    @error('website') <span class="mt-1 block text-xs text-rose-500">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700">Description</label>
-                                    <textarea wire:model="description" rows="4" class="mt-2 w-full rounded-2xl border-slate-200 text-sm shadow-none resize-none"></textarea>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
-                                        <input type="checkbox" wire:model="is_active" class="rounded border-slate-300 text-slate-900 focus:ring-slate-500">
-                                        Keep this make active
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-                            <button type="button" wire:click="closeModal" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900">Cancel</button>
-                            <button type="submit" class="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">{{ $make_id ? 'Update Make' : 'Save Make' }}</button>
-                        </div>
-                    </form>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div class="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <h3 class="text-base font-bold text-slate-900">{{ $make_id ? 'Edit Make' : 'New Make' }}</h3>
+                    <button wire:click="closeModal" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
                 </div>
+
+                <form wire:submit.prevent="store" class="space-y-4 text-xs">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Make Name</label>
+                            <input type="text" wire:model="name" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                            @error('name') <span class="text-rose-500">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Code</label>
+                            <input type="text" wire:model="code" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                            @error('code') <span class="text-rose-500">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Country of Origin</label>
+                            <input type="text" wire:model="country_of_origin" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700">Website</label>
+                            <input type="url" wire:model="website" placeholder="https://example.com" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                            @error('website') <span class="text-rose-500">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Description</label>
+                        <textarea wire:model="description" rows="3" class="w-full rounded-lg border-slate-200 px-3 py-2 font-medium text-slate-900 focus:ring-0"></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="inline-flex items-center gap-2 font-semibold text-slate-700">
+                            <input type="checkbox" wire:model="is_active" class="rounded border-slate-300 text-slate-900 focus:ring-0">
+                            Keep this make active
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" wire:click="closeModal" class="rounded-lg border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800 shadow-xs">{{ $make_id ? 'Update Make' : 'Create Make' }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

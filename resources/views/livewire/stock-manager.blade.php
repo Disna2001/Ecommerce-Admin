@@ -1,73 +1,90 @@
-<div class="min-h-screen bg-[#F8FAFC] p-4 lg:p-8">
-    <div class="mx-auto max-w-[1600px] space-y-8">
-        <!-- Dashboard Header -->
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white shadow-lg">
-                        <i class="fas fa-boxes-stacked text-[10px]"></i>
-                    </div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Warehouse Intelligence</p>
-                </div>
-                <h1 class="text-4xl font-black tracking-tight text-slate-900">Inventory Management</h1>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <button wire:click="exportCsv" class="flex h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 shadow-sm">
-                    <i class="fas fa-file-export text-slate-400"></i>
-                    Export Registry
-                </button>
-                <button wire:click="openModal" class="flex h-12 items-center gap-3 rounded-2xl bg-slate-900 px-8 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-2xl shadow-slate-200 transition-all hover:scale-105 active:scale-95">
-                    <i class="fas fa-plus text-[10px] opacity-50"></i>
-                    New Product Intake
-                </button>
-            </div>
+<div class="space-y-6">
+    <!-- Top Bar / Page Actions -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900">Inventory Board</h1>
+            <p class="text-xs text-slate-500">Manage stock inventory, items, arrivals, and dispatches.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <button wire:click="exportCsv" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 shadow-xs">
+                <i class="fas fa-file-export text-slate-400 text-xs"></i>
+                <span>Export CSV</span>
+            </button>
+            <button wire:click="openModal" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">
+                <i class="fas fa-plus text-xs"></i>
+                <span>New Product Intake</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Metric Summary (Contextual: Only on Inventory Board) -->
+    @if($stockWorkspaceTab === 'inventory')
+        <x-admin.stock.summary :stocks="$stocks" :movementSummary="$movementSummary" />
+    @endif
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <!-- Sidebar Navigation -->
+        <div class="w-full lg:col-span-3 xl:col-span-2">
+            <x-admin.stock.sidebar :stockWorkspaceTab="$stockWorkspaceTab" :movementSummary="$movementSummary" />
         </div>
 
-        <!-- Metric Summary -->
-        <x-admin.stock.summary :stocks="$stocks" :movementSummary="$movementSummary" />
+        <!-- Main Workspace -->
+        <div class="w-full lg:col-span-9 xl:col-span-10 space-y-6">
+            @if($stockWorkspaceTab === 'inventory')
+                <x-admin.stock.filters 
+                    :categories="$categories" 
+                    :makes="$makes" 
+                    :brands="$brands" 
+                    :suppliers="$suppliers" 
+                    :inventoryQuickFilter="$inventoryQuickFilter" 
+                    :inventoryQuickCounts="$inventoryQuickCounts"
+                    :compactTableMode="$compactTableMode"
+                    :scanMode="$scanMode"
+                />
+                
+                <x-admin.stock.table 
+                    :stocks="$stocks" 
+                    :inventoryQuickFilter="$inventoryQuickFilter" 
+                    :selectedStockIds="$selectedStockIds"
+                />
 
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            <!-- Sidebar Navigation -->
-            <div class="w-full lg:col-span-3 xl:col-span-2">
-                <x-admin.stock.sidebar :stockWorkspaceTab="$stockWorkspaceTab" :movementSummary="$movementSummary" />
-            </div>
-
-            <!-- Main Workspace -->
-            <div class="w-full lg:col-span-9 xl:col-span-10 space-y-8">
-                @if($stockWorkspaceTab === 'inventory')
-                    <x-admin.stock.filters 
-                        :categories="$categories" 
-                        :makes="$makes" 
-                        :brands="$brands" 
-                        :suppliers="$suppliers" 
-                        :inventoryQuickFilter="$inventoryQuickFilter" 
-                        :inventoryQuickCounts="$inventoryQuickCounts"
-                        :compactTableMode="$compactTableMode"
-                        :scanMode="$scanMode"
-                    />
-                    
-                    <x-admin.stock.table 
-                        :stocks="$stocks" 
-                        :inventoryQuickFilter="$inventoryQuickFilter" 
-                        :selectedStockIds="$selectedStockIds"
-                    />
-                @elseif($stockWorkspaceTab === 'intake')
-                    <x-admin.stock.intake :scanMode="$scanMode" />
-                @elseif($stockWorkspaceTab === 'import')
-                    <x-admin.stock.import :import-file="$importFile" />
-                @elseif(in_array($stockWorkspaceTab, ['categories', 'brands', 'makes', 'suppliers', 'item_types', 'warranties', 'quality_levels']))
-                    <x-admin.stock.registries 
-                        :stock-workspace-tab="$stockWorkspaceTab" 
-                        :categories="$categories" 
-                        :brands="$brands" 
-                        :makes="$makes" 
-                        :suppliers="$suppliers" 
-                        :item-types="$itemTypes" 
-                        :warranties="$warranties"
-                        :quality-levels="$qualityLevels"
-                    />
-                @endif
-            </div>
+                <!-- Recent Movements Preview Panel -->
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-clock-rotate-left text-slate-500 text-xs"></i>
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">Recent Inventory Movements</h4>
+                        </div>
+                        <a href="{{ route('admin.stock-movements') }}" wire:navigate class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1">
+                            <span>View Stock Movements</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                    <div class="space-y-2">
+                        @forelse($this->recentMovements as $log)
+                            <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-200/80 bg-slate-50/50 text-xs">
+                                <div class="flex items-center gap-3">
+                                    <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase {{ $log->direction === 'in' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : ($log->direction === 'out' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-amber-50 text-amber-600 border border-amber-100') }}">
+                                        {{ $log->direction }}
+                                    </span>
+                                    <span class="font-semibold text-slate-900">{{ $log->stock->name ?? ($log->stock->sku ?? 'Stock #'.$log->stock_id) }}</span>
+                                    <span class="text-slate-500 text-[11px]">({{ $log->quantity > 0 ? '+'.$log->quantity : $log->quantity }})</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+                                    <span>{{ ucwords(str_replace('_', ' ', $log->context ?? 'adjustment')) }}</span>
+                                    <span>{{ $log->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="py-4 text-center text-xs text-slate-400 font-medium">No recent inventory movements recorded.</div>
+                        @endforelse
+                    </div>
+                </div>
+            @elseif($stockWorkspaceTab === 'intake')
+                <x-admin.stock.intake :scanMode="$scanMode" />
+            @elseif($stockWorkspaceTab === 'import')
+                <x-admin.stock.import :import-file="$importFile" />
+            @endif
         </div>
     </div>
 
@@ -133,72 +150,62 @@
     <div 
         x-data="{ show: @entangle('isRegistryEditModalOpen') }" 
         x-show="show" 
-        class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
         x-cloak
     >
         <div 
             x-show="show" 
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            class="relative w-full max-w-lg rounded-[3rem] border border-slate-200 bg-white shadow-2xl p-10"
+            class="relative w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl p-6 space-y-6"
         >
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mb-2">Protocol: Refinement</p>
-                    <h3 class="text-2xl font-black tracking-tight text-slate-900">Edit Registry Record</h3>
-                </div>
-                <button @click="show = false" class="h-10 w-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-rose-500 transition-colors">
-                    <i class="fas fa-times text-xs"></i>
-                </button>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Edit Item</h3>
+                <button @click="show = false" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
             </div>
 
-            <form wire:submit.prevent="saveRegistryEntity" class="space-y-6">
-                <div class="space-y-2">
-                    <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Display Name</label>
-                    <input type="text" wire:model.defer="editingRegistryName" class="w-full rounded-2xl border-slate-200 bg-slate-50 px-6 py-4 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
+            <form wire:submit.prevent="saveRegistryEntity" class="space-y-4 text-xs">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Display Name</label>
+                    <input type="text" wire:model.defer="editingRegistryName" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                 </div>
 
                 @if($editingRegistryType === 'warranties')
-                    <div class="space-y-2">
-                        <label class="px-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration (Months)</label>
-                        <input type="number" wire:model.defer="editingRegistryDuration" class="w-full rounded-2xl border-slate-200 bg-slate-50 px-6 py-4 text-sm font-black text-slate-900 shadow-inner focus:bg-white focus:ring-0">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700">Duration (Months)</label>
+                        <input type="number" wire:model.defer="editingRegistryDuration" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                     </div>
                 @endif
 
-                <div class="pt-4">
-                    <button type="submit" class="w-full rounded-2xl bg-slate-900 px-8 py-5 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                        Update Registry Entry
-                    </button>
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" @click="show = false" class="rounded-lg border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800 shadow-xs">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Global AI Insights Hub (Floating) -->
-    <div class="fixed bottom-8 right-8 z-50">
+    <!-- AI Insights Floating Hub -->
+    <div class="fixed bottom-6 right-6 z-50">
         <div x-data="{ open: false }" class="relative">
-            <button @click="open = !open" class="flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-2xl shadow-slate-400 transition-all hover:scale-110 active:scale-95">
-                <i class="fas fa-sparkles text-lg" :class="open ? 'rotate-45' : ''"></i>
+            <button @click="open = !open" class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition-transform hover:scale-105">
+                <i class="fas fa-sparkles text-sm" :class="open ? 'rotate-45' : ''"></i>
             </button>
             
-            <div x-show="open" @click.away="open = false" x-transition class="absolute bottom-20 right-0 w-80 rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-2xl">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Inventory AI Pulse</p>
-                <div class="space-y-4">
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <p class="text-[11px] font-black text-slate-900 uppercase leading-none mb-2">Demand Insight</p>
-                        <p class="text-[10px] font-medium text-slate-500 leading-relaxed">{{ $aiDemandInsight ?: 'Analyze a product to receive demand projections based on current market signals and seasonal trends.' }}</p>
+            <div x-show="open" @click.away="open = false" x-transition class="absolute bottom-16 right-0 w-80 rounded-xl border border-slate-200 bg-white p-5 shadow-xl space-y-4 text-xs">
+                <p class="font-bold text-slate-900">Inventory AI Insights</p>
+                <div class="space-y-3">
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                        <p class="font-bold text-slate-900 mb-1">Demand Insight</p>
+                        <p class="text-slate-500 font-medium leading-relaxed text-[11px]">{{ $aiDemandInsight ?: 'Analyze a product to receive demand projections based on current market signals.' }}</p>
                     </div>
                     @if($aiSuggestion)
-                        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
-                            <p class="text-[11px] font-black text-emerald-900 uppercase leading-none mb-2">Pricing Intelligence</p>
-                            <p class="text-[10px] font-medium text-emerald-700 leading-relaxed">Suggested: Rs {{ number_format($aiSuggestion['suggested_price'], 2) }}</p>
-                            <button wire:click="applyAiSuggestion" class="mt-3 text-[9px] font-black text-emerald-900 uppercase tracking-widest underline underline-offset-4">Apply Suggestion</button>
+                        <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
+                            <p class="font-bold text-emerald-900 mb-1">Pricing Recommendation</p>
+                            <p class="text-emerald-700 font-medium text-[11px]">Suggested: Rs {{ number_format($aiSuggestion['suggested_price'], 2) }}</p>
+                            <button wire:click="applyAiSuggestion" class="mt-2 text-[10px] font-bold text-emerald-800 underline">Apply Suggestion</button>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
-    
 </div>

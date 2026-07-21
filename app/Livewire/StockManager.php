@@ -101,6 +101,14 @@ class StockManager extends Component
     public $isLoading = false;
     public $seoKeywords = [];
 
+    public function getRecentMovementsProperty()
+    {
+        return \App\Models\StockMovementLog::with(['stock', 'user'])
+            ->latest()
+            ->take(5)
+            ->get();
+    }
+
     // For file uploads
     public $tempImages = []; // Input bridge
     public $currentImages = [];
@@ -1043,10 +1051,7 @@ class StockManager extends Component
 
     public function setStockWorkspaceTab(string $tab): void
     {
-        $allowed = [
-            'inventory', 'intake', 'import', 
-            'categories', 'brands', 'makes', 'suppliers', 'item_types', 'warranties', 'quality_levels'
-        ];
+        $allowed = ['inventory', 'intake', 'import'];
         $this->stockWorkspaceTab = in_array($tab, $allowed, true) ? $tab : 'inventory';
     }
 

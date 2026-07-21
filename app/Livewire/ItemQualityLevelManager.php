@@ -49,7 +49,10 @@ class ItemQualityLevelManager extends Component
             ->paginate($this->perPage);
 
         return view('livewire.item-quality-level-manager', [
-            'qualities' => $qualities
+            'qualities' => $qualities,
+            'totalTiers' => ItemQualityLevel::count(),
+            'activeTiers' => ItemQualityLevel::where('is_active', true)->count(),
+            'tiersWithProducts' => ItemQualityLevel::has('stocks')->count(),
         ]);
     }
 

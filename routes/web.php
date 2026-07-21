@@ -7,116 +7,70 @@ use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAuthController;
+
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use App\Livewire\Settings\RoleManager;
 use Illuminate\Support\Facades\Route;
 
-// Homepage
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
-Route::get('/help-center', [StorefrontController::class, 'helpCenter'])->name('help-center');
 Route::get('/track-order', [StorefrontController::class, 'trackOrder'])->name('track-order');
+Route::get('/help-center', [StorefrontController::class, 'helpCenter'])->name('help-center');
 Route::get('/refund-policy', [StorefrontController::class, 'refundPolicy'])->name('refund-policy');
-Route::get('/privacy-policy', [StorefrontController::class, 'privacyPolicy'])->name('privacy-policy');
-Route::get('/terms-and-conditions', [StorefrontController::class, 'termsConditions'])->name('terms-and-conditions');
 
-// Dynamic XML Sitemap for SEO
-Route::get('/sitemap.xml', function () {
-    $stocks = \App\Models\Stock::visibleOnStorefront()->get();
-    
-    // Resolve dynamic request host bypassing Laravel's URL overrides
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || ($_SERVER['SERVER_PORT'] ?? 80) == 443
-        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-    $scheme = $isHttps ? 'https' : 'http';
-    $host = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'www.displaylanka.shop');
-    $host = rtrim($host, '/');
-    
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-    
-    // Add homepage
-    $xml .= '<url>';
-    $xml .= '<loc>' . $host . '</loc>';
-    $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
-    $xml .= '<changefreq>daily</changefreq>';
-    $xml .= '<priority>1.0</priority>';
-    $xml .= '</url>';
-    
-    // Add products index page
-    $xml .= '<url>';
-    $xml .= '<loc>' . $host . '/products' . '</loc>';
-    $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
-    $xml .= '<changefreq>daily</changefreq>';
-    $xml .= '<priority>0.9</priority>';
-    $xml .= '</url>';
+Route::get('/about', function () {
+    return view('frontend.pages.about');
+})->name('about');
 
-    // Add general pages
-    $pages = ['help-center', 'track-order', 'refund-policy', 'privacy-policy', 'terms-and-conditions'];
-    foreach ($pages as $page) {
-        $xml .= '<url>';
-        $xml .= '<loc>' . $host . '/' . $page . '</loc>';
-        $xml .= '<lastmod>' . now()->subDays(2)->toAtomString() . '</lastmod>';
-        $xml .= '<changefreq>monthly</changefreq>';
-        $xml .= '<priority>0.5</priority>';
-        $xml .= '</url>';
-    }
-    
-    // Add active products
-    foreach ($stocks as $stock) {
-        $xml .= '<url>';
-        $xml .= '<loc>' . $host . '/products/' . $stock->getRouteKey() . '</loc>';
-        $xml .= '<lastmod>' . ($stock->updated_at?->toAtomString() ?: now()->toAtomString()) . '</lastmod>';
-        $xml .= '<changefreq>weekly</changefreq>';
-        $xml .= '<priority>0.8</priority>';
-        $xml .= '</url>';
-    }
-    
-    $xml .= '</urlset>';
-    
-    return response($xml, 200, [
-        'Content-Type' => 'application/xml',
-    ]);
-});
+Route::get('/contact', function () {
+    return view('frontend.pages.contact');
+})->name('contact');
+
+Route::get('/faq', function () {
+    return view('frontend.pages.faq');
+})->name('faq');
+
+Route::get('/privacy-policy', function () {
+    return view('frontend.pages.privacy');
+})->name('privacy-policy');
+
+Route::get('/terms-and-conditions', function () {
+    return view('frontend.pages.terms');
+})->name('terms-and-conditions');
+
+Route::get('/shipping-and-returns', function () {
+    return view('frontend.pages.shipping');
+})->name('shipping-and-returns');
+
+Route::get('/wholesale-inquiry', function () {
+    return view('frontend.pages.wholesale-inquiry');
+})->name('wholesale-inquiry');
+
+Route::get('/deals', [StorefrontController::class, 'deals'])->name('deals');
+Route::get('/new-arrivals', [StorefrontController::class, 'newArrivals'])->name('new-arrivals');
+Route::get('/categories', [StorefrontController::class, 'categories'])->name('shop.categories');
+Route::get('/categories/{slug}', [StorefrontController::class, 'categoryShow'])->name('shop.category');
+
+// Public WhatsApp Webhook Route (signature & verify token protected)
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify'])->name('whatsapp.webhook.verify');
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'receive'])->name('whatsapp.webhook.receive');
 
-// Secure Dynamic Session Bridge for Mobile App Checkout
-Route::get('/auth/checkout-login', function (\Illuminate\Http\Request $request) {
-    $tokenString = $request->query('token');
-    $token = \Laravel\Sanctum\PersonalAccessToken::findToken($tokenString);
-    if (!$token) {
-        return redirect()->route('home');
-    }
-    $user = $token->tokenable;
-    auth()->login($user);
-    
-    $redirect = $request->query('redirect');
-    if ($redirect) {
-        return redirect($redirect);
-    }
-    return redirect()->route('checkout.index');
-})->name('auth.checkout-login');
+// WhatsApp Bridge Webhook (Node.js Baileys bridge → Laravel, secret-verified)
+Route::post('/whatsapp/bridge-webhook', [\App\Http\Controllers\WhatsAppBridgeWebhookController::class, 'handle'])->name('whatsapp.bridge-webhook');
 
-// Secure Dynamic Session Bridge for Mobile App Administration
-Route::get('/auth/admin-login', function (\Illuminate\Http\Request $request) {
-    $tokenString = $request->query('token');
-    $token = \Laravel\Sanctum\PersonalAccessToken::findToken($tokenString);
-    if (!$token || !$token->tokenable->can('view dashboard')) {
-        return redirect()->route('home');
-    }
-    $user = $token->tokenable;
-    auth()->login($user);
-    
-    $redirect = $request->query('redirect');
-    if ($redirect) {
-        return redirect($redirect);
-    }
-    return redirect()->route('admin.dashboard');
-})->name('auth.admin-login');
-
-// Auth pages
 Route::get('/dashboard', function () {
+    /** @var \App\Models\User $user */
     $user = auth()->user();
 
     if ($user && $user->can('view dashboard')) {
@@ -237,6 +191,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->middleware('permission:view orders')
         ->name('orders');
 
+    Route::get('/whatsapp-conversations', [AdminController::class, 'whatsappConversations'])
+        ->middleware('permission:view whatsapp conversations')
+        ->name('whatsapp-conversations');
+
     Route::prefix('site-management')->name('site-management.')->group(function () {
         Route::get('/', [SiteManagementController::class, 'index'])
             ->middleware('permission:view site management')
@@ -259,6 +217,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/automated-discounts', [SiteManagementController::class, 'automatedDiscounts'])
             ->middleware('permission:view site management')
             ->name('automated-discounts');
+    });
+
+    Route::prefix('api')->group(function () {
+        require __DIR__.'/api_admin.php';
     });
 });
 

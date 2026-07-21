@@ -214,7 +214,7 @@ class ProductDetail extends Component
                 ],
                 'value_title' => SiteSetting::get('detail_value_title', 'Why shoppers choose this listing'),
                 'value_text' => SiteSetting::get('detail_value_text', 'Clear pricing, direct checkout, and order notifications at each major status change.'),
-                'value_cta' => SiteSetting::get('detail_value_cta', 'Checkout ready'),
+                'value_cta' => SiteSetting::get('detail_value_cta', 'Proceed to Checkout'),
                 'in_stock_label' => SiteSetting::get('detail_in_stock_label', 'In Stock'),
                 'low_stock_template' => SiteSetting::get('detail_low_stock_template', 'Only {quantity} left!'),
                 'out_of_stock_label' => SiteSetting::get('detail_out_of_stock_label', 'Out of Stock'),

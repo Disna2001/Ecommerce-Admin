@@ -1,29 +1,52 @@
 @props(['items'])
 
-<div class="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-sm">
-    <div class="flex items-center gap-4 mb-8">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg">
-            <i class="fas fa-server text-xs"></i>
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 font-semibold">
+                <i class="fas fa-server text-xs"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-slate-900">System Status</h3>
+                <p class="text-xs text-slate-500 font-medium">Service health and configuration status</p>
+            </div>
         </div>
-        <div>
-            <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">System Integrity</h3>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Service & Protocol Status</p>
+
+        <!-- Status Legend -->
+        <div class="flex items-center gap-3 text-[11px] font-medium text-slate-500 self-start sm:self-auto">
+            <span class="flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span>Operational</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                <span>Attention</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                <span>Failing</span>
+            </span>
         </div>
     </div>
 
-    <div class="space-y-4">
+    <div class="space-y-3">
         @foreach($items as [$label, $status, $icon, $colorClass])
-            <div class="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 group hover:bg-white hover:border-slate-200 hover:shadow-md transition-all duration-300">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-inner text-slate-400 group-hover:text-slate-900 transition-colors">
+            @php
+                $dotColor = str_contains($colorClass, 'emerald') ? 'bg-emerald-500' : (str_contains($colorClass, 'rose') ? 'bg-rose-500' : 'bg-amber-500');
+            @endphp
+            <div class="flex items-center justify-between p-3.5 rounded-lg border border-slate-200/80 bg-slate-50/50 hover:bg-white transition-colors duration-150">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-md bg-white border border-slate-200 text-slate-500 shadow-xs">
                         <i class="fas {{ $icon }} text-xs"></i>
                     </div>
                     <div>
-                        <p class="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">{{ $label }}</p>
-                        <p class="mt-1.5 text-[9px] font-bold {{ $colorClass }} uppercase tracking-tighter">{{ $status }}</p>
+                        <p class="text-xs font-semibold text-slate-900 leading-tight">{{ $label }}</p>
+                        <p class="text-[11px] font-medium {{ $colorClass }} mt-0.5">{{ $status }}</p>
                     </div>
                 </div>
-                <div class="h-2 w-2 rounded-full {{ str_contains($colorClass, 'emerald') ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : (str_contains($colorClass, 'rose') ? 'bg-rose-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]') }}"></div>
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full {{ $dotColor }}"></span>
+                </div>
             </div>
         @endforeach
     </div>

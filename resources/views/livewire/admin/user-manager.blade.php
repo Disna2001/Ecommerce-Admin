@@ -1,89 +1,87 @@
 <div class="space-y-6">
     @if (session()->has('message'))
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{{ session('message') }}</div>
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">{{ session('message') }}</div>
     @endif
 
     @if (session()->has('error'))
-        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{{ session('error') }}</div>
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700">{{ session('error') }}</div>
     @endif
 
-    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <!-- Content Header -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Governance Workspace</p>
-                <h2 class="mt-2 text-2xl font-bold text-slate-900">User & Access Control</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Manage organizational hierarchies, merchant partnerships, and granular security protocols.</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">User Management</p>
+                <h2 class="mt-1 text-xl font-bold text-slate-900">User & Access Control</h2>
+                <p class="mt-1 text-xs text-slate-500">Manage staff accounts, roles, and permissions.</p>
             </div>
             
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shadow-inner">
-                    <span class="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-200">Global Search</span>
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
-                        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Filter identities..." class="border-0 bg-transparent py-1 pl-8 pr-3 text-xs font-bold focus:ring-0 w-48">
-                    </div>
+                <div class="relative w-64">
+                    <i class="fas fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search users..." class="w-full rounded-lg border-slate-200 pl-9 text-xs font-semibold shadow-xs focus:border-slate-900 focus:ring-0">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="grid min-w-0 gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+    <div class="grid min-w-0 gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
         <!-- Sidebar Navigation -->
         <div class="space-y-6">
-            <div class="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
-                <nav class="flex flex-col gap-1.5">
-                    <p class="mb-3 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Management</p>
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                <nav class="flex flex-col gap-1 text-xs font-semibold">
+                    <p class="mb-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Management</p>
                     
-                    <button type="button" wire:click="setUserWorkspaceTab('staff')" class="group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all {{ $userWorkspaceTab === 'staff' ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl {{ $userWorkspaceTab === 'staff' ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white' }}"><i class="fas fa-shield-halved text-xs"></i></div>
-                            <span class="text-sm font-bold">Staff Directory</span>
+                    <button type="button" wire:click="setUserWorkspaceTab('staff')" class="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all {{ $userWorkspaceTab === 'staff' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $userWorkspaceTab === 'staff' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-shield-halved text-xs"></i></div>
+                            <span>Staff Directory</span>
                         </div>
-                        <i class="fas fa-chevron-right text-[10px] opacity-20"></i>
+                        <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
                     </button>
 
-                    <button type="button" wire:click="setUserWorkspaceTab('merchants')" class="group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all {{ $userWorkspaceTab === 'merchants' ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl {{ $userWorkspaceTab === 'merchants' ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white' }}"><i class="fas fa-store text-xs"></i></div>
-                            <span class="text-sm font-bold">Merchant Panel</span>
+                    <button type="button" wire:click="setUserWorkspaceTab('merchants')" class="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all {{ $userWorkspaceTab === 'merchants' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $userWorkspaceTab === 'merchants' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-store text-xs"></i></div>
+                            <span>Merchants</span>
                         </div>
-                        <i class="fas fa-chevron-right text-[10px] opacity-20"></i>
+                        <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
                     </button>
 
-                    <button type="button" wire:click="setUserWorkspaceTab('regular')" class="group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all {{ $userWorkspaceTab === 'regular' ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl {{ $userWorkspaceTab === 'regular' ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white' }}"><i class="fas fa-users text-xs"></i></div>
-                            <span class="text-sm font-bold">Regular Users</span>
+                    <button type="button" wire:click="setUserWorkspaceTab('regular')" class="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all {{ $userWorkspaceTab === 'regular' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $userWorkspaceTab === 'regular' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-users text-xs"></i></div>
+                            <span>Regular Users</span>
                         </div>
-                        <i class="fas fa-chevron-right text-[10px] opacity-20"></i>
+                        <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
                     </button>
 
-                    <div class="my-4 border-t border-slate-100"></div>
-                    <p class="mb-3 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Security & Sourcing</p>
+                    <div class="my-3 border-t border-slate-100"></div>
+                    <p class="mb-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Security & Access</p>
 
-                    <button type="button" wire:click="setUserWorkspaceTab('roles')" class="group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all {{ $userWorkspaceTab === 'roles' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl {{ $userWorkspaceTab === 'roles' ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white' }}"><i class="fas fa-user-gear text-xs"></i></div>
-                            <span class="text-sm font-bold">Role Architect</span>
+                    <button type="button" wire:click="setUserWorkspaceTab('roles')" class="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all {{ $userWorkspaceTab === 'roles' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $userWorkspaceTab === 'roles' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-user-gear text-xs"></i></div>
+                            <span>Roles & Permissions</span>
                         </div>
-                        <i class="fas fa-chevron-right text-[10px] opacity-20"></i>
+                        <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
                     </button>
 
-                    <button type="button" wire:click="setUserWorkspaceTab('teams')" class="group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all {{ $userWorkspaceTab === 'teams' ? 'bg-sky-600 text-white shadow-xl shadow-sky-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl {{ $userWorkspaceTab === 'teams' ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white' }}"><i class="fas fa-people-group text-xs"></i></div>
-                            <span class="text-sm font-bold">Team Registry</span>
+                    <button type="button" wire:click="setUserWorkspaceTab('teams')" class="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all {{ $userWorkspaceTab === 'teams' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $userWorkspaceTab === 'teams' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-people-group text-xs"></i></div>
+                            <span>Teams</span>
                         </div>
-                        <i class="fas fa-chevron-right text-[10px] opacity-20"></i>
+                        <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
                     </button>
 
-                    <button type="button" wire:click="setUserWorkspaceTab('requests')" class="group flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all {{ $userWorkspaceTab === 'requests' ? 'bg-amber-500 text-white shadow-xl shadow-amber-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-xl {{ $userWorkspaceTab === 'requests' ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover:bg-white' }}"><i class="fas fa-hand-holding-heart text-xs"></i></div>
-                            <span class="text-sm font-bold">Request Access Hub</span>
+                    <button type="button" wire:click="setUserWorkspaceTab('requests')" class="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all {{ $userWorkspaceTab === 'requests' ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-md {{ $userWorkspaceTab === 'requests' ? 'bg-white/20' : 'bg-slate-100 text-slate-500' }}"><i class="fas fa-hand-holding-heart text-xs"></i></div>
+                            <span>Access Requests</span>
                         </div>
                         @if($attentionQueues['unverified'] > 0)
-                            <span class="flex h-5 min-w-[20px] items-center justify-center rounded-lg bg-white/20 px-1 text-[10px] font-black leading-none">{{ $attentionQueues['unverified'] }}</span>
+                            <span class="flex h-5 min-w-[20px] items-center justify-center rounded-md bg-white/20 px-1 text-[10px] font-bold">{{ $attentionQueues['unverified'] }}</span>
                         @endif
                     </button>
                 </nav>
@@ -93,21 +91,21 @@
         <!-- Main Workspace -->
         <div class="min-w-0 space-y-6">
             @if(in_array($userWorkspaceTab, ['staff', 'merchants', 'regular']))
-                <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="h-10 w-10 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-900 shadow-inner">
-                                <i class="fas {{ $userWorkspaceTab === 'staff' ? 'fa-shield-halved' : ($userWorkspaceTab === 'merchants' ? 'fa-store' : 'fa-users') }} text-sm"></i>
+                            <div class="h-9 w-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-900">
+                                <i class="fas {{ $userWorkspaceTab === 'staff' ? 'fa-shield-halved' : ($userWorkspaceTab === 'merchants' ? 'fa-store' : 'fa-users') }} text-xs"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-slate-900">
-                                    {{ $userWorkspaceTab === 'staff' ? 'Internal Staff' : ($userWorkspaceTab === 'merchants' ? 'Active Merchants' : 'Customer Registry') }}
+                                <h3 class="text-sm font-bold text-slate-900">
+                                    {{ $userWorkspaceTab === 'staff' ? 'Internal Staff' : ($userWorkspaceTab === 'merchants' ? 'Merchants' : 'Customers') }}
                                 </h3>
-                                <p class="text-xs text-slate-500 font-medium">Managing {{ number_format($filteredUsers) }} identified profiles</p>
+                                <p class="text-xs text-slate-500">Managing {{ number_format($filteredUsers) }} accounts</p>
                             </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3">
-                             <select wire:model.live="selectedRole" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold shadow-none focus:ring-0 transition-all focus:bg-white">
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                             <select wire:model.live="selectedRole" class="rounded-lg border-slate-200 px-3 py-1.5 font-semibold text-slate-700 shadow-xs focus:ring-0">
                                 <option value="">All Roles</option>
                                 <option value="__no_role__">No Roles</option>
                                 @foreach($roles as $role)
@@ -115,7 +113,7 @@
                                 @endforeach
                             </select>
 
-                            <select wire:model.live="selectedTeam" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold shadow-none focus:ring-0 transition-all focus:bg-white">
+                            <select wire:model.live="selectedTeam" class="rounded-lg border-slate-200 px-3 py-1.5 font-semibold text-slate-700 shadow-xs focus:ring-0">
                                 <option value="">All Teams</option>
                                 <option value="__no_team__">No Team</option>
                                 @foreach($teams as $team)
@@ -123,159 +121,150 @@
                                 @endforeach
                             </select>
 
-                             <select wire:model.live="perPage" class="rounded-xl border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold shadow-none focus:ring-0 transition-all focus:bg-white">
-                                <option value="10">10 Rows</option>
-                                <option value="25">25 Rows</option>
-                                <option value="50">50 Rows</option>
+                             <select wire:model.live="perPage" class="rounded-lg border-slate-200 px-3 py-1.5 font-semibold text-slate-700 shadow-xs focus:ring-0">
+                                <option value="10">10 per page</option>
+                                <option value="25">25 per page</option>
+                                <option value="50">50 per page</option>
                             </select>
 
-                            <button type="button" wire:click="clearFilters" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-rose-400 border border-slate-200 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Reset Filters">
+                            <button type="button" wire:click="clearFilters" class="h-[31px] w-[31px] flex items-center justify-center rounded-lg bg-white text-slate-400 border border-slate-200 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-xs" title="Reset Filters">
                                 <i class="fas fa-rotate-left text-xs"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40">
+                <div class="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-100">
-                            <thead>
-                                <tr class="bg-slate-50/50">
-                                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">User Identity</th>
-                                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Access Level</th>
+                            <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <tr>
+                                    <th class="px-6 py-3.5">User</th>
+                                    <th class="px-6 py-3.5">Role</th>
                                     @if($userWorkspaceTab === 'merchants')
-                                        <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Commerce Profile</th>
+                                        <th class="px-6 py-3.5">Business Details</th>
                                     @else
-                                        <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Deployment</th>
+                                        <th class="px-6 py-3.5">Team</th>
                                     @endif
-                                    <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Status</th>
-                                    <th class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Actions</th>
+                                    <th class="px-6 py-3.5">Status</th>
+                                    <th class="px-6 py-3.5 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 bg-white">
+                            <tbody class="divide-y divide-slate-100 bg-white text-xs">
                                 @forelse($users as $user)
-                                    <tr class="group transition-colors hover:bg-slate-50/50">
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
                                         <td class="px-6 py-4">
-                                            <div class="flex items-center gap-4">
-                                                <div class="h-10 w-10 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ring-2 ring-transparent transition-all group-hover:ring-slate-100">
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-9 w-9 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shrink-0">
                                                     <img src="{{ $user->profile_photo_url }}" class="h-full w-full object-cover">
                                                 </div>
                                                 <div>
-                                                    <p class="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{{ $user->name }}</p>
-                                                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-tighter">{{ $user->email }}</p>
+                                                    <p class="font-bold text-slate-900">{{ $user->name }}</p>
+                                                    <p class="text-[10px] text-slate-400 font-mono">{{ $user->email }}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="flex flex-wrap gap-1.5">
+                                            <div class="flex flex-wrap gap-1">
                                                 @forelse($user->roles as $role)
-                                                    <span class="inline-flex items-center rounded-lg bg-slate-100 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-slate-600">{{ $role->name }}</span>
+                                                    <span class="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 border border-slate-200">{{ $role->name }}</span>
                                                 @empty
-                                                    <span class="inline-flex items-center rounded-lg bg-rose-50 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-rose-500">No Access</span>
+                                                    <span class="inline-flex rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-500 border border-rose-100">No Access</span>
                                                 @endforelse
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             @if($userWorkspaceTab === 'merchants' && $user->merchant)
-                                                <div class="space-y-1">
-                                                    <p class="text-xs font-bold text-slate-700">{{ $user->merchant->shop_name }}</p>
-                                                    <p class="text-[10px] font-medium text-slate-400 truncate max-w-[150px]">{{ $user->merchant->shop_address }}</p>
+                                                <div class="space-y-0.5">
+                                                    <p class="font-bold text-slate-800">{{ $user->merchant->shop_name }}</p>
+                                                    <p class="text-[10px] text-slate-400 truncate max-w-[150px]">{{ $user->merchant->shop_address }}</p>
                                                 </div>
                                             @else
-                                                <div class="flex flex-wrap gap-1.5">
+                                                <div class="flex flex-wrap gap-1">
                                                     @forelse($user->teams as $team)
-                                                        <span class="inline-flex items-center rounded-lg bg-{{ $team->color ?? 'slate' }}-50 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-{{ $team->color ?? 'slate' }}-600">{{ $team->name }}</span>
+                                                        <span class="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700 border border-slate-200">{{ $team->name }}</span>
                                                     @empty
-                                                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">Personal</span>
+                                                        <span class="text-[10px] font-medium text-slate-400 italic">Personal</span>
                                                     @endforelse
                                                 </div>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4">
                                             @if($user->email_verified_at)
-                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600">
-                                                    <span class="h-1 w-1 rounded-full bg-emerald-600"></span> Active
-                                                </span>
+                                                <span class="inline-flex rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-100">Active</span>
                                             @else
-                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-amber-600">
-                                                    <span class="h-1 w-1 rounded-full bg-amber-600 animate-pulse"></span> Pending
-                                                </span>
+                                                <span class="inline-flex rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 border border-amber-100">Pending</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <button wire:click="openUser({{ $user->id }})" class="h-8 w-8 rounded-lg text-slate-400 transition hover:bg-slate-900 hover:text-white shadow-sm">
+                                            <button wire:click="openUser({{ $user->id }})" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-xs" title="Manage User">
                                                 <i class="fas fa-gear text-xs"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="py-20 text-center">
-                                            <div class="flex flex-col items-center">
-                                                <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-200">
-                                                    <i class="fas fa-user-slash text-2xl"></i>
-                                                </div>
-                                                <p class="text-sm font-bold text-slate-500">No identities match your criteria</p>
-                                            </div>
-                                        </td>
+                                        <td colspan="5" class="px-6 py-8 text-center text-slate-400 font-medium">No users found matching your search.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-                </div>
-                <div class="mt-6">
-                    {{ $users->links() }}
+                    @if($users->hasPages())
+                        <div class="px-6 py-4 border-t border-slate-100">
+                            {{ $users->links() }}
+                        </div>
+                    @endif
                 </div>
 
             @elseif($userWorkspaceTab === 'roles')
                 <div class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                        <div class="flex items-center gap-4 mb-10">
-                            <div class="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-indigo-600 text-white shadow-xl shadow-indigo-100"><i class="fas fa-user-shield text-xl"></i></div>
+                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
+                        <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-xs"><i class="fas fa-user-shield text-xs"></i></div>
                             <div>
-                                <h3 class="text-2xl font-black tracking-tight text-slate-900">Role Architect</h3>
-                                <p class="text-sm font-medium text-slate-500">Engineer granular permissions and access levels</p>
+                                <h3 class="text-base font-bold text-slate-900">Roles & Permissions</h3>
+                                <p class="text-xs text-slate-500">Define permissions and access levels for system roles.</p>
                             </div>
                         </div>
 
-                        <form wire:submit.prevent="createRole" class="space-y-6">
-                            <div class="space-y-2">
-                                <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Unique Role Name</label>
-                                <input type="text" wire:model="newRoleName" placeholder="e.g. Content Editor" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-6 py-4 text-sm font-bold shadow-inner focus:bg-white focus:border-indigo-600 focus:ring-0 transition-all">
-                                @error('newRoleName') <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1">{{ $message }}</p> @enderror
+                        <form wire:submit.prevent="createRole" class="space-y-4 text-xs">
+                            <div class="space-y-1">
+                                <label class="block font-bold text-slate-700">Role Name</label>
+                                <input type="text" wire:model="newRoleName" placeholder="e.g. Content Editor" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                                @error('newRoleName') <span class="text-rose-500">{{ $message }}</span> @enderror
                             </div>
 
-                            <div class="space-y-4">
-                                <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Entitlements Coverage</label>
-                                <div class="grid gap-2 sm:grid-cols-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div class="space-y-2">
+                                <label class="block font-bold text-slate-700">Permissions</label>
+                                <div class="grid gap-1.5 sm:grid-cols-2 max-h-[260px] overflow-y-auto pr-2">
                                     @foreach($allPermissions as $permission)
-                                        <label class="group relative flex cursor-pointer items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3 transition-all hover:bg-white hover:border-indigo-600">
-                                            <input type="checkbox" wire:model="selectedPermissions" value="{{ $permission->name }}" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-0">
-                                            <span class="text-[11px] font-bold text-slate-600 group-hover:text-indigo-600 uppercase tracking-tighter">{{ str_replace('_', ' ', $permission->name) }}</span>
+                                        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 p-2.5 hover:bg-white hover:border-slate-200">
+                                            <input type="checkbox" wire:model="selectedPermissions" value="{{ $permission->name }}" class="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-0">
+                                            <span class="text-xs font-semibold text-slate-700">{{ str_replace('_', ' ', $permission->name) }}</span>
                                         </label>
                                     @endforeach
                                 </div>
-                                @error('selectedPermissions') <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1">{{ $message }}</p> @enderror
+                                @error('selectedPermissions') <span class="text-rose-500">{{ $message }}</span> @enderror
                             </div>
 
-                            <button type="submit" class="w-full rounded-2xl bg-slate-900 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-xl shadow-slate-200 transition hover:scale-[1.02] active:scale-[0.98]">Deploy Access Role</button>
+                            <button type="submit" class="w-full rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">Create Role</button>
                         </form>
                     </div>
 
-                    <div class="space-y-6">
-                        <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Deployed Policy Matrix</p>
-                        <div class="grid gap-3">
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Existing Roles</label>
+                        <div class="grid gap-2">
                             @foreach($roles as $role)
-                                <div class="group flex items-center justify-between rounded-3xl border border-slate-200 bg-white p-5 transition-all hover:shadow-lg hover:shadow-slate-100">
-                                    <div class="flex items-center gap-4">
-                                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><i class="fas fa-fingerprint text-lg"></i></div>
+                                <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500"><i class="fas fa-fingerprint text-xs"></i></div>
                                         <div>
-                                            <p class="text-sm font-bold text-slate-900">{{ $role->name }}</p>
-                                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $role->users_count }} active users</p>
+                                            <p class="font-bold text-slate-900 text-xs">{{ $role->name }}</p>
+                                            <p class="text-[10px] text-slate-400">{{ $role->users_count }} active users</p>
                                         </div>
                                     </div>
-                                    <button class="h-8 w-8 rounded-lg text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"><i class="fas fa-trash-can text-xs"></i></button>
+                                    <button class="h-8 w-8 rounded-lg text-slate-300 hover:text-rose-500 transition-colors"><i class="fas fa-trash-can text-xs"></i></button>
                                 </div>
                             @endforeach
                         </div>
@@ -284,25 +273,25 @@
 
             @elseif($userWorkspaceTab === 'teams')
                 <div class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                        <div class="flex items-center gap-4 mb-10">
-                            <div class="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-sky-600 text-white shadow-xl shadow-sky-100"><i class="fas fa-people-line text-xl"></i></div>
+                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
+                        <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-600 text-white shadow-xs"><i class="fas fa-people-line text-xs"></i></div>
                             <div>
-                                <h3 class="text-2xl font-black tracking-tight text-slate-900">Team Registry</h3>
-                                <p class="text-sm font-medium text-slate-500">Define operational groups and default onboarding paths</p>
+                                <h3 class="text-base font-bold text-slate-900">Teams</h3>
+                                <p class="text-xs text-slate-500">Organize users into teams and assign default roles.</p>
                             </div>
                         </div>
 
-                        <form wire:submit.prevent="createTeam" class="space-y-6">
-                            <div class="grid gap-4 md:grid-cols-2">
-                                <div class="space-y-2">
-                                    <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Team Name</label>
-                                    <input type="text" wire:model="newTeamName" placeholder="e.g. Sales Division" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-6 py-4 text-sm font-bold shadow-inner focus:bg-white focus:border-sky-600 focus:ring-0 transition-all">
-                                    @error('newTeamName') <p class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1">{{ $message }}</p> @enderror
+                        <form wire:submit.prevent="createTeam" class="space-y-4 text-xs">
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div class="space-y-1">
+                                    <label class="block font-bold text-slate-700">Team Name</label>
+                                    <input type="text" wire:model="newTeamName" placeholder="e.g. Sales Division" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
+                                    @error('newTeamName') <span class="text-rose-500">{{ $message }}</span> @enderror
                                 </div>
-                                <div class="space-y-2">
-                                    <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Default Role</label>
-                                    <select wire:model="newTeamDefaultRole" class="w-full rounded-2xl border-slate-100 bg-slate-50 px-6 py-4 text-sm font-bold shadow-inner focus:bg-white focus:border-sky-600 focus:ring-0 transition-all">
+                                <div class="space-y-1">
+                                    <label class="block font-bold text-slate-700">Default Role</label>
+                                    <select wire:model="newTeamDefaultRole" class="w-full rounded-lg border-slate-200 px-3 py-2 font-semibold text-slate-900 focus:ring-0">
                                         <option value="">No Default</option>
                                         @foreach($roles as $role)
                                             <option value="{{ $role->name }}">{{ $role->name }}</option>
@@ -311,52 +300,35 @@
                                 </div>
                             </div>
 
-                            <div class="space-y-2">
-                                <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Description & Mission</label>
-                                <textarea wire:model="newTeamDescription" rows="3" placeholder="Define the core purpose of this group..." class="w-full rounded-2xl border-slate-100 bg-slate-50 px-6 py-4 text-sm font-bold shadow-inner focus:bg-white focus:border-sky-600 focus:ring-0 transition-all resize-none"></textarea>
+                            <div class="space-y-1">
+                                <label class="block font-bold text-slate-700">Description</label>
+                                <textarea wire:model="newTeamDescription" rows="2" placeholder="Define purpose of this team..." class="w-full rounded-lg border-slate-200 px-3 py-2 font-medium text-slate-900 focus:ring-0"></textarea>
                             </div>
 
-                            <div class="space-y-2">
-                                <label class="block px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Brand Identity</label>
-                                <div class="flex flex-wrap gap-3 p-4 rounded-2xl border border-slate-100 bg-slate-50/50">
-                                    @foreach(['sky', 'indigo', 'rose', 'emerald', 'amber', 'violet', 'slate'] as $color)
-                                        <label class="relative flex cursor-pointer items-center justify-center">
-                                            <input type="radio" wire:model="newTeamColor" value="{{ $color }}" class="peer sr-only">
-                                            <div class="h-8 w-8 rounded-full bg-{{ $color }}-500 ring-offset-2 ring-{{ $color }}-500 transition-all peer-checked:ring-2"></div>
-                                            <i class="fas fa-check absolute text-[10px] text-white opacity-0 transition-opacity peer-checked:opacity-100"></i>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <button type="submit" class="w-full rounded-2xl bg-slate-900 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] shadow-xl shadow-slate-200 transition hover:scale-[1.02] active:scale-[0.98]">Authorize New Team</button>
+                            <button type="submit" class="w-full rounded-lg bg-slate-900 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs">Create Team</button>
                         </form>
                     </div>
 
-                    <div class="space-y-6">
-                        <p class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Operational Groups</p>
-                        <div class="grid gap-4">
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Existing Teams</label>
+                        <div class="grid gap-3">
                             @foreach($teams as $team)
-                                <div class="group relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-6 transition-all hover:border-{{ $team->color ?? 'sky' }}-400 hover:shadow-2xl hover:shadow-{{ $team->color ?? 'sky' }}-50">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex items-center gap-5">
-                                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-{{ $team->color ?? 'sky' }}-50 text-{{ $team->color ?? 'sky' }}-600 shadow-inner">
-                                                <i class="fas fa-people-group text-xl"></i>
+                                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-xs space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                                                <i class="fas fa-people-group text-xs"></i>
                                             </div>
                                             <div>
-                                                <h4 class="text-lg font-black text-slate-900">{{ $team->name }}</h4>
-                                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $team->users_count }} members enrolled</p>
+                                                <h4 class="font-bold text-slate-900 text-xs">{{ $team->name }}</h4>
+                                                <p class="text-[10px] text-slate-400">{{ $team->users_count }} members</p>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            @if($team->default_role_name)
-                                                <span class="rounded-lg bg-slate-100 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-slate-500">Auto-Role: {{ $team->default_role_name }}</span>
-                                            @endif
-                                            <button class="h-8 w-8 rounded-lg text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"><i class="fas fa-trash-can text-xs"></i></button>
-                                        </div>
+                                        @if($team->default_role_name)
+                                            <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Default: {{ $team->default_role_name }}</span>
+                                        @endif
                                     </div>
-                                    <p class="mt-4 text-xs font-medium leading-relaxed text-slate-500">{{ $team->description ?: 'No operational mission defined for this registry entry.' }}</p>
-                                    <div class="absolute bottom-0 right-0 h-24 w-24 translate-x-8 translate-y-8 rounded-full bg-{{ $team->color ?? 'sky' }}-50 opacity-20 transition-transform group-hover:scale-150"></div>
+                                    <p class="text-xs text-slate-500">{{ $team->description ?: 'No description added for this team.' }}</p>
                                 </div>
                             @endforeach
                         </div>
@@ -364,63 +336,55 @@
                 </div>
 
             @elseif($userWorkspaceTab === 'requests')
-                <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                    <div class="flex items-center gap-4 mb-10">
-                        <div class="flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-amber-500 text-white shadow-xl shadow-amber-100"><i class="fas fa-handshake text-xl"></i></div>
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
+                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-white shadow-xs"><i class="fas fa-handshake text-xs"></i></div>
                         <div>
-                            <h3 class="text-2xl font-black tracking-tight text-slate-900">Request Access Hub</h3>
-                            <p class="text-sm font-medium text-slate-500">Audit and authorize incoming merchant partnership applications</p>
+                            <h3 class="text-base font-bold text-slate-900">Access Requests</h3>
+                            <p class="text-xs text-slate-500">Review and approve merchant account applications.</p>
                         </div>
                     </div>
 
-                    <div class="space-y-4">
+                    <div class="space-y-3 text-xs">
                         @forelse($merchantRequests as $req)
-                            <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition-all hover:border-amber-400 hover:shadow-xl hover:shadow-amber-50">
-                                <div class="flex flex-col gap-6 p-6 lg:flex-row lg:items-center">
-                                    <div class="flex flex-1 items-center gap-6">
-                                        <div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-[1.5rem] border-4 border-slate-50 bg-slate-100 shadow-inner">
+                            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-xs space-y-3">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-12 w-12 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
                                             @if($req->shop_image_path)
                                                 <img src="{{ asset('storage/' . $req->shop_image_path) }}" class="h-full w-full object-cover">
                                             @else
-                                                <div class="flex h-full w-full items-center justify-center text-slate-300"><i class="fas fa-shop text-xl"></i></div>
+                                                <div class="flex h-full w-full items-center justify-center text-slate-300"><i class="fas fa-shop text-xs"></i></div>
                                             @endif
                                         </div>
-                                        <div class="space-y-1">
+                                        <div>
                                             <div class="flex items-center gap-2">
-                                                <h4 class="text-lg font-black text-slate-900">{{ $req->shop_name }}</h4>
-                                                <span class="rounded-lg bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-600">Pending Review</span>
+                                                <h4 class="font-bold text-slate-900 text-sm">{{ $req->shop_name }}</h4>
+                                                <span class="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 border border-amber-100">Pending Review</span>
                                             </div>
-                                            <p class="text-sm font-bold text-slate-600">{{ $req->user->name }} <span class="mx-2 text-slate-300">•</span> <span class="text-slate-400 font-medium">{{ $req->user->email }}</span></p>
-                                            <div class="flex items-center gap-4 pt-1">
-                                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><i class="fas fa-phone mr-1.5"></i> {{ $req->phone_number }}</span>
-                                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest"><i class="fas fa-id-card mr-1.5"></i> NIC: {{ $req->nic_number }}</span>
-                                            </div>
+                                            <p class="text-xs font-medium text-slate-600 mt-0.5">{{ $req->user->name }} • <span class="text-slate-400">{{ $req->user->email }}</span></p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 border-t border-slate-50 pt-6 lg:border-0 lg:pt-0">
-                                        <button wire:click="approveMerchant({{ $req->id }})" class="flex-1 rounded-2xl bg-emerald-600 px-6 py-3 text-[10px] font-black text-white uppercase tracking-widest transition hover:bg-emerald-700 lg:flex-none">Authorize Access</button>
-                                        <button x-data @click="const reason = prompt('Rejection Reason:'); if(reason) $wire.rejectMerchant({{ $req->id }}, reason)" class="rounded-2xl border border-slate-100 bg-slate-50 px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest transition hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 lg:flex-none">Reject</button>
+                                    <div class="flex items-center gap-2">
+                                        <button wire:click="approveMerchant({{ $req->id }})" class="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs">Approve</button>
+                                        <button x-data @click="const reason = prompt('Rejection Reason:'); if(reason) $wire.rejectMerchant({{ $req->id }}, reason)" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Reject</button>
                                     </div>
-                                </div>
-                                <div class="bg-slate-50/50 px-8 py-3 flex items-center justify-between">
-                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Submitted {{ $req->created_at->diffForHumans() }}</p>
-                                     <button class="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">View Verification Dossier</button>
                                 </div>
                             </div>
                         @empty
-                            <div class="py-20 text-center border-2 border-dashed border-slate-100 rounded-[2.5rem]">
-                                <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-200 mx-auto">
-                                    <i class="fas fa-inbox text-3xl"></i>
-                                </div>
-                                <h4 class="text-lg font-black text-slate-900">Registry is Clear</h4>
-                                <p class="text-sm font-medium text-slate-400 mt-1">No merchant partnership requests are currently awaiting triage.</p>
+                            <div class="py-12 text-center text-slate-400 font-medium">
+                                <i class="fas fa-inbox text-3xl mb-3 text-slate-300"></i>
+                                <p class="text-sm font-bold text-slate-900">No Pending Requests</p>
+                                <p class="text-xs text-slate-500 mt-0.5">There are no merchant applications waiting for review.</p>
                             </div>
                         @endforelse
                     </div>
 
-                    <div class="mt-8">
-                        {{ $merchantRequests->links() }}
-                    </div>
+                    @if($merchantRequests->hasPages())
+                        <div class="pt-4 border-t border-slate-100">
+                            {{ $merchantRequests->links() }}
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>
@@ -430,10 +394,10 @@
         <x-admin.users.user-modal :selected-user="$selectedUser" :roles="$roles" :teams="$teams" />
     @endif
 
-    <div wire:loading class="fixed bottom-8 right-8 z-[60]">
-        <div class="flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-white shadow-2xl shadow-slate-400 animate-in fade-in slide-in-from-bottom-4">
-            <div class="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
-            <span class="text-[10px] font-black uppercase tracking-widest">Processing Intelligence...</span>
+    <div wire:loading class="fixed bottom-6 right-6 z-50">
+        <div class="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-lg">
+            <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+            <span>Loading...</span>
         </div>
     </div>
 </div>
